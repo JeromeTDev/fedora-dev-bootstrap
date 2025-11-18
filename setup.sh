@@ -231,17 +231,6 @@ if [ ! -d "$HOME/.config/nvim" ]; then
 
     log_info "Starte LazyVim kurz im Headless-Modus, um Plugins zu installieren..."
     nvim --headless +Lazy! +qall
-
-    SNACKS_FILE="$HOME/.config/nvim/lua/config/snacks.lua"
-    if [ -f "$SNACKS_FILE" ]; then
-        log_info "Aktiviere Snacks.image..."
-        # setze enabled = true in der Datei
-        sed -i "s/enabled\s*=\s*false/enabled = true/" "$SNACKS_FILE" || log_warn "Snacks.image konnte nicht aktiviert werden."
-    else
-        log_warn "Snacks.lua nicht gefunden. Snacks.image bleibt deaktiviert."
-    fi
-else
-    log_warn "~/.config/nvim existiert bereits. LazyVim-Installation übersprungen."
 fi
 
 
@@ -251,7 +240,6 @@ echo "--------------------------------------------------------"
 echo "Nächste Schritte:"
 echo "- Terminal neu starten für Fish/Starship."
 echo "- Beim ersten Start von Neovim werden LazyVim Plugins installiert."
-echo "- Mermaid CLI (mmdc) ist über npm verfügbar."
-echo "- pdflatex über texlive-scheme-basic installiert."
-echo "- Lua 5.1 und LuaRocks installiert. LuaRocks-Pakete für Lua 5.1: luarocks-5.1 install <package>"
+echo "- zum starten von nvim -> im Terminal nvim eingeben"
+echo "- nach der installtion im nvm mit :checkhealth überprüfen ob alle nötige installiert ist"
 echo "--------------------------------------------------------"
