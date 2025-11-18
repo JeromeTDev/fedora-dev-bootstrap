@@ -214,6 +214,15 @@ deploy_dotfiles
 if [ ! -d "$HOME/.config/nvim" ]; then
     log_info "Installiere LazyVim Starter..."
     git clone https://github.com/LazyVim/starter ~/.config/nvim || log_warn "LazyVim konnte nicht geklont werden."
+
+    # Snacks.image aktivieren
+    SNACKS_CONFIG="$HOME/.config/nvim/lua/plugins/snacks.lua"
+    if [ -f "$SNACKS_CONFIG" ]; then
+        log_info "Aktiviere Snacks.image..."
+        sed -i "s/enabled = false/enabled = true/" "$SNACKS_CONFIG" || log_warn "Snacks.image konnte nicht aktiviert werden."
+    else
+        log_warn "Snacks.lua nicht gefunden. Snacks.image nicht aktiviert."
+    fi
 else
     log_warn "~/.config/nvim existiert bereits. LazyVim-Installation übersprungen."
 fi
