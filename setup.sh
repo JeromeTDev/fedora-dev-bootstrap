@@ -231,6 +231,7 @@ else
 fi
 
 
+
 log_success "🎉 Fedora Dev Bootstrap abgeschlossen!"
 echo "--------------------------------------------------------"
 echo "Nächste Schritte:"
