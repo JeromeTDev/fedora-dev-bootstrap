@@ -2,11 +2,11 @@
 
 #### Deutsch
 
-Automatisiertes Setup für Fedora, das eine minimale GNOME-Entwicklungsumgebung mit allen nötigen Entwickler-Tools und LazyVim einrichtet. Dieses Repository ist öffentlich und enthält nur sichere, allgemein nutzbare Konfigurationen.
+Automatisiertes Setup für Fedora, das eine minimale GNOME-Entwicklungsumgebung mit allen nötigen Entwickler-Tools, Lua 5.1, LuaRocks, pdflatex, Mermaid CLI und LazyVim einrichtet. Dieses Repository ist öffentlich und enthält nur sichere, allgemein nutzbare Konfigurationen.
 
 #### English
 
-Automated setup for Fedora that configures a minimal GNOME development environment with all necessary developer tools and LazyVim. This repository is public and contains only safe, generally usable configurations.
+Automated setup for Fedora that configures a minimal GNOME development environment with all necessary developer tools, Lua 5.1, LuaRocks, pdflatex, Mermaid CLI, and LazyVim. This repository is public and contains only safe, generally usable configurations.
 
 ---
 
@@ -20,11 +20,14 @@ Automated setup for Fedora that configures a minimal GNOME development environme
   - Fonts: JetBrains Mono Nerd Font
 - **Entwicklungsumgebung:**
   - Compiler & Build: `git`, `lazygit`, `clang`, `gcc`, `cmake`, `make`
-  - Laufzeiten: `nodejs`, `python3`
+  - Laufzeiten: `nodejs`, `python3`, `lua 5.1` & `luarocks`
+  - LaTeX: `pdflatex` über `texlive-scheme-basic`
+  - Mermaid CLI: `mmdc` über npm
 - **Neovim/LazyVim Integration:**
   - Installation von `neovim`
   - Node.js & Python Provider für Neovim
   - LazyVim Plugins werden beim ersten Start automatisch installiert
+  - Snacks.image wird automatisch aktiviert, falls vorhanden
 - **Konfiguration:**
   - Starship Prompt für Fish Shell aktiviert
   - Kitty als Standard-Terminal
