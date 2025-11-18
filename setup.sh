@@ -5,6 +5,20 @@
 # Description: Automated setup for a minimal Fedora GNOME development environment.
 #
 
+# Einmaliges Abfragen des sudo-Passworts
+log_info "Prüfe sudo-Rechte..."
+sudo -v
+
+# Halte das sudo-Credential während des Scripts aktiv
+# durch Hintergrund-Refresh alle 60 Sekunden
+(
+  while true; do
+    sudo -v
+    sleep 60
+    kill -0 "$$" || exit
+  done
+) &
+
 # --- Konfiguration ---
 DNF_PACKAGES=(
     git make cmake gcc clang python3 nodejs
