@@ -142,6 +142,7 @@ deploy_dotfiles() {
     cd - > /dev/null
 }
 
+
 # --- Hauptskript ---
 echo "🚀 Starte Fedora Dev Bootstrap..."
 
@@ -155,6 +156,16 @@ activate_starship
 install_fonts
 setup_flatpak
 deploy_dotfiles
+
+# LazyVim installieren
+if [ ! -d "$HOME/.config/nvim" ]; then
+    log_info "Installiere LazyVim Starter..."
+    git clone https://github.com/LazyVim/starter ~/.config/nvim || log_warn "LazyVim konnte nicht geklont werden."
+else
+    log_warn "~/.config/nvim existiert bereits. LazyVim-Installation übersprungen."
+fi
+
+
 
 log_success "🎉 Fedora Dev Bootstrap abgeschlossen!"
 echo "--------------------------------------------------------"
