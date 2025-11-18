@@ -12,6 +12,7 @@ DNF_PACKAGES=(
     fzf tree ripgrep btop neofetch zoxide fd-find
     flatpak stow
     xdg-desktop-portal-gtk
+    texlive-scheme-basic lua-5.1 luarocks
 )
 
 COPR_REPOS=(
@@ -36,6 +37,12 @@ log_error() { echo -e "\033[1;31m[ERROR]\033[0m $1"; exit 1; }
 install_dnf_packages() {
     log_info "Installiere DNF Pakete..."
     sudo dnf install -y "${DNF_PACKAGES[@]}" --skip-unavailable || log_warn "Einige Pakete konnten nicht installiert werden."
+}
+
+# --- NPM-Pakete ---
+install_npm_packages() {
+    log_info "Installiere globale NPM-Pakete..."
+    npm install -g neovim @mermaid-js/mermaid-cli || log_warn "NPM-Pakete konnten nicht installiert werden."
 }
 
 # --- COPR Repos und Pakete ---
@@ -142,7 +149,6 @@ deploy_dotfiles() {
     cd - > /dev/null
 }
 
-
 # --- Hauptskript ---
 echo "🚀 Starte Fedora Dev Bootstrap..."
 
@@ -151,13 +157,14 @@ sudo dnf upgrade -y || log_warn "Systemupdate fehlgeschlagen."
 
 configure_system
 install_dnf_packages
+install_npm_packages
 install_copr_packages
 activate_starship
 install_fonts
 setup_flatpak
 deploy_dotfiles
 
-# LazyVim installieren
+# LazyVim installieren **nach den Dotfiles**
 if [ ! -d "$HOME/.config/nvim" ]; then
     log_info "Installiere LazyVim Starter..."
     git clone https://github.com/LazyVim/starter ~/.config/nvim || log_warn "LazyVim konnte nicht geklont werden."
@@ -165,11 +172,12 @@ else
     log_warn "~/.config/nvim existiert bereits. LazyVim-Installation übersprungen."
 fi
 
-
-
 log_success "🎉 Fedora Dev Bootstrap abgeschlossen!"
 echo "--------------------------------------------------------"
 echo "Nächste Schritte:"
 echo "- Terminal neu starten für Fish/Starship."
 echo "- Beim ersten Start von Neovim werden LazyVim Plugins installiert."
+echo "- Mermaid CLI (mmdc) ist über npm verfügbar."
+echo "- pdflatex über texlive-scheme-basic installiert."
+echo "- Lua 5.1 und LuaRocks installiert. LuaRocks-Pakete für Lua 5.1: luarocks-5.1 install <package>"
 echo "--------------------------------------------------------"
