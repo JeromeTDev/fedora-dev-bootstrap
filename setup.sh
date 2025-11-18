@@ -11,9 +11,18 @@ echo "🚀 Starte Fedora Dev Bootstrap..."
 sudo dnf update -y
 sudo sh -c 'echo -e "max_parallel_downloads=10\nfastestmirror=True" >> /etc/dnf/dnf.conf'
 
+# Füge RPM Fusion Repositories hinzu
+sudo dnf install -y \
+  https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+  # --- Flatpak & Flathub ---
+sudo dnf install -y flatpak
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
 # --- Install Core Tools ---
 sudo dnf install -y \
-  kitty fish git lazygit neovim fzf tree ripgrep \
+  kitty fish git lazygit neovim fzf tree ripgrep stow \
   gnome-tweaks gnome-shell-extensions gnome-extension-manager \
   xdg-desktop-portal-gtk btop neofetch zoxide \
   imagemagick poppler-utils ffmpegthumbnailer p7zip p7zip-plugins unzip \
@@ -33,10 +42,6 @@ mkdir -p ~/.config/fish
 if ! grep -q 'starship init fish' ~/.config/fish/config.fish 2>/dev/null; then
     echo 'starship init fish | source' >> ~/.config/fish/config.fish
 fi
-
-# --- Flatpak & Flathub ---
-sudo dnf install -y flatpak
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 # --- Nerd Font installieren ---
 FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
