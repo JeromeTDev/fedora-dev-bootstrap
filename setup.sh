@@ -163,6 +163,31 @@ if [ "$(basename $SHELL)" = "fish" ]; then
     fi
 fi
 
+# --- NPM Global Path setzen für alle Shells ---
+configure_npm_path() {
+    log_info "Füge ~/.npm-global/bin zum PATH hinzu..."
+    
+    # Für Bash
+    if ! grep -q 'export PATH="$HOME/.npm-global/bin:$PATH"' ~/.bashrc; then
+        echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+    fi
+
+    # Für Zsh
+    if ! grep -q 'export PATH="$HOME/.npm-global/bin:$PATH"' ~/.zshrc; then
+        echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.zshrc
+    fi
+
+    # Für Fish (falls noch nicht gesetzt)
+    if [ "$(basename $SHELL)" = "fish" ]; then
+        if ! grep -q "$HOME/.npm-global/bin" ~/.config/fish/config.fish; then
+            echo 'set -U fish_user_paths $HOME/.npm-global/bin $fish_user_paths' >> ~/.config/fish/config.fish
+        fi
+    fi
+
+    # PATH sofort für die aktuelle Session setzen
+    export PATH="$HOME/.npm-global/bin:$PATH"
+}
+
 # Neovim Node.js Provider installieren
 log_info "Installiere globale NPM-Pakete..."
 npm install -g neovim || log_warn "NPM-Pakete konnten nicht installiert werden."
@@ -176,6 +201,7 @@ sudo dnf upgrade -y || log_warn "Systemupdate fehlgeschlagen."
 
 configure_system
 install_dnf_packages
+configure_npm_path
 setup_npm
 install_npm_packages
 install_copr_packages
