@@ -149,6 +149,25 @@ deploy_dotfiles() {
     cd - > /dev/null
 }
 
+setup_npm(){
+# --- Node.js Provider für Neovim (NPM) ---
+log_info "Konfiguriere Nutzerlokale globale NPM-Pakete..."
+mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+
+# PATH in Fish hinzufügen (falls Fish benutzt wird)
+if [ "$(basename $SHELL)" = "fish" ]; then
+    if ! grep -q "$HOME/.npm-global/bin" ~/.config/fish/config.fish; then
+        echo 'set -U fish_user_paths $HOME/.npm-global/bin $fish_user_paths' >> ~/.config/fish/config.fish
+        log_info "Nutzerlokaler NPM-Pfad zu Fish hinzugefügt."
+    fi
+fi
+
+# Neovim Node.js Provider installieren
+log_info "Installiere globale NPM-Pakete..."
+npm install -g neovim || log_warn "NPM-Pakete konnten nicht installiert werden."
+}
+
 # --- Hauptskript ---
 echo "🚀 Starte Fedora Dev Bootstrap..."
 
@@ -157,6 +176,7 @@ sudo dnf upgrade -y || log_warn "Systemupdate fehlgeschlagen."
 
 configure_system
 install_dnf_packages
+setup_npm
 install_npm_packages
 install_copr_packages
 activate_starship
