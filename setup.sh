@@ -210,22 +210,26 @@ install_fonts
 setup_flatpak
 deploy_dotfiles
 
-# LazyVim installieren **nach den Dotfiles**
+# LazyVim installieren und Snacks aktivieren
 if [ ! -d "$HOME/.config/nvim" ]; then
     log_info "Installiere LazyVim Starter..."
     git clone https://github.com/LazyVim/starter ~/.config/nvim || log_warn "LazyVim konnte nicht geklont werden."
 
-    # Snacks.image aktivieren
-    SNACKS_CONFIG="$HOME/.config/nvim/lua/plugins/snacks.lua"
-    if [ -f "$SNACKS_CONFIG" ]; then
+    log_info "Starte LazyVim kurz im Headless-Modus, um Plugins zu installieren..."
+    nvim --headless +Lazy! +qall
+
+    SNACKS_FILE="$HOME/.config/nvim/lua/config/snacks.lua"
+    if [ -f "$SNACKS_FILE" ]; then
         log_info "Aktiviere Snacks.image..."
-        sed -i "s/enabled = false/enabled = true/" "$SNACKS_CONFIG" || log_warn "Snacks.image konnte nicht aktiviert werden."
+        # setze enabled = true in der Datei
+        sed -i "s/enabled\s*=\s*false/enabled = true/" "$SNACKS_FILE" || log_warn "Snacks.image konnte nicht aktiviert werden."
     else
-        log_warn "Snacks.lua nicht gefunden. Snacks.image nicht aktiviert."
+        log_warn "Snacks.lua nicht gefunden. Snacks.image bleibt deaktiviert."
     fi
 else
     log_warn "~/.config/nvim existiert bereits. LazyVim-Installation übersprungen."
 fi
+
 
 log_success "🎉 Fedora Dev Bootstrap abgeschlossen!"
 echo "--------------------------------------------------------"
