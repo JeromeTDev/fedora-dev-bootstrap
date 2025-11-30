@@ -41,6 +41,10 @@ Automatisiertes Setup für **Fedora**, das eine minimale GNOME-Entwicklungsumgeb
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/JeromeTDev/fedora-dev-bootstrap/main/setup.sh)
 ```
+PopOs:
+```bash
+bash <(curl -s https://raw.githubusercontent.com/JeromeTDev/fedora-dev-bootstrap/main/popos-setup.sh)
+```
 
 Pop!_OS Variante:  
 
