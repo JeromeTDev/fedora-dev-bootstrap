@@ -45,6 +45,10 @@ Automated setup for Fedora that configures a minimal GNOME development environme
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/JeromeTDev/fedora-dev-bootstrap/main/setup.sh)
 ```
+PopOs:
+```bash
+bash <(curl -s https://raw.githubusercontent.com/JeromeTDev/fedora-dev-bootstrap/main/popos-setup.sh)
+```
 
 ### Alternative: Clone + Ausführen / Clone & Run
 
