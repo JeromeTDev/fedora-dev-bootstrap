@@ -1,18 +1,22 @@
 #!/bin/bash
 #
-# Pop!_OS Dev Bootstrap - Clean Edition
+# Pop!_OS Dev Bootstrap - Clean Edition (Optimized)
 # Author: JeromeTDev (Optimized by ChatGPT)
 #
 
+set -euo pipefail
+IFS=$'\n\t'
+
 # --- Logging ---
-log_info() { echo -e "\n\033[1;34m[INFO]\033[0m $1"; }
+log_info()    { echo -e "\n\033[1;34m[INFO]\033[0m $1"; }
 log_success() { echo -e "\033[1;32m[SUCCESS]\033[0m $1"; }
-log_warn() { echo -e "\033[1;33m[WARN]\033[0m $1"; }
-log_error() { echo -e "\033[1;31m[ERROR]\033[0m $1"; exit 1; }
+log_warn()    { echo -e "\033[1;33m[WARN]\033[0m $1"; }
+log_error()   { echo -e "\033[1;31m[ERROR]\033[0m $1"; exit 1; }
 
 # Keep sudo alive
 log_info "Prüfe sudo-Rechte..."
 sudo -v
+trap "kill $!" EXIT
 (
   while true; do
     sudo -v
@@ -22,43 +26,33 @@ sudo -v
 
 # --- Package Lists ---
 APT_PACKAGES=(
-    # --- System Basics ---
-    flatpak stow xdg-desktop-portal-gtk zathura
-
-    # --- Terminal & Shell ---
+    # System Basics
+    stow xdg-desktop-portal-gtk zathura
+    # Terminal & Shell
     fish kitty neofetch zoxide
-
-    # --- Development Tools ---
-    git gh make cmake
-    gcc clang python3 python3-pip
+    # Development Tools
+    git gh make cmake gcc clang python3 python3-pip
     lazygit neovim zeal xournalpp
-
-    # --- TUI / Power Tools ---
-    btop fd-find fzf ripgrep
-    tree caffeine
-
-    # --- Yazi Dependencies ---
-    ffmpeg p7zip-full jq poppler-utils
-    imagemagick mediainfo libimage-exiftool-perl chafa
-
-    # --- Extras ---
+    # TUI / Power Tools
+    btop fd-find fzf ripgrep tree caffeine
+    # Yazi Dependencies
+    ffmpeg p7zip-full jq poppler-utils imagemagick mediainfo libimage-exiftool-perl chafa
+    # Extras
     texlive-base keepassxc
-)
-
-
-PPAS=(
-    ppa:fish-shell/release-3
 )
 
 FLATPAK_APPS=(
     com.mattjakeman.ExtensionManager
+    com.teamspeak.TeamSpeak
+    com.discordapp.Discord
+    org.cryptomator.Cryptomator
+    md.obsidian.Obsidian
+    mega.MEGASync
 )
 
-DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
-DOTFILES_DIR="$HOME/popos-dev-bootstrap"
+PPAS=(ppa:fish-shell/release-3)
 
 # --- Functions ---
-
 install_apt_packages() {
     log_info "Installiere APT-Pakete..."
     sudo apt update
@@ -69,15 +63,12 @@ install_ppas() {
     log_info "Füge PPAs hinzu..."
     for ppa in "${PPAS[@]}"; do
         if ! grep -R "$ppa" /etc/apt/sources.list.d &>/dev/null; then
-            sudo add-apt-repository -y "$ppa" || {
-                log_error "Konnte $ppa nicht hinzufügen."
-            }
+            sudo add-apt-repository -y "$ppa" || log_error "Konnte $ppa nicht hinzufügen."
         else
             log_info "PPA $ppa bereits vorhanden."
         fi
     done
-    sudo apt update || log_error "APT Update fehlgeschlagen."
-    sudo apt install -y "${PPA_PACKAGES[@]}" || log_error "Konnte PPA-Pakete nicht installieren."
+    sudo apt update
 }
 
 set_kitty_default_terminal() {
@@ -89,11 +80,9 @@ set_kitty_default_terminal() {
 }
 
 set_fish_default_shell() {
-    if command -v fish >/dev/null; then
-        if [ "$SHELL" != "$(command -v fish)" ]; then
-            log_info "Setze Fish als Standard-Shell..."
-            chsh -s "chsh -s $(which fish)" || log_warn "Konnte Fish nicht als Standardshell setzen."
-        fi
+    if command -v fish >/dev/null && [ "$SHELL" != "$(command -v fish)" ]; then
+        log_info "Setze Fish als Standard-Shell..."
+        chsh -s "$(which fish)" || log_warn "Konnte Fish nicht als Standardshell setzen."
     fi
 }
 
@@ -105,20 +94,42 @@ activate_starship() {
 
     case "$(basename "$SHELL")" in
         fish)
-            echo 'starship init fish | source' >> ~/.config/fish/config.fish
+            grep -qxF 'starship init fish | source' ~/.config/fish/config.fish \
+                || echo 'starship init fish | source' >> ~/.config/fish/config.fish
             ;;
         bash)
-            echo "eval \"\$(starship init bash)\"" >> ~/.bashrc
+            grep -qxF 'eval "$(starship init bash)"' ~/.bashrc \
+                || echo 'eval "$(starship init bash)"' >> ~/.bashrc
             ;;
         zsh)
-            echo "eval \"\$(starship init zsh)\"" >> ~/.zshrc
+            grep -qxF 'eval "$(starship init zsh)"' ~/.zshrc \
+                || echo 'eval "$(starship init zsh)"' >> ~/.zshrc
             ;;
     esac
 }
 
 install_yazi() {
     log_info "Installiere Yazi..."
-    curl -sSL https://yazi-rs.github.io/install.sh | bash || log_warn "Yazi Installation fehlgeschlagen."
+    LATEST_URL=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest \
+        | grep "browser_download_url.*x86_64-unknown-linux-gnu" \
+        | cut -d '"' -f 4)
+
+    if [ -z "$LATEST_URL" ]; then
+        log_warn "Konnte neueste Yazi-Version nicht ermitteln."
+        return
+    fi
+
+    TMP_DIR=$(mktemp -d)
+    cd "$TMP_DIR" || exit
+
+    curl -LO "$LATEST_URL" || log_warn "Download von Yazi fehlgeschlagen."
+    chmod +x yazi-*-x86_64-unknown-linux-gnu
+    sudo mv yazi-*-x86_64-unknown-linux-gnu /usr/local/bin/yazi
+
+    cd - >/dev/null
+    rm -rf "$TMP_DIR"
+
+    log_success "Yazi installiert!"
 }
 
 install_fonts() {
@@ -127,14 +138,12 @@ install_fonts() {
 }
 
 install_nvm_node() {
-    log_info "Installiere Node.js via nvm..."
+    log_info "Installiere Node.js via NVM..."
     if [ ! -d "$HOME/.nvm" ]; then
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
     fi
-
     export NVM_DIR="$HOME/.nvm"
-    [ -f "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-
+    [ -f "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     nvm install --lts
     nvm use --lts
 }
@@ -145,29 +154,21 @@ setup_npm_tools() {
 }
 
 setup_flatpak() {
-    log_info "Richte Flathub ein..."
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo --system
+    log_info "Installiere Flatpak-Apps..."
+    
+    # Flathub als Remote hinzufügen, falls nicht vorhanden
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+    # Apps installieren
     for app in "${FLATPAK_APPS[@]}"; do
-        flatpak install -y --non-interactive flathub "$app"
+        if ! flatpak list | grep -q "$app"; then
+            flatpak install -y flathub "$app"
+        else
+            log_info "Flatpak $app bereits installiert."
+        fi
     done
 }
 
-
-deploy_dotfiles() {
-    log_info "Deploye Dotfiles..."
-
-    if [ ! -d "$DOTFILES_DIR" ]; then
-        git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
-    fi
-
-    cd "$DOTFILES_DIR" || exit
-
-    for dir in */; do
-        [ "$dir" != ".git/" ] && stow "$dir"
-    done
-
-   cd - >/dev/null
-}
 
 # --- Main ---
 echo "🚀 Starte Pop!_OS Dev Bootstrap..."
@@ -176,6 +177,7 @@ sudo apt update && sudo apt upgrade -y
 
 install_apt_packages
 install_ppas
+setup_flatpak
 set_fish_default_shell
 set_kitty_default_terminal
 activate_starship
@@ -183,8 +185,6 @@ install_yazi
 install_fonts
 install_nvm_node
 setup_npm_tools
-setup_flatpak
-deploy_dotfiles
 
 log_success "🎉 Pop!_OS Dev Bootstrap abgeschlossen!"
 echo "--------------------------------------------------------"
@@ -193,4 +193,3 @@ echo "- Terminal neu starten (Fish + Starship aktiv)"
 echo "- 'nvim' starten für LazyVim Setup"
 echo "- In Neovim :checkhealth ausführen"
 echo "--------------------------------------------------------"
-
