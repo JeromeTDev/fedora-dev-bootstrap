@@ -22,15 +22,29 @@ sudo -v
 
 # --- Package Lists ---
 APT_PACKAGES=(
-    git make cmake gcc clang
-    python3 python3-pip
-    fish kitty neovim
-    fzf tree ripgrep btop neofetch zoxide fd-find
-    flatpak stow
-    xdg-desktop-portal-gtk
-    zathura 
-    texlive-base
+    # --- System Basics ---
+    flatpak stow xdg-desktop-portal-gtk zathura
+
+    # --- Terminal & Shell ---
+    fish kitty neofetch zoxide
+
+    # --- Development Tools ---
+    git gh make cmake
+    gcc clang python3 python3-pip
+    lazygit neovim zeal xournalpp
+
+    # --- TUI / Power Tools ---
+    btop fd-find fzf ripgrep
+    tree caffeine
+
+    # --- Yazi Dependencies ---
+    ffmpeg p7zip-full jq poppler-utils
+    imagemagick mediainfo libimage-exiftool-perl chafa
+
+    # --- Extras ---
+    texlive-base keepassxc
 )
+
 
 PPAS=(
     ppa:lazygit-team/release
