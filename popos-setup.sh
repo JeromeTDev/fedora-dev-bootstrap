@@ -47,12 +47,7 @@ APT_PACKAGES=(
 
 
 PPAS=(
-    ppa:lazygit-team/release
     ppa:fish-shell/release-3
-)
-
-PPA_PACKAGES=(
-    lazygit
 )
 
 FLATPAK_APPS=(
@@ -74,14 +69,15 @@ install_ppas() {
     log_info "Füge PPAs hinzu..."
     for ppa in "${PPAS[@]}"; do
         if ! grep -R "$ppa" /etc/apt/sources.list.d &>/dev/null; then
-            sudo add-apt-repository -y "$ppa" || log_warn "Konnte $ppa nicht hinzufügen."
+            sudo add-apt-repository -y "$ppa" || {
+                log_error "Konnte $ppa nicht hinzufügen."
+            }
         else
             log_info "PPA $ppa bereits vorhanden."
         fi
     done
-
-    sudo apt update
-    sudo apt install -y "${PPA_PACKAGES[@]}"
+    sudo apt update || log_error "APT Update fehlgeschlagen."
+    sudo apt install -y "${PPA_PACKAGES[@]}" || log_error "Konnte PPA-Pakete nicht installieren."
 }
 
 set_kitty_default_terminal() {
@@ -96,7 +92,7 @@ set_fish_default_shell() {
     if command -v fish >/dev/null; then
         if [ "$SHELL" != "$(command -v fish)" ]; then
             log_info "Setze Fish als Standard-Shell..."
-            chsh -s "$(command -v fish)" || log_warn "Konnte Fish nicht als Standardshell setzen."
+            chsh -s "chsh -s $(which fish)" || log_warn "Konnte Fish nicht als Standardshell setzen."
         fi
     fi
 }
@@ -150,12 +146,12 @@ setup_npm_tools() {
 
 setup_flatpak() {
     log_info "Richte Flathub ein..."
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo --system
     for app in "${FLATPAK_APPS[@]}"; do
-        flatpak install -y flathub "$app"
+        flatpak install -y --non-interactive flathub "$app"
     done
 }
+
 
 deploy_dotfiles() {
     log_info "Deploye Dotfiles..."
