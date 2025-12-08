@@ -29,30 +29,36 @@ ROOT_DEV=$(findmnt -n -o SOURCE /)
 UUID=$(blkid -s UUID -o value "$ROOT_DEV")
 log_info "Root-Device: $ROOT_DEV, UUID: $UUID"
 
-# --- Subvolumes erstellen ---
+# --- Subvolumes erstellen (Fedora Standard Konform) ---
+# Fedora nutzt standardmäßig 'root' und 'home'
 create_subvol() {
-    local path="$1"
-    local label="$2"
-    if ! sudo btrfs subvolume list / | grep -q "$label"; then
-        log_info "Erstelle Subvolume: $label → $path"
-        sudo btrfs subvolume create "$path"
+    local label="$1"
+    local mountpoint="$2"
+    
+    if ! sudo btrfs subvolume list / | grep -q "path $label$"; then
+        log_info "Erstelle Subvolume: $label"
+        # Wir erstellen das Subvolume auf der obersten Ebene
+        sudo mount -o subvolid=5 "$ROOT_DEV" /mnt
+        sudo btrfs subvolume create "/mnt/$label"
+        sudo umount /mnt
     else
-        log_info "Subvolume $label existiert bereits → überspringe."
+        log_info "Subvolume $label existiert bereits."
     fi
 }
 
 log_info "Subvolumes prüfen/erstellen..."
-create_subvol "/@home" "@home"
-create_subvol "/@data" "@data"
-create_subvol "/@snapshots" "@snapshots"
+# 'root' und 'home' existieren bei Fedora bereits
+create_subvol "data" "/data"
+create_subvol "snapshots" "/.snapshots"
 
-# --- Mountpoints erstellen ---
-sudo mkdir -p /home /data /.snapshots
+# --- Mountpoints und Berechtigungen ---
+sudo mkdir -p /data /.snapshots
 
-# --- NO-COW für /data ---
-sudo mount -o subvol=@data "$ROOT_DEV" /data
-sudo chattr +C /data
-log_info "NO-COW für @data gesetzt und gemountet"
+# --- NO-COW für data ---
+# Wichtig für Datenbanken, VMs oder LLMs
+sudo mount -o subvol=data "$ROOT_DEV" /data
+sudo chattr +C /data 2>/dev/null || log_warn "Konnte NO-COW Attribut nicht setzen."
+log_info "NO-COW für /data gesetzt."
 
 # --- fstab-Einträge idempotent ---
 update_fstab() {
@@ -60,20 +66,21 @@ update_fstab() {
     local subvol="$2"
 
     if ! grep -q "subvol=$subvol" /etc/fstab; then
-        echo "UUID=$UUID $mountpoint btrfs subvol=$subvol,defaults 0 0" | sudo tee -a /etc/fstab
-        log_info "fstab-Eintrag für $mountpoint hinzugefügt"
+        # Nutze die Standard-Fedora Mount-Optionen (relatime, ssd, discard=async, etc.)
+        echo "UUID=$UUID $mountpoint btrfs subvol=$subvol,compress=zstd:1,defaults 0 0" | sudo tee -a /etc/fstab
+        log_info "fstab-Eintrag für $mountpoint hinzugefügt."
     else
-        log_info "fstab-Eintrag für $mountpoint existiert bereits → überspringe"
+        log_info "fstab-Eintrag für $mountpoint existiert bereits."
     fi
 }
 
-update_fstab "/" "@"
-update_fstab "/home" "@home"
-update_fstab "/data" "@data"
-update_fstab "/.snapshots" "@snapshots"
+# Wir fügen nur die neuen Subvolumes hinzu. 
+# Fedora's / und /home stehen bereits in der fstab.
+update_fstab "/data" "data"
+update_fstab "/.snapshots" "snapshots"
 
-# --- Berechtigungen ---
-sudo chown -R "$USER:$USER" /home /data
+# --- Berechtigungen für Daten ---
+sudo chown "$USER:$USER" /data
 
 ###############################################################################
 # SECTION 2: Fedora Dev Setup
