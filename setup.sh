@@ -62,18 +62,48 @@ for sv in "${SUBVOLS[@]}"; do
 done
 
 ###############################################################################
-# SECTION 3 — FSTAB erzeugen (Backup + Write)
+# SECTION 3 — Subvolumes erstellen + NO-COW setzen + FSTAB erzeugen
 ###############################################################################
+log_info "Erstelle Btrfs-Subvolumes und setze NO-COW für Daten, Games, Flatpak..."
+
+# Subvolumes
+SUBVOLS_COW=( "@" "@home" "@snapshots" "@code" )
+SUBVOLS_NOCOW=( "@data" "@games" "@flatpak" )
+
+# COW Subvolumes
+for sv in "${SUBVOLS_COW[@]}"; do
+    path="/$sv"
+    if [ ! -d "$path" ]; then
+        sudo btrfs subvolume create "$path"
+        log_info "Subvolume $sv erstellt (COW)"
+    else
+        log_info "Subvolume $sv existiert bereits"
+    fi
+done
+
+# NO-COW Subvolumes
+for sv in "${SUBVOLS_NOCOW[@]}"; do
+    path="/$sv"
+    if [ ! -d "$path" ]; then
+        sudo btrfs subvolume create "$path"
+        sudo chattr +C "$path"   # NO-COW setzen
+        log_info "Subvolume $sv erstellt (NO-COW)"
+    else
+        log_info "Subvolume $sv existiert bereits"
+        sudo chattr +C "$path"   # sicherheitshalber NO-COW setzen
+    fi
+done
+
+# Mountpoints sicherstellen
+for mp in /home /.snapshots /code /data /games /var/lib/flatpak; do
+    sudo mkdir -p "$mp"
+done
+
+# FSTAB schreiben
 log_info "Erzeuge /etc/fstab Einträge…"
 
 UUID_VAL=$(blkid -s UUID -o value "$BTRFS_DEV" 2>/dev/null || true)
-if [ -z "$UUID_VAL" ]; then
-    # Fall-back: use device path
-    log_warn "Konnte UUID nicht lesen, verwende Gerät: $BTRFS_DEV"
-    DEVICE_FOR_FSTAB="$BTRFS_DEV"
-else
-    DEVICE_FOR_FSTAB="UUID=$UUID_VAL"
-fi
+DEVICE_FOR_FSTAB="${UUID_VAL:-$BTRFS_DEV}"
 
 FSTAB_NEW=$(mktemp)
 cat <<EOF > "$FSTAB_NEW"
@@ -90,9 +120,14 @@ $DEVICE_FOR_FSTAB  /var/lib/flatpak btrfs subvol=@flatpak,compress=zstd:3,noatim
 tmpfs   /tmp    tmpfs    defaults,noatime,mode=1777   0 0
 EOF
 
+# Backup der alten fstab
 sudo cp /etc/fstab /etc/fstab.bak_$(date +%s)
 sudo cp "$FSTAB_NEW" /etc/fstab
 log_success "Neue fstab installiert (Backup in /etc/fstab.bak_*)"
+
+# Mounten aller Subvolumes
+sudo mount -a || log_warn "mount -a hatte Probleme"
+
 
 ###############################################################################
 # SECTION 4 — Remountes (versucht live zu mounten; wenn nötig Neustart)
