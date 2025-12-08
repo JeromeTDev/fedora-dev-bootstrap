@@ -91,10 +91,10 @@ DNF_PACKAGES=(
     fish kitty neovim
     fzf tree ripgrep btop neofetch zoxide fd-find ncdu
     stow jq
-    zathura zathura-pdf-mupdf zathura-djvu zathura-ps
+    zathura zathura-pdf-mupdf
     poppler-utils imagemagick mediainfo perl-Image-ExifTool
-    zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine
-)
+    zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine keepassxc
+    )
 
 COPR_REPOS=( atim/lazygit atim/starship lihaohong/yazi )
 COPR_PACKAGES=( lazygit starship yazi )
@@ -105,7 +105,6 @@ FLATPAK_APPS=(
     com.discordapp.Discord
     org.cryptomator.Cryptomator
     md.obsidian.Obsidian
-    mega.MEGASync
 )
 
 DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
