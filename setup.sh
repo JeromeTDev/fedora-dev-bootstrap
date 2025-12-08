@@ -1,137 +1,87 @@
 #!/bin/bash
 #
-# Fedora Dev Bootstrap + Btrfs FSTAB Setup + Mise (Option A: /code/mise)
-# Variante: Vollständige @-Subvolume + Fstab-Autokonfiguration + Mise in /code/mise
+# Fedora Dev Bootstrap + vereinfachte Btrfs Subvolume Struktur
+# Autor: JeromeTDev (angepasst)
 #
-set -euo pipefail
-IFS=$'\n\t'
 
 # --- Logging ---
-log_info()    { echo -e "\033[1;34m[INFO]\033[0m $1"; }
-log_success() { echo -e "\033[1;32m[SUCCESS]\033[0m $1"; }
-log_warn()    { echo -e "\033[1;33m[WARN]\033[0m $1"; }
-log_error()   { echo -e "\033[1;31m[ERROR]\033[0m $1"; exit 1; }
+log_info()    { echo -e "\n\033[1;34m[INFO]\033[0m $1"; }
+log_success() { echo -e "\n\033[1;32m[SUCCESS]\033[0m $1"; }
+log_warn()    { echo -e "\n\033[1;33m[WARN]\033[0m $1"; }
+log_error()   { echo -e "\n\033[1;31m[ERROR]\033[0m $1"; exit 1; }
 
+# --- Sudo aktiv halten ---
 sudo -v
+(
+  while true; do
+    sudo -v
+    sleep 60
+    kill -0 "$$" || exit
+  done
+) &
 
 ###############################################################################
-# SECTION 0 — sanity
+# SECTION 1: Btrfs Subvolumes einrichten
 ###############################################################################
-if [ "$(id -u)" -eq 0 ]; then
-  log_error "Bitte als normaler Nutzer (nicht root) ausführen. Das Script verwendet sudo."
-fi
 
-###############################################################################
-# SECTION 1 — Btrfs Root erkennen
-###############################################################################
 ROOT_DEV=$(findmnt -n -o SOURCE /)
 
-if [[ "$ROOT_DEV" != *"btrfs"* ]]; then
-    log_error "Root ist kein Btrfs — Abbruch."
+if [[ "$ROOT_DEV" == *"subvol="* ]]; then
+    log_info "Btrfs erkannt auf $ROOT_DEV"
+else
+    log_error "Root-Dateisystem ist kein Btrfs. Abbruch."
 fi
 
-# Normalize device: if it's /dev/mapper/... or contains UUID[...] keep as-is for blkid
-BTRFS_DEV="$ROOT_DEV"
-log_info "Btrfs-Device erkannt: $BTRFS_DEV"
+create_subvol() {
+    local path="$1"
+    local label="$2"
+    if [ ! -d "$path" ]; then
+        log_info "Erstelle Subvolume: $label → $path"
+        sudo btrfs subvolume create "$path" || log_warn "Konnte $label nicht erstellen."
+    else
+        log_info "Subvolume $label existiert bereits → überspringe."
+    fi
+}
+
+log_info "Richte vereinfachte Btrfs-Subvolumes ein..."
+create_subvol "/.snapshots" "@snapshots"
+create_subvol "/home" "@home"
+create_subvol "/data" "@data"
+create_subvol "/" "@"
+
+# NO-COW für /data
+sudo chattr +C /data
+
+# Berechtigungen
+sudo chown -R "$USER:$USER" /home /data
 
 ###############################################################################
-# SECTION 2 — Subvolumes erstellen (mit Checks)
+# SECTION 2: Fedora Dev Setup
 ###############################################################################
-SUBVOLS=(
-    "@"
-    "@home"
-    "@snapshots"
-    "@code"
-    "@data"
-    "@games"
-    "@flatpak"
+
+DNF_PACKAGES=(
+    # Development
+    git make cmake gcc clang python3 nodejs
+
+    # Terminal & Shell
+    fish kitty neovim
+
+    # TUI Tools
+    fzf tree ripgrep btop neofetch zoxide fd-find ncdu
+
+    # Utilities
+    stow jq
+
+    # Document & Media
+    zathura zathura-pdf-mupdf zathura-djvu zathura-ps
+    poppler-utils imagemagick mediainfo perl-Image-ExifTool
+
+    # Extras
+    zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine
 )
 
-log_info "Erstelle Subvolumes falls nötig…"
-
-# list existing subvols once for speed
-EXISTING=$(sudo btrfs subvolume list -o / 2>/dev/null || true)
-
-for sv in "${SUBVOLS[@]}"; do
-    if echo "$EXISTING" | grep -q "path $sv"; then
-        log_info "Subvolume $sv existiert bereits."
-    else
-        log_info "Erstelle Subvolume: $sv"
-        sudo btrfs subvolume create "/$sv" || log_warn "Konnte /$sv nicht erstellen (Bereits vorhanden oder Fehler)."
-    fi
-done
-
-###############################################################################
-# SECTION 3 — Subvolumes erstellen + NO-COW setzen + FSTAB erzeugen
-###############################################################################
-log_info "Erstelle Btrfs-Subvolumes und setze NO-COW für Daten, Games, Flatpak..."
-
-# Subvolumes
-SUBVOLS_COW=( "@" "@home" "@snapshots" "@code" )
-SUBVOLS_NOCOW=( "@data" "@games" "@flatpak" )
-
-# COW Subvolumes
-for sv in "${SUBVOLS_COW[@]}"; do
-    path="/$sv"
-    if [ ! -d "$path" ]; then
-        sudo btrfs subvolume create "$path"
-        log_info "Subvolume $sv erstellt (COW)"
-    else
-        log_info "Subvolume $sv existiert bereits"
-    fi
-done
-
-# NO-COW Subvolumes
-for sv in "${SUBVOLS_NOCOW[@]}"; do
-    path="/$sv"
-    if [ ! -d "$path" ]; then
-        sudo btrfs subvolume create "$path"
-        sudo chattr +C "$path"   # NO-COW setzen
-        log_info "Subvolume $sv erstellt (NO-COW)"
-    else
-        log_info "Subvolume $sv existiert bereits"
-        sudo chattr +C "$path"   # sicherheitshalber NO-COW setzen
-    fi
-done
-
-# Mountpoints sicherstellen
-for mp in /home /.snapshots /code /data /games /var/lib/flatpak; do
-    sudo mkdir -p "$mp"
-done
-
-# FSTAB schreiben
-log_info "Erzeuge /etc/fstab Einträge…"
-
-UUID_VAL=$(blkid -s UUID -o value "$BTRFS_DEV" 2>/dev/null || true)
-DEVICE_FOR_FSTAB="${UUID_VAL:-$BTRFS_DEV}"
-
-FSTAB_NEW=$(mktemp)
-cat <<EOF > "$FSTAB_NEW"
-# /etc/fstab — automatisch generiert by fedora-dev-bootstrap
-
-$DEVICE_FOR_FSTAB  /               btrfs  subvol=@,compress=zstd:3,noatime 0 0
-$DEVICE_FOR_FSTAB  /home           btrfs  subvol=@home,compress=zstd:3,noatime 0 0
-$DEVICE_FOR_FSTAB  /.snapshots     btrfs  subvol=@snapshots,compress=zstd:3,noatime 0 0
-$DEVICE_FOR_FSTAB  /code           btrfs  subvol=@code,compress=zstd:3,noatime 0 0
-$DEVICE_FOR_FSTAB  /data           btrfs  subvol=@data,compress=zstd:3,noatime 0 0
-$DEVICE_FOR_FSTAB  /games          btrfs  subvol=@games,compress=zstd:3,noatime 0 0
-$DEVICE_FOR_FSTAB  /var/lib/flatpak btrfs subvol=@flatpak,compress=zstd:3,noatime 0 0
-
-tmpfs   /tmp    tmpfs    defaults,noatime,mode=1777   0 0
-EOF
-
-# Backup der alten fstab
-sudo cp /etc/fstab /etc/fstab.bak_$(date +%s)
-sudo cp "$FSTAB_NEW" /etc/fstab
-log_success "Neue fstab installiert (Backup in /etc/fstab.bak_*)"
-
-# Mounten aller Subvolumes
-sudo mount -a || log_warn "mount -a hatte Probleme"
-
-
-###############################################################################
-# SECTION 4 — Flatpak Installation → in @flatpak (NO-COW)
-###############################################################################
+COPR_REPOS=( atim/lazygit atim/starship )
+COPR_PACKAGES=( lazygit starship )
 
 FLATPAK_APPS=(
     com.mattjakeman.ExtensionManager
@@ -142,165 +92,108 @@ FLATPAK_APPS=(
     mega.MEGASync
 )
 
+DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
+DOTFILES_DIR="$HOME/fedora-dev-bootstrap"
+
+###############################################################################
+# NPM Setup → global in /home/.npm-global
+###############################################################################
+
+configure_npm_path() {
+    log_info "Konfiguriere NPM global in ~/.npm-global..."
+
+    NPM_DIR="$HOME/.npm-global"
+    mkdir -p "$NPM_DIR"
+
+    npm config set prefix "$NPM_DIR"
+
+    export PATH="$NPM_DIR/bin:$PATH"
+
+    # Shell-PATH dauerhaft hinzufügen
+    grep -q "$NPM_DIR/bin" ~/.bashrc || echo "export PATH=\"$NPM_DIR/bin:\$PATH\"" >> ~/.bashrc
+    grep -q "$NPM_DIR/bin" ~/.zshrc || echo "export PATH=\"$NPM_DIR/bin:\$PATH\"" >> ~/.zshrc
+
+    if [ "$(basename "$SHELL")" = "fish" ]; then
+        grep -q "$NPM_DIR/bin" ~/.config/fish/config.fish || \
+            echo "set -U fish_user_paths $NPM_DIR/bin \$fish_user_paths" >> ~/.config/fish/config.fish
+    fi
+}
+
+setup_npm() {
+    configure_npm_path
+    log_info "Installiere globale NPM-Tools..."
+    npm install -g neovim @mermaid-js/mermaid-cli || log_warn "NPM-Tools konnten nicht installiert werden."
+}
+
+###############################################################################
+# Flatpak Installation → unter Home
+###############################################################################
+
 setup_flatpak() {
-    log_info "Richte Flatpak ein (Subvolume: @flatpak)..."
+    log_info "Richte Flatpak ein (unter $HOME)..."
 
-    # Sicherstellen, dass Subvolume existiert und NO-COW ist
-    sudo mkdir -p /var/lib/flatpak
-    sudo chown "$USER:$USER" /var/lib/flatpak
-    sudo chattr +C /var/lib/flatpak  # NO-COW
-
-    # Flathub als Remote hinzufügen, falls noch nicht vorhanden
+    mkdir -p "$HOME/.local/share/flatpak"
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-    # Apps installieren
     for app in "${FLATPAK_APPS[@]}"; do
-        if ! flatpak list | grep -q "$app"; then
-            log_info "Installiere Flatpak-App: $app"
-            flatpak install flathub "$app" -y || log_warn "Flatpak-App $app konnte nicht installiert werden."
-        else
-            log_info "Flatpak-App $app bereits installiert"
-        fi
+        flatpak install flathub "$app" -y || log_warn "Flatpak-App $app konnte nicht installiert werden."
     done
 }
 
-
 ###############################################################################
-# SECTION 5 — DNF Packages (Fedora dev stack)
+# Restlicher Setup
 ###############################################################################
-DNF_PACKAGES=(
-    git make cmake gcc clang python3 nodejs
 
-    fish kitty neovim
+install_dnf_packages() { sudo dnf install -y "${DNF_PACKAGES[@]}" --skip-unavailable; }
+install_copr_packages() { sudo dnf install -y "${COPR_PACKAGES[@]}"; }
 
-    fzf tree ripgrep btop neofetch zoxide fd-find ncdu
+configure_system() {
+    log_info "Konfiguriere System..."
 
-    flatpak stow jq
-    zathura zathura-pdf-mupdf zathura-ps zathura-djvu
-    poppler-utils imagemagick mediainfo perl-Image-ExifTool
+    sudo sed -i '/^max_parallel_downloads/d' /etc/dnf/dnf.conf
+    sudo sed -i '/^fastestmirror/d' /etc/dnf/dnf.conf
+    echo "max_parallel_downloads=10" | sudo tee -a /etc/dnf/dnf.conf >/dev/null
+    echo "fastestmirror=True" | sudo tee -a /etc/dnf/dnf.conf >/dev/null
 
-    zeal xournalpp texlive-scheme-basic
-)
-
-log_info "Installiere DNF-Pakete…"
-sudo dnf upgrade -y
-sudo dnf install -y "${DNF_PACKAGES[@]}" --skip-unavailable
-
-###############################################################################
-# SECTION 6 — Flatpak setup (in @flatpak)
-###############################################################################
-log_info "Richte Flatpak ein (Subvolume @flatpak)..."
-sudo mkdir -p /var/lib/flatpak
-sudo chown "$USER:$USER" /var/lib/flatpak
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-flatpak install -y flathub com.mattjakeman.ExtensionManager || log_warn "Flatpak install hat Fehler."
-
-###############################################################################
-# SECTION 7 — NPM global prefix (keep in /code) — optional, mise handles tools but we keep this
-###############################################################################
-log_info "Konfiguriere globales NPM (prefix) nach /code/npm-global..."
-sudo mkdir -p /code/npm-global
-sudo chown "$USER:$USER" /code/npm-global
-npm config set prefix "/code/npm-global" || log_warn "npm fehlgeschlagen (evtl. nodejs fehlt)."
-
-# add to shells if absent
-if ! grep -q "/code/npm-global/bin" ~/.bashrc 2>/dev/null; then
-    echo 'export PATH="/code/npm-global/bin:$PATH"' >> ~/.bashrc
-fi
-if [ -d ~/.config/fish ]; then
-    if ! grep -q "/code/npm-global/bin" ~/.config/fish/config.fish 2>/dev/null; then
-        echo 'set -U fish_user_paths /code/npm-global/bin $fish_user_paths' >> ~/.config/fish/config.fish
+    if command -v fish &>/dev/null; then
+        chsh -s "$(command -v fish)"
     fi
-fi
 
-###############################################################################
-# SECTION 8 — MISE: Install into /code/mise and activate in shells (Option A)
-# Docs: curl https://mise.run | sh  (can set MISE_INSTALL_PATH)
-# Set MISE_DATA_DIR/MISE_INSTALLS_DIR to /code/mise to keep all installs in /code
-# (References: mise docs: getting-started, installing, config/directories)
-###############################################################################
-
-log_info "Installiere mise in /code/mise ..."
-
-# prepare dirs
-sudo mkdir -p /code/mise/bin
-sudo mkdir -p /code/mise/data
-sudo mkdir -p /code/mise/cache
-sudo chown -R "$USER:$USER" /code/mise
-
-# Run remote install script but instruct it to put the binary into /code/mise/bin
-# the official installer accepts MISE_INSTALL_PATH=/usr/local/bin/mise (see docs)
-# we set it to /code/mise/bin/mise
-export MISE_INSTALL_PATH="/code/mise/bin/mise"
-
-# Use the official installer (will drop the CLI binary into our MISE_INSTALL_PATH)
-curl -fsSL https://mise.run | MISE_INSTALL_PATH="$MISE_INSTALL_PATH" sh || log_warn "mise installer schlug fehl (prüfe Netzwerk)."
-
-# Ensure binary is executable
-if [ -x "/code/mise/bin/mise" ]; then
-    log_success "mise CLI installiert: /code/mise/bin/mise"
-else
-    log_warn "mise CLI nicht in /code/mise/bin/mise gefunden — versuche Fallback (~/.local/bin/mise)..."
-fi
-
-# Configure mise data/install dirs via env vars in shell rc files
-# MISE_DATA_DIR is where mise stores installs, plugins etc. We'll put it under /code/mise/data
-# MISE_CACHE_DIR under /code/mise/cache
-MISE_DATA_DIR="/code/mise/data"
-MISE_CACHE_DIR="/code/mise/cache"
-MISE_INSTALLS_DIR="$MISE_DATA_DIR/installs"
-
-# Export env vars for interactive shells (append if not already present)
-append_if_missing() {
-  local file="$1"; shift
-  local line="$*"
-  grep -F -- "$line" "$file" >/dev/null 2>&1 || echo "$line" >> "$file"
+    if command -v kitty &>/dev/null; then
+        gsettings set org.gnome.desktop.default-applications.terminal exec 'kitty'
+    fi
 }
 
-# bash
-append_if_missing ~/.bashrc "export MISE_DATA_DIR=\"$MISE_DATA_DIR\""
-append_if_missing ~/.bashrc "export MISE_CACHE_DIR=\"$MISE_CACHE_DIR\""
-append_if_missing ~/.bashrc "export MISE_INSTALLS_DIR=\"$MISE_INSTALLS_DIR\""
-# activate mise automatically in interactive shells
-append_if_missing ~/.bashrc 'eval "$(/code/mise/bin/mise activate bash 2>/dev/null || true)"'
-
-# zsh
-append_if_missing ~/.zshrc "export MISE_DATA_DIR=\"$MISE_DATA_DIR\""
-append_if_missing ~/.zshrc "export MISE_CACHE_DIR=\"$MISE_CACHE_DIR\""
-append_if_missing ~/.zshrc "export MISE_INSTALLS_DIR=\"$MISE_INSTALLS_DIR\""
-append_if_missing ~/.zshrc 'eval "$(/code/mise/bin/mise activate zsh 2>/dev/null || true)"'
-
-# fish
-mkdir -p ~/.config/fish
-append_if_missing ~/.config/fish/config.fish "set -x MISE_DATA_DIR $MISE_DATA_DIR"
-append_if_missing ~/.config/fish/config.fish "set -x MISE_CACHE_DIR $MISE_CACHE_DIR"
-append_if_missing ~/.config/fish/config.fish "set -x MISE_INSTALLS_DIR $MISE_INSTALLS_DIR"
-append_if_missing ~/.config/fish/config.fish '/code/mise/bin/mise activate fish | source || true'
-
-log_success "Mise installiert und in Shells (bash/zsh/fish) aktiviert (via /code/mise/bin/mise)."
-
-# Ensure installs dir exists and is owned by user
-mkdir -p "$MISE_INSTALLS_DIR"
-chown -R "$USER:$USER" "$MISE_DATA_DIR" "$MISE_CACHE_DIR"
+deploy_dotfiles() {
+    log_info "Deploy Dotfiles..."
+    if [ ! -d "$DOTFILES_DIR" ]; then
+        git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    fi
+    cd "$DOTFILES_DIR" || return
+    for dir in *; do
+        [ -d "$dir" ] && stow "$dir"
+    done
+}
 
 ###############################################################################
-# SECTION 9 — (Optional) Beispiel: globale Node/Python via mise (auskommentiert)
-# Wenn du willst, entferne die Kommentare und passe Versionen an.
-# Hinweise: mise use --global <tool@version>
-# z.B. mise use --global node@24
-# siehe: mise install-into / mise use docs
+# RUN SCRIPT
 ###############################################################################
-: <<'OPTIONAL_MISE_INSTALLS'
-log_info "Optional: mise: Installiere Node LTS global (Beispiel)"
-/code/mise/bin/mise use --global node@24 || log_warn "mise node install fehlgeschlagen"
 
-log_info "Optional: mise: Installiere Python global (Beispiel)"
-/code/mise/bin/mise use --global python@3 || log_warn "mise python install fehlgeschlagen"
-OPTIONAL_MISE_INSTALLS
+log_info "System aktualisieren..."
+sudo dnf upgrade -y
 
-###############################################################################
-# DONE
-###############################################################################
-log_success "🎉 Fedora + Btrfs + FSTAB + Mise (Option A) Setup abgeschlossen!"
-echo "➡️  Starte dein Terminal neu (oder eine neue Shell), damit mise activation und PATHs wirken."
-echo "➡️  Wenn du globale Tools mit mise installieren willst, entferne die Kommentare im Script-Block 'Optional: mise installs' oder führe 'mise use --global <tool@version>'."
+configure_system
+install_dnf_packages
+setup_npm
+install_copr_packages
+setup_flatpak
+deploy_dotfiles
+
+log_success "🎉 Fedora Dev + vereinfachtes Btrfs Setup abgeschlossen!"
+echo "--------------------------------------------------------"
+echo "Nächste Schritte:"
+echo "- Terminal neu starten (Fish + Starship aktiv)"
+echo "- 'nvim' starten für LazyVim Setup"
+echo "- In Neovim :checkhealth ausführen"
+echo "- Große Dateien (Games/LLM) unter /data speichern"
+echo "--------------------------------------------------------"
