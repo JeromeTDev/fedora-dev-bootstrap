@@ -24,13 +24,13 @@ sudo -v
 # SECTION 1: Btrfs Subvolumes einrichten
 ###############################################################################
 
-ROOT_DEV=$(findmnt -n -o SOURCE /)
-
-if [[ "$ROOT_DEV" == *"subvol="* ]]; then
-    log_info "Btrfs erkannt auf $ROOT_DEV"
+FS_TYPE=$(findmnt -n -o FSTYPE /)
+if [[ "$FS_TYPE" == "btrfs" ]]; then
+    log_info "Btrfs erkannt auf /"
 else
     log_error "Root-Dateisystem ist kein Btrfs. Abbruch."
 fi
+
 
 create_subvol() {
     local path="$1"
