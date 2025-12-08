@@ -184,14 +184,22 @@ configure_system() {
 
 
 install_fonts() {
-    log_info "Installiere Fonts..."
+    log_info "Installiere Standard-Fonts via DNF..."
     sudo dnf install -y \
-        google-roboto-fonts \
-        google-noto-sans-cjk-ttc \
-        jetbrains-mono-fonts \
         adobe-source-code-pro-fonts \
         liberation-sans-fonts \
         dejavu-sans-fonts || log_warn "Einige Fonts konnten nicht installiert werden."
+
+    log_info "Aktiviere Copr-Repo für JetBrainsMono Nerd Font..."
+    sudo dnf copr enable maveonair/jetbrains-mono-nerd-fonts -y || log_warn "Copr-Repo konnte nicht aktiviert werden."
+
+    log_info "Installiere JetBrainsMono Nerd Font via DNF..."
+    sudo dnf install -y jetbrains-mono-nerd-fonts || log_warn "JetBrainsMono Nerd Font konnte nicht installiert werden."
+
+    log_info "Font-Cache aktualisieren..."
+    fc-cache -fv
+
+    log_success "JetBrainsMono Nerd Font (Copr) installiert und bereit."
 }
 
 deploy_dotfiles() {
