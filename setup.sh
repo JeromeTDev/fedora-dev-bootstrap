@@ -204,12 +204,22 @@ install_fonts() {
 
 deploy_dotfiles() {
     log_info "Deploy Dotfiles..."
+    
+    # Dotfiles-Repo klonen, falls noch nicht vorhanden
     [ ! -d "$DOTFILES_DIR" ] && git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+
     cd "$DOTFILES_DIR" || return
+
+    # Für jedes Verzeichnis im Repo (also jedes Paket) ...
     for dir in *; do
-        [ -d "$dir" ] && stow "$dir"
+        [ -d "$dir" ] || continue
+        # Symlinks neu setzen, vorhandene Dateien & Symlinks überschreiben
+        stow -R --override "$dir"
     done
+
+    log_success "Dotfiles deployed und Symlinks korrekt gesetzt."
 }
+
 
 setup_starship() {
     FISH_CONFIG="$HOME/.config/fish/config.fish"
