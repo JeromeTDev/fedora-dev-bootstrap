@@ -130,19 +130,40 @@ sudo mount -a || log_warn "mount -a hatte Probleme"
 
 
 ###############################################################################
-# SECTION 4 — Remountes (versucht live zu mounten; wenn nötig Neustart)
+# SECTION 4 — Flatpak Installation → in @flatpak (NO-COW)
 ###############################################################################
-log_info "Versuche Remounts gemäß neuer fstab..."
 
-# create mountpoints in case they don't exist
-for mp in /home /.snapshots /code /data /games /var/lib/flatpak; do
-    sudo mkdir -p "$mp"
-done
+FLATPAK_APPS=(
+    com.mattjakeman.ExtensionManager
+    com.teamspeak.TeamSpeak
+    com.discordapp.Discord
+    org.cryptomator.Cryptomator
+    md.obsidian.Obsidian
+    mega.MEGASync
+)
 
-# Try to mount (ignore failures for remounting root)
-sudo mount -a || log_warn "mount -a hatte Probleme (ein Reboot kann nötig sein)."
+setup_flatpak() {
+    log_info "Richte Flatpak ein (Subvolume: @flatpak)..."
 
-sudo chown -R "$USER:$USER" /code /data /games /var/lib/flatpak || true
+    # Sicherstellen, dass Subvolume existiert und NO-COW ist
+    sudo mkdir -p /var/lib/flatpak
+    sudo chown "$USER:$USER" /var/lib/flatpak
+    sudo chattr +C /var/lib/flatpak  # NO-COW
+
+    # Flathub als Remote hinzufügen, falls noch nicht vorhanden
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+    # Apps installieren
+    for app in "${FLATPAK_APPS[@]}"; do
+        if ! flatpak list | grep -q "$app"; then
+            log_info "Installiere Flatpak-App: $app"
+            flatpak install flathub "$app" -y || log_warn "Flatpak-App $app konnte nicht installiert werden."
+        else
+            log_info "Flatpak-App $app bereits installiert"
+        fi
+    done
+}
+
 
 ###############################################################################
 # SECTION 5 — DNF Packages (Fedora dev stack)
