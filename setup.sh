@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # Fedora Dev Bootstrap + vereinfachte Btrfs Subvolume Struktur
-# Autor: JeromeTDev (angepasst)
+# Autor: angepasst für sauberes Setup
 #
 
 # --- Logging ---
@@ -20,34 +20,59 @@ sudo -v
   done
 ) &
 
-###############################################################################
-# SECTION 1: Btrfs Subvolumes einrichten
-###############################################################################
-
+# --- Root prüfen ---
 FS_TYPE=$(findmnt -n -o FSTYPE /)
 [[ "$FS_TYPE" == "btrfs" ]] || log_error "Root-Dateisystem ist kein Btrfs. Abbruch."
 
+# --- Root Device ermitteln ---
+ROOT_DEV=$(findmnt -n -o SOURCE /)
+UUID=$(blkid -s UUID -o value "$ROOT_DEV")
+log_info "Root-Device: $ROOT_DEV, UUID: $UUID"
+
+# --- Subvolumes erstellen ---
 create_subvol() {
     local path="$1"
     local label="$2"
-    if [ ! -d "$path" ]; then
+    if ! sudo btrfs subvolume list / | grep -q "$label"; then
         log_info "Erstelle Subvolume: $label → $path"
-        sudo btrfs subvolume create "$path" || log_warn "Konnte $label nicht erstellen."
+        sudo btrfs subvolume create "$path"
     else
         log_info "Subvolume $label existiert bereits → überspringe."
     fi
 }
 
-log_info "Richte vereinfachte Btrfs-Subvolumes ein..."
-create_subvol "/.snapshots" "@snapshots"
-create_subvol "/home" "@home"
-create_subvol "/data" "@data"
-create_subvol "/" "@"
+log_info "Subvolumes prüfen/erstellen..."
+create_subvol "/@home" "@home"
+create_subvol "/@data" "@data"
+create_subvol "/@snapshots" "@snapshots"
 
-# NO-COW für /data
+# --- Mountpoints erstellen ---
+sudo mkdir -p /home /data /.snapshots
+
+# --- NO-COW für /data ---
+sudo mount -o subvol=@data "$ROOT_DEV" /data
 sudo chattr +C /data
+log_info "NO-COW für @data gesetzt und gemountet"
 
-# Berechtigungen
+# --- fstab-Einträge idempotent ---
+update_fstab() {
+    local mountpoint="$1"
+    local subvol="$2"
+
+    if ! grep -q "subvol=$subvol" /etc/fstab; then
+        echo "UUID=$UUID $mountpoint btrfs subvol=$subvol,defaults 0 0" | sudo tee -a /etc/fstab
+        log_info "fstab-Eintrag für $mountpoint hinzugefügt"
+    else
+        log_info "fstab-Eintrag für $mountpoint existiert bereits → überspringe"
+    fi
+}
+
+update_fstab "/" "@"
+update_fstab "/home" "@home"
+update_fstab "/data" "@data"
+update_fstab "/.snapshots" "@snapshots"
+
+# --- Berechtigungen ---
 sudo chown -R "$USER:$USER" /home /data
 
 ###############################################################################
@@ -67,7 +92,6 @@ DNF_PACKAGES=(
 COPR_REPOS=( atim/lazygit atim/starship lihaohong/yazi )
 COPR_PACKAGES=( lazygit starship yazi )
 
-
 FLATPAK_APPS=(
     com.mattjakeman.ExtensionManager
     com.teamspeak.TeamSpeak
@@ -81,7 +105,7 @@ DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
 DOTFILES_DIR="$HOME/fedora-dev-bootstrap"
 
 ###############################################################################
-# Funktionen
+# Funktionen für Dev Setup
 ###############################################################################
 
 install_dnf_packages() {
@@ -97,11 +121,7 @@ install_copr_packages() {
 
     log_info "Installiere COPR-Pakete..."
     for pkg in "${COPR_PACKAGES[@]}"; do
-        if [ "$pkg" == "yazi" ]; then
-            sudo dnf install -y --setopt=install_weak_deps=False "$pkg" || log_warn "Konnte $pkg nicht installieren."
-        else
-            sudo dnf install -y "$pkg" || log_warn "Konnte $pkg nicht installieren."
-        fi
+        sudo dnf install -y "$pkg" || log_warn "Konnte $pkg nicht installieren."
     done
 }
 
@@ -112,7 +132,6 @@ setup_npm() {
     npm config set prefix "$NPM_DIR"
     export PATH="$NPM_DIR/bin:$PATH"
 
-    # Shell-PATH dauerhaft hinzufügen
     grep -q "$NPM_DIR/bin" ~/.bashrc || echo "export PATH=\"$NPM_DIR/bin:\$PATH\"" >> ~/.bashrc
     grep -q "$NPM_DIR/bin" ~/.zshrc || echo "export PATH=\"$NPM_DIR/bin:\$PATH\"" >> ~/.zshrc
     if [ "$(basename "$SHELL")" = "fish" ]; then
@@ -135,25 +154,27 @@ setup_flatpak() {
 
 configure_system() {
     log_info "Konfiguriere System..."
+
     # DNF optimieren
     sudo sed -i '/^max_parallel_downloads/d' /etc/dnf/dnf.conf
     sudo sed -i '/^fastestmirror/d' /etc/dnf/dnf.conf
     echo "max_parallel_downloads=10" | sudo tee -a /etc/dnf/dnf.conf >/dev/null
     echo "fastestmirror=True" | sudo tee -a /etc/dnf/dnf.conf >/dev/null
 
-    # Fish als Standard-Shell
-    command -v fish &>/dev/null && chsh -s "$(command -v fish)"
+    # Fish als Standard-Shell setzen, falls noch nicht aktiv
+    if command -v fish &>/dev/null && [ "$SHELL" != "$(command -v fish)" ]; then
+        chsh -s "$(command -v fish)"
+        log_info "Fish als Standard-Shell gesetzt."
+    fi
 
-    # Kitty als Standard-Terminal setzen (GNOME)
+    # Kitty als Standard-Terminal für GNOME
     if command -v kitty &>/dev/null && command -v gsettings &>/dev/null; then
         KITTY_PATH=$(command -v kitty)
-        log_info "Setze Kitty als Standard-Terminal: $KITTY_PATH"
         gsettings set org.gnome.desktop.default-applications.terminal exec "$KITTY_PATH"
-        gsettings set org.gnome.desktop.default-applications.terminal exec-arg '-e'
-    else
-        log_warn "Kitty oder gsettings nicht gefunden → Standard-Terminal nicht gesetzt."
+        log_info "Kitty als Standard-Terminal gesetzt."
     fi
 }
+
 
 install_fonts() {
     log_info "Installiere Fonts..."
@@ -165,7 +186,6 @@ install_fonts() {
         liberation-sans-fonts \
         dejavu-sans-fonts || log_warn "Einige Fonts konnten nicht installiert werden."
 }
-
 
 deploy_dotfiles() {
     log_info "Deploy Dotfiles..."
