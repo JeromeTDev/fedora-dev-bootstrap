@@ -111,7 +111,7 @@ FLATPAK_APPS=(
 )
 
 DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
-DOTFILES_DIR="$HOME/fedora-dev-bootstrap"
+DOTFILES_DIR="$HOME/.dotfiles"
 
 ###############################################################################
 # Funktionen für Dev Setup
