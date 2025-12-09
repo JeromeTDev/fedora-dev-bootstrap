@@ -219,36 +219,77 @@ deploy_dotfiles() {
   log_info "Deploy Dotfiles..."
 
   # Dotfiles-Repo klonen, falls noch nicht vorhanden
-  [ ! -d "$DOTFILES_DIR" ] && git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+  if [ ! -d "$DOTFILES_DIR" ]; then
+    git clone "$DOTFILES_REPO" "$DOTFILES_DIR" || log_error "Konnte Dotfiles-Repo nicht klonen."
+  else
+    log_info "Dotfiles-Repo existiert bereits, aktualisiere..."
+    cd "$DOTFILES_DIR" && git pull --rebase || log_warn "Repo konnte nicht aktualisiert werden."
+  fi
 
-  cd "$DOTFILES_DIR" || return
+  cd "$DOTFILES_DIR" || log_error "Konnte in Dotfiles-Verzeichnis wechseln."
 
   # Für jedes Verzeichnis im Repo (also jedes Paket) ...
   for dir in *; do
     [ -d "$dir" ] || continue
-    # Symlinks neu setzen, vorhandene Dateien & Symlinks überschreiben
-    stow -R --override "$dir"
+    log_info "Setze Symlinks für Paket: $dir"
+    stow -R --override "$dir" || log_warn "Stow für Paket $dir fehlgeschlagen."
   done
 
   log_success "Dotfiles deployed und Symlinks korrekt gesetzt."
+
+  # --- Starship für Fish/Bash/Zsh aktivieren ---
+  setup_starship
 }
 
-setup_starship() {
-  log_info "Aktiviere Starship für Fish..."
-  FISH_CONFIG="$HOME/.config/fish/config.fish"
 
-  # Sicherstellen, dass die Datei existiert
+setup_starship() {
+  log_info "Aktiviere Starship..."
+
+  # Fish
+  FISH_CONFIG="$HOME/.config/fish/config.fish"
   mkdir -p "$(dirname "$FISH_CONFIG")"
   touch "$FISH_CONFIG"
-
-  # Sicherstellen, dass der Eintrag nur einmal hinzugefügt wird
   if ! grep -q "starship init fish" "$FISH_CONFIG"; then
     echo -e "\n# Starship Prompt\nif type starship >/dev/null 2>&1; starship init fish | source; end" >>"$FISH_CONFIG"
     log_success "Starship für Fish in $FISH_CONFIG aktiviert."
   else
     log_info "Starship-Eintrag in config.fish existiert bereits."
   fi
+
+  # Bash
+  BASH_CONFIG="$HOME/.bashrc"
+  touch "$BASH_CONFIG"
+  if ! grep -q "starship init bash" "$BASH_CONFIG"; then
+    echo -e "\n# Starship Prompt\nif type starship >/dev/null 2>&1; then eval \"\$(starship init bash)\"; fi" >>"$BASH_CONFIG"
+    log_success "Starship für Bash in $BASH_CONFIG aktiviert."
+  else
+    log_info "Starship-Eintrag in .bashrc existiert bereits."
+  fi
+
+  # Zsh
+  ZSH_CONFIG="$HOME/.zshrc"
+  touch "$ZSH_CONFIG"
+  if ! grep -q "starship init zsh" "$ZSH_CONFIG"; then
+    echo -e "\n# Starship Prompt\nif type starship >/dev/null 2>&1; then eval \"\$(starship init zsh)\"; fi" >>"$ZSH_CONFIG"
+    log_success "Starship für Zsh in $ZSH_CONFIG aktiviert."
+  else
+    log_info "Starship-Eintrag in .zshrc existiert bereits."
+  fi
 }
+
+setup_flatpak() {
+  log_info "Richte Flatpak ein..."
+  mkdir -p "$HOME/.local/share/flatpak"
+  flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+  log_info "Flatpak-Repository aktualisieren..."
+  flatpak update -y || log_warn "Flatpak-Update fehlgeschlagen."
+
+  for app in "${FLATPAK_APPS[@]}"; do
+    flatpak install flathub "$app" -y || log_warn "Flatpak-App $app konnte nicht installiert werden."
+  done
+}
+
 
 ###############################################################################
 # RUN SCRIPT
