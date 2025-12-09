@@ -94,7 +94,7 @@ DNF_PACKAGES=(
   fish kitty neovim
   fzf tree ripgrep btop neofetch zoxide fd-find ncdu
   stow jq
-  zathura zathura-pdf-mupdf
+  zathura zathura-pdf-mupdf timeshift
   poppler-utils imagemagick mediainfo perl-Image-ExifTool
   zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine keepassxc
 )
