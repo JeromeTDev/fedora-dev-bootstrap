@@ -95,7 +95,7 @@ DNF_PACKAGES=(
   fzf tree ripgrep btop neofetch zoxide fd-find ncdu
   stow jq
   zathura zathura-pdf-mupdf timeshift
-  poppler-utils imagemagick mediainfo perl-Image-ExifTool
+  poppler-utils ImageMagick mediainfo perl-Image-ExifTool
   zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine keepassxc
 )
 
@@ -115,6 +115,7 @@ COPR_PACKAGES=(
 
 FLATPAK_APPS=(
   com.mattjakeman.ExtensionManager
+  com.github.caffeine-ng.Caffeine
   com.teamspeak.TeamSpeak
   com.discordapp.Discord
   org.cryptomator.Cryptomator
@@ -175,37 +176,44 @@ setup_flatpak() {
 configure_system() {
   log_info "Konfiguriere System..."
 
-  # DNF optimieren
-  sudo sed -i '/^max_parallel_downloads/d' /etc/dnf/dnf.conf
+  # --- Minimal Fedora 43 DNF Config ---
   sudo sed -i '/^fastestmirror/d' /etc/dnf/dnf.conf
-  echo "max_parallel_downloads=10" | sudo tee -a /etc/dnf/dnf.conf >/dev/null
-  echo "fastestmirror=True" | sudo tee -a /etc/dnf/dnf.conf >/dev/null
+  sudo sed -i '/^max_parallel_downloads/d' /etc/dnf/dnf.conf
+  sudo sed -i '/^defaultyes/d' /etc/dnf/dnf.conf
+  sudo sed -i '/^install_weak_deps/d' /etc/dnf/dnf.conf
+  sudo sed -i '/^clean_requirements_on_remove/d' /etc/dnf/dnf.conf
 
-  # --- Kitty als Standard-Terminal für GNOME (Integrierte Logik) ---
-  log_info "Versuche, Kitty als Standard-Terminal (GNOME) zu setzen..."
+  {
+    echo "fastestmirror=True"
+    echo "max_parallel_downloads=15"
+    echo "defaultyes=True"
+    echo "install_weak_deps=False"
+    echo "clean_requirements_on_remove=True"
+  } | sudo tee -a /etc/dnf/dnf.conf >/dev/null
 
+  log_info "Minimal optimierte DNF-Konfiguration angewendet."
+
+  # --- Kitty Standardterminal (falls vorhanden) ---
   if command -v kitty &>/dev/null && command -v gsettings &>/dev/null; then
     KITTY_PATH=$(command -v kitty)
 
-    # GNOME-Standard-Schema verwenden
     gsettings set org.gnome.desktop.default-applications.terminal exec "$KITTY_PATH"
     gsettings set org.gnome.desktop.default-applications.terminal exec-arg ""
 
-    # Prüfen, ob die Änderung erfolgreich war
     if [ "$(gsettings get org.gnome.desktop.default-applications.terminal exec)" = "'$KITTY_PATH'" ]; then
       log_success "Kitty erfolgreich als GNOME Standard-Terminal gesetzt."
     else
-      log_warn "Konnte Kitty nicht über GNOME gsettings setzen. Möglicherweise wird eine andere DE/Session verwendet."
+      log_warn "Konnte Kitty nicht über GNOME gsettings setzen."
     fi
   fi
-  # --- Ende Kitty-Logik ---
 
-  # Fish als Standard-Shell setzen, falls noch nicht aktiv
+  # --- Fish als Standard-Shell setzen ---
   if command -v fish &>/dev/null && [ "$SHELL" != "$(command -v fish)" ]; then
     chsh -s "$(command -v fish)"
     log_info "Fish als Standard-Shell gesetzt."
   fi
 }
+
 
 install_fonts() {
   log_info "Aktualisiere Font-Cache..."
