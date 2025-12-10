@@ -89,16 +89,16 @@ FedDev beinhaltet:
 ### 🧩 Installation
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/DEIN_USERNAME/fedora-dev-bootstrap/main/setup.sh)
+bash <(curl -s https://raw.githubusercontent.com/JeromeTDev/fedora-dev-bootstrap/main/feddev-setup.sh)
 ```
 
 **Alternative: Klonen & Ausführen**
 
 ```bash
-git clone https://github.com/DEIN_USERNAME/fedora-dev-bootstrap.git ~/fedora-dev-bootstrap
+git clone https://github.com/JeromeTDev/fedora-dev-bootstrap.git ~/fedora-dev-bootstrap
 cd ~/fedora-dev-bootstrap
-chmod +x setup.sh
-./setup.sh
+chmod +x feddev-setup.sh
+./feddev-setup.sh
 ```
 
 ### 🧪 Nach der Installation
