@@ -228,12 +228,7 @@ deploy_dotfiles() {
 
   cd "$DOTFILES_DIR" || log_error "Konnte in Dotfiles-Verzeichnis wechseln."
 
-  # Für jedes Verzeichnis im Repo (also jedes Paket) ...
-  for dir in *; do
-    [ -d "$dir" ] || continue
-    log_info "Setze Symlinks für Paket: $dir"
-    stow -R --override "$dir" || log_warn "Stow für Paket $dir fehlgeschlagen."
-  done
+  stow --adopt .
 
   log_success "Dotfiles deployed und Symlinks korrekt gesetzt."
 
