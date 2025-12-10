@@ -90,7 +90,7 @@ sudo chown "$USER:$USER" /data
 ###############################################################################
 
 DNF_PACKAGES=(
-  git make cmake gcc clang python3 nodejs
+  git gh make cmake gcc clang python3 nodejs
   fish kitty neovim
   fzf tree ripgrep btop neofetch zoxide fd-find ncdu
   stow jq
