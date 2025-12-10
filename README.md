@@ -11,7 +11,14 @@
 
 ## 🇺🇸 English <a name="english"></a>
 
-A fully automated **Fedora developer bootstrap** for a clean, developer-friendly environment. Includes:
+A fully automated **Fedora developer bootstrap** for a clean, developer-friendly environment. 
+
+### Requirements:
+
+- A fresh Fedora installation (recommended Fedora 43 or newer)
+- Internet connection
+
+#### FedDev includes:
 
 - **Btrfs subvolumes** for `/data` and snapshots (`/.snapshots`) with NO-COW optimization
 - **Developer tools:** git, gcc/clang, cmake, make, python3, nodejs, lua 5.1 + luarocks
@@ -56,6 +63,12 @@ chmod +x feddev-setup.sh
 ## 🇩🇪 Deutsch <a name="deutsch"></a>
 
 Vollautomatisiertes **Fedora-Developer-Bootstrap**, ideal für Entwickler:
+
+### Voraussetzungen:
+- Eine frisch installierte Fedora-Version (empfohlen: Fedora 43 oder neuer)
+- Internetverbindung
+
+FedDev beinhaltet:
 
 - **Btrfs-Subvolumes:** `/data` & `/.snapshots` (NO-COW optimiert)  
 - **Dev-Tools:** git, gcc/clang, cmake, make, python3, nodejs, lua 5.1 + luarocks  
