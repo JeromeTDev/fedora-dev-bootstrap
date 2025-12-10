@@ -220,20 +220,19 @@ deploy_dotfiles() {
 
   # Dotfiles-Repo klonen, falls noch nicht vorhanden
   if [ ! -d "$DOTFILES_DIR" ]; then
-    git clone "$DOTFILES_REPO" "$DOTFILES_DIR" || log_error "Konnte Dotfiles-Repo nicht klonen."
+    git clone "$DOTFILES_REPO" "$DOTFILES_DIR" || { log_error "Konnte Dotfiles-Repo nicht klonen."; return 1; }
   else
     log_info "Dotfiles-Repo existiert bereits, aktualisiere..."
-    cd "$DOTFILES_DIR" && git pull --rebase || log_warn "Repo konnte nicht aktualisiert werden."
+    cd "$DOTFILES_DIR" || { log_error "Konnte in Dotfiles-Verzeichnis wechseln."; return 1; }
+    git pull --rebase || log_warn "Repo konnte nicht aktualisiert werden."
   fi
 
-  cd "$DOTFILES_DIR" || log_error "Konnte in Dotfiles-Verzeichnis wechseln."
+  cd "$DOTFILES_DIR" || { log_error "Konnte in Dotfiles-Verzeichnis wechseln."; return 1; }
 
-  stow --adopt .
+  # Symlinks setzen
+  stow --adopt . || log_error "Fehler beim Setzen der Symlinks."
 
   log_success "Dotfiles deployed und Symlinks korrekt gesetzt."
-
-  # --- Starship für Fish/Bash/Zsh aktivieren ---
-  setup_starship
 }
 
 
