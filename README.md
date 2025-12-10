@@ -3,7 +3,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Fedora](https://img.shields.io/badge/Fedora-43-blue.svg)](https://getfedora.org/)
-[![GitHub Repo](https://img.shields.io/github/stars/DEIN_USERNAME/fedora-dev-bootstrap?style=social)](https://github.com/DEIN_USERNAME/fedora-dev-bootstrap)
+style=social)](https://github.com/DEIN_USERNAME/fedora-dev-bootstrap)
 
 ---
 [🇺🇸 English](#english) | [🇩🇪 Deutsch](#deutsch)
