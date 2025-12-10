@@ -103,14 +103,12 @@ COPR_REPOS=(
   atim/lazygit
   atim/starship
   lihaohong/yazi
-  maveonair/jetbrains-mono-nerd-fonts   # Nerd Font Copr
 )
 
 COPR_PACKAGES=(
   lazygit
   starship
   yazi
-  jetbrains-mono-nerd-fonts   # Nerd Font installieren
 )
 
 FLATPAK_APPS=(
@@ -216,10 +214,22 @@ configure_system() {
 
 
 install_fonts() {
-  log_info "Aktualisiere Font-Cache..."
+  log_info "Installiere Nerd Font (JetBrainsMono Nerd Font)..."
+
+  FONT_DIR="$HOME/.local/share/fonts"
+  mkdir -p "$FONT_DIR"
+
+  TMP_FONT="/tmp/JetBrainsMono.zip"
+
+  curl -L -o "$TMP_FONT" \
+    https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
+
+  unzip -o "$TMP_FONT" -d "$FONT_DIR"
+
   fc-cache -fv
-  log_success "Fonts bereit."
+  log_success "Nerd Font erfolgreich installiert."
 }
+
 
 
 deploy_dotfiles() {
