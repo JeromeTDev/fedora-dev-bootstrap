@@ -1,0 +1,15 @@
+{
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.11",
+  "reportUndefinedVariable": false,
+  "globals": {
+    "var": true,
+    "diff": true,
+    "integrate": true,
+    "sin": true,
+    "cos": true,
+    "show": true,
+    "x": true,
+    "y": true
+  }
+}

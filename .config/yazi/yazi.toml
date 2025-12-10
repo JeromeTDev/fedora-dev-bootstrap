@@ -1,0 +1,26 @@
+[opener]
+edit = [{ run = 'nvim "$@"', block = true }]
+
+[git]
+enabled = true
+
+
+# Keymaps
+[bindings]
+save = "ctrl+s"
+quit = "ctrl+q"
+undo = "ctrl+z"
+redo = "ctrl+y"
+copy = "ctrl+c"
+paste = "ctrl+v"
+
+# Plugins / Extensions
+enable_spellcheck = true
+enable_markdown_preview = true
+
+# Editor Verhalten
+wrap = true                   # Zeilen umbrechen
+show_line_numbers = true
+tab_size = 4
+auto_save = true              # Speichert automatisch beim Wechsel der Datei
+highlight_current_line = true
