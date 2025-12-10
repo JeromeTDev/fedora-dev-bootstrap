@@ -4,7 +4,8 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Fedora](https://img.shields.io/badge/Fedora-43-blue.svg)](https://getfedora.org/)
 [![GitHub Repo](https://img.shields.io/github/stars/DEIN_USERNAME/fedora-dev-bootstrap?style=social)](https://github.com/DEIN_USERNAME/fedora-dev-bootstrap)
-[![Latest Release](https://img.shields.io/github/v/release/DEIN_USERNAME/fedora-dev-bootstrap)](https://github.com/DEIN_USERNAME/fedora-dev-bootstrap/releases)
+
+---
 [🇺🇸 English](#english) | [🇩🇪 Deutsch](#deutsch)
 
 ---
@@ -31,19 +32,17 @@ A fully automated **Fedora developer bootstrap** for a clean, developer-friendly
 
 ### 🧩 Installation
 
-**One-liner:**
-
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/DEIN_USERNAME/fedora-dev-bootstrap/main/setup.sh)
+bash <(curl -s https://raw.githubusercontent.com/JeromeTDev/fedora-dev-bootstrap/main/feddev-setup.sh)
 ```
 
 **Alternative: Clone & run**
 
 ```bash
-git clone https://github.com/DEIN_USERNAME/fedora-dev-bootstrap.git ~/fedora-dev-bootstrap
+git clone https://github.com/JeromeTDev/fedora-dev-bootstrap.git ~/fedora-dev-bootstrap
 cd ~/fedora-dev-bootstrap
-chmod +x setup.sh
-./setup.sh
+chmod +x feddev-setup.sh
+./feddev-setup.sh
 ```
 
 ### 🧪 After installation
@@ -77,8 +76,6 @@ Vollautomatisiertes **Fedora-Developer-Bootstrap**, ideal für Entwickler:
 
 ### 🧩 Installation
 
-**One-Liner:**
-
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/DEIN_USERNAME/fedora-dev-bootstrap/main/setup.sh)
 ```
@@ -102,4 +99,4 @@ chmod +x setup.sh
 ---
 
 ## 📘 License
-MIT License © DEIN_USERNAME
+MIT License © JeromeTDev
