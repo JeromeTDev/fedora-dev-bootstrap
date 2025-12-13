@@ -13,16 +13,7 @@ log_success() { echo -e "\033[1;32m[SUCCESS]\033[0m $1"; }
 log_warn()    { echo -e "\033[1;33m[WARN]\033[0m $1"; }
 log_error()   { echo -e "\033[1;31m[ERROR]\033[0m $1"; exit 1; }
 
-# Keep sudo alive
-log_info "Prüfe sudo-Rechte..."
-sudo -v
-trap "kill $!" EXIT
-(
-  while true; do
-    sudo -v
-    sleep 60
-  done
-) &
+
 
 # --- Package Lists ---
 APT_PACKAGES=(
