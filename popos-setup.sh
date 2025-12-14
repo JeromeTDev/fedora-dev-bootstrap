@@ -1,7 +1,6 @@
 #!/bin/bash
 #
 # Pop!_OS Dev Bootstrap - Clean Edition (Optimized)
-# Author: JeromeTDev (Optimized by ChatGPT)
 #
 
 set -euo pipefail
@@ -9,27 +8,19 @@ IFS=$'\n\t'
 
 # --- Logging ---
 log_info()    { echo -e "\n\033[1;34m[INFO]\033[0m $1"; }
-log_success() { echo -e "\033[1;32m[SUCCESS]\033[0m $1"; }
-log_warn()    { echo -e "\033[1;33m[WARN]\033[0m $1"; }
-log_error()   { echo -e "\033[1;31m[ERROR]\033[0m $1"; exit 1; }
-
-
+log_success() { echo -e "\n\033[1;32m[SUCCESS]\033[0m $1"; }
+log_warn()    { echo -e "\n\033[1;33m[WARN]\033[0m $1"; }
+log_error()   { echo -e "\n\033[1;31m[ERROR]\033[0m $1"; exit 1; }
 
 # --- Package Lists ---
 APT_PACKAGES=(
-    # System Basics
     stow xdg-desktop-portal-gtk zathura
-    # Terminal & Shell
     fish kitty neofetch zoxide
-    # Development Tools
     git gh make cmake gcc clang python3 python3-pip
     lazygit neovim zeal xournalpp
-    # TUI / Power Tools
     btop fd-find fzf ripgrep tree caffeine
-    # Yazi Dependencies
     ffmpeg p7zip-full jq poppler-utils imagemagick mediainfo libimage-exiftool-perl chafa
-    # Extras
-    texlive-base keepassxc
+    texlive-base keepassxc timeshift
 )
 
 FLATPAK_APPS=(
@@ -37,13 +28,11 @@ FLATPAK_APPS=(
     com.teamspeak.TeamSpeak
     com.discordapp.Discord
     org.cryptomator.Cryptomator
-    md.obsidian.Obsidian
-    mega.MEGASync
 )
 
 PPAS=(ppa:fish-shell/release-3)
 
-# --- Functions ---
+# --- Funktionen ---
 install_apt_packages() {
     log_info "Installiere APT-Pakete..."
     sudo apt update
@@ -112,11 +101,9 @@ install_yazi() {
 
     TMP_DIR=$(mktemp -d)
     cd "$TMP_DIR" || exit
-
     curl -LO "$LATEST_URL" || log_warn "Download von Yazi fehlgeschlagen."
     chmod +x yazi-*-x86_64-unknown-linux-gnu
     sudo mv yazi-*-x86_64-unknown-linux-gnu /usr/local/bin/yazi
-
     cd - >/dev/null
     rm -rf "$TMP_DIR"
 
@@ -146,11 +133,7 @@ setup_npm_tools() {
 
 setup_flatpak() {
     log_info "Installiere Flatpak-Apps..."
-    
-    # Flathub als Remote hinzufügen, falls nicht vorhanden
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
-    # Apps installieren
     for app in "${FLATPAK_APPS[@]}"; do
         if ! flatpak list | grep -q "$app"; then
             flatpak install -y flathub "$app"
@@ -160,6 +143,37 @@ setup_flatpak() {
     done
 }
 
+setup_data_partition() {
+    # Optional: Mountpoint /data
+    DATA_DEV=$(lsblk -no NAME,FSTYPE,SIZE | grep -E 'ext4' | grep -v "$(df / | tail -1 | awk '{print $1}' | sed 's|/dev/||')" | head -n1 | awk '{print "/dev/"$1}')
+    if [ -n "$DATA_DEV" ]; then
+        sudo mkdir -p /data
+        sudo mount "$DATA_DEV" /data
+        sudo chown "$USER:$USER" /data
+
+        if ! grep -q "/data" /etc/fstab; then
+            UUID=$(blkid -s UUID -o value "$DATA_DEV")
+            echo "UUID=$UUID /data ext4 defaults 0 2" | sudo tee -a /etc/fstab
+        fi
+
+        log_success "/data Partition eingerichtet und gemountet!"
+    else
+        log_warn "Keine separate ext4-Partition für /data gefunden."
+    fi
+}
+
+deploy_dotfiles() {
+    DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
+    DOTFILES_DIR="$HOME/.dotfiles"
+
+    if [ ! -d "$DOTFILES_DIR" ]; then
+        git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
+    fi
+
+    cd "$DOTFILES_DIR"
+    stow --adopt .
+    log_success "Dotfiles deployed und Symlinks gesetzt."
+}
 
 # --- Main ---
 echo "🚀 Starte Pop!_OS Dev Bootstrap..."
@@ -176,6 +190,8 @@ install_yazi
 install_fonts
 install_nvm_node
 setup_npm_tools
+setup_data_partition
+deploy_dotfiles
 
 log_success "🎉 Pop!_OS Dev Bootstrap abgeschlossen!"
 echo "--------------------------------------------------------"
@@ -183,4 +199,5 @@ echo "Nächste Schritte:"
 echo "- Terminal neu starten (Fish + Starship aktiv)"
 echo "- 'nvim' starten für LazyVim Setup"
 echo "- In Neovim :checkhealth ausführen"
+echo "- Große Dateien (Games/LLM) unter /data speichern"
 echo "--------------------------------------------------------"
