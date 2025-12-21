@@ -14,17 +14,16 @@ log_error()   { echo -e "\n\033[1;31m[ERROR]\033[0m $1"; exit 1; }
 
 # --- Package Lists ---
 APT_PACKAGES=(
-    stow xdg-desktop-portal-gtk zathura
-    fish kitty neofetch zoxide
+    stow zathura
+    fish kitty zoxide
     git gh make cmake gcc clang python3 python3-pip
-    lazygit neovim zeal xournalpp
-    btop fd-find fzf ripgrep tree caffeine
+    lazygit neovim xournalpp
+    btop fd-find fzf ripgrep tree
     ffmpeg p7zip-full jq poppler-utils imagemagick mediainfo libimage-exiftool-perl chafa
-    texlive-base keepassxc timeshift
+    texlive-base keepassxc timeshift nodejs npm
 )
 
 FLATPAK_APPS=(
-    com.mattjakeman.ExtensionManager
     com.teamspeak.TeamSpeak
     com.discordapp.Discord
     org.cryptomator.Cryptomator
@@ -37,6 +36,10 @@ install_apt_packages() {
     log_info "Installiere APT-Pakete..."
     sudo apt update
     sudo apt install -y "${APT_PACKAGES[@]}" || log_warn "Einige Pakete konnten nicht installiert werden."
+    # fd → fdfind Symlink setzen
+    if command -v fdfind >/dev/null && ! command -v fd >/dev/null; then
+        sudo ln -sf "$(command -v fdfind)" /usr/local/bin/fd
+    fi
 }
 
 install_ppas() {
@@ -53,9 +56,9 @@ install_ppas() {
 
 set_kitty_default_terminal() {
     if command -v kitty >/dev/null; then
-        log_info "Setze Kitty als Standardterminal..."
-        gsettings set org.gnome.desktop.default-applications.terminal exec 'kitty'
-        gsettings set org.gnome.desktop.default-applications.terminal exec-arg '-e'
+        log_info "Setze Kitty als Standard-Terminal..."
+        sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator "$(command -v kitty)" 50
+        sudo update-alternatives --set x-terminal-emulator "$(command -v kitty)" || true
     fi
 }
 
@@ -115,22 +118,6 @@ install_fonts() {
     sudo apt install -y fonts-jetbrains-mono fonts-noto-cjk fonts-droid-fallback
 }
 
-install_nvm_node() {
-    log_info "Installiere Node.js via NVM..."
-    if [ ! -d "$HOME/.nvm" ]; then
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
-    fi
-    export NVM_DIR="$HOME/.nvm"
-    [ -f "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    nvm install --lts
-    nvm use --lts
-}
-
-setup_npm_tools() {
-    log_info "Installiere globale NPM Tools..."
-    npm install -g neovim @mermaid-js/mermaid-cli
-}
-
 setup_flatpak() {
     log_info "Installiere Flatpak-Apps..."
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -144,18 +131,15 @@ setup_flatpak() {
 }
 
 setup_data_partition() {
-    # Optional: Mountpoint /data
     DATA_DEV=$(lsblk -no NAME,FSTYPE,SIZE | grep -E 'ext4' | grep -v "$(df / | tail -1 | awk '{print $1}' | sed 's|/dev/||')" | head -n1 | awk '{print "/dev/"$1}')
     if [ -n "$DATA_DEV" ]; then
         sudo mkdir -p /data
         sudo mount "$DATA_DEV" /data
         sudo chown "$USER:$USER" /data
-
         if ! grep -q "/data" /etc/fstab; then
             UUID=$(blkid -s UUID -o value "$DATA_DEV")
             echo "UUID=$UUID /data ext4 defaults 0 2" | sudo tee -a /etc/fstab
         fi
-
         log_success "/data Partition eingerichtet und gemountet!"
     else
         log_warn "Keine separate ext4-Partition für /data gefunden."
@@ -165,11 +149,9 @@ setup_data_partition() {
 deploy_dotfiles() {
     DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
     DOTFILES_DIR="$HOME/.dotfiles"
-
     if [ ! -d "$DOTFILES_DIR" ]; then
         git clone "$DOTFILES_REPO" "$DOTFILES_DIR"
     fi
-
     cd "$DOTFILES_DIR"
     stow --adopt .
     log_success "Dotfiles deployed und Symlinks gesetzt."
@@ -180,16 +162,14 @@ echo "🚀 Starte Pop!_OS Dev Bootstrap..."
 
 sudo apt update && sudo apt upgrade -y
 
-install_apt_packages
 install_ppas
+install_apt_packages
+set_kitty_default_terminal
 setup_flatpak
 set_fish_default_shell
-set_kitty_default_terminal
 activate_starship
 install_yazi
 install_fonts
-install_nvm_node
-setup_npm_tools
 setup_data_partition
 deploy_dotfiles
 
