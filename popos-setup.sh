@@ -56,24 +56,28 @@ install_ppas() {
 
 install_lazygit() {
     log_info "Installiere Lazygit..."
-    LATEST_URL=$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest \
-        | grep "browser_download_url.*_Linux_x86_64.deb" \
-        | cut -d '"' -f 4)
+    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" \
+        | grep -Po '"tag_name": *"v\K[^"]*')
 
-    if [ -z "$LATEST_URL" ]; then
-        log_warn "Konnte Lazygit Release-URL nicht ermitteln."
+    if [ -z "$LAZYGIT_VERSION" ]; then
+        log_warn "Konnte Lazygit-Version nicht ermitteln."
         return
     fi
 
     TMP_DIR=$(mktemp -d)
     cd "$TMP_DIR" || exit
-    FILE=$(basename "$LATEST_URL")
-    curl -LO "$LATEST_URL" || log_warn "Download von Lazygit fehlgeschlagen."
-    sudo dpkg -i "$FILE" || sudo apt -f install -y
+
+    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" \
+        || { log_warn "Download von Lazygit fehlgeschlagen."; cd -; rm -rf "$TMP_DIR"; return; }
+
+    tar xf lazygit.tar.gz lazygit
+    sudo install lazygit /usr/local/bin
+
     cd - >/dev/null
     rm -rf "$TMP_DIR"
-    log_success "Lazygit installiert!"
+    log_success "Lazygit $LAZYGIT_VERSION installiert!"
 }
+
 
 set_kitty_default_terminal() {
     if command -v kitty >/dev/null; then
