@@ -158,21 +158,6 @@ setup_flatpak() {
     done
 }
 
-setup_data_partition() {
-    DATA_DEV=$(lsblk -no NAME,FSTYPE,SIZE | grep -E 'ext4' | grep -v "$(df / | tail -1 | awk '{print $1}' | sed 's|/dev/||')" | head -n1 | awk '{print "/dev/"$1}')
-    if [ -n "$DATA_DEV" ]; then
-        sudo mkdir -p /data
-        sudo mount "$DATA_DEV" /data
-        sudo chown "$USER:$USER" /data
-        if ! grep -q "/data" /etc/fstab; then
-            UUID=$(blkid -s UUID -o value "$DATA_DEV")
-            echo "UUID=$UUID /data ext4 defaults 0 2" | sudo tee -a /etc/fstab
-        fi
-        log_success "/data Partition eingerichtet und gemountet!"
-    else
-        log_warn "Keine separate ext4-Partition für /data gefunden."
-    fi
-}
 
 deploy_dotfiles() {
     DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
@@ -199,7 +184,6 @@ set_fish_default_shell
 activate_starship
 install_yazi
 install_fonts
-setup_data_partition
 deploy_dotfiles
 
 log_success "🎉 Pop!_OS Dev Bootstrap abgeschlossen!"
