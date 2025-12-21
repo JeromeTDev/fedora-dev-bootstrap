@@ -123,19 +123,7 @@ install_yazi() {
     cd - >/dev/null
     rm -rf "$TMP_DIR"
     log_success "Yazi installiert!"
-} 
-
-
-# ausführbar machen
-chmod +x "$FILE"
-
-# nach /usr/local/bin verschieben
-sudo mv "$FILE" /usr/local/bin/yazi
-
-cd - >/dev/null
-rm -rf "$TMP_DIR"
-log_success "Yazi installiert!"
-
+}
 
 install_fonts() {
     log_info "Installiere Fonts..."
