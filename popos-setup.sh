@@ -56,7 +56,9 @@ install_ppas() {
 
 install_lazygit() {
     log_info "Installiere Lazygit..."
-    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" \
+
+    # neueste Version ermitteln
+    LAZYGIT_VERSION=$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest \
         | grep -Po '"tag_name": *"v\K[^"]*')
 
     if [ -z "$LAZYGIT_VERSION" ]; then
@@ -67,16 +69,21 @@ install_lazygit() {
     TMP_DIR=$(mktemp -d)
     cd "$TMP_DIR" || exit
 
-    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" \
-        || { log_warn "Download von Lazygit fehlgeschlagen."; cd -; rm -rf "$TMP_DIR"; return; }
+    # korrekten Download-Link zusammenbauen
+    DOWNLOAD_URL="https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
 
-    tar xf lazygit.tar.gz lazygit
+    # herunterladen
+    curl -LO "$DOWNLOAD_URL" || { log_warn "Download von Lazygit fehlgeschlagen."; cd -; rm -rf "$TMP_DIR"; return; }
+
+    # entpacken und installieren
+    tar -xzf "lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
     sudo install lazygit /usr/local/bin
 
     cd - >/dev/null
     rm -rf "$TMP_DIR"
     log_success "Lazygit $LAZYGIT_VERSION installiert!"
 }
+
 
 
 set_kitty_default_terminal() {
