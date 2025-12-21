@@ -16,8 +16,7 @@ log_error()   { echo -e "\n\033[1;31m[ERROR]\033[0m $1"; exit 1; }
 APT_PACKAGES=(
     stow zathura
     fish kitty zoxide
-    git gh make cmake gcc clang python3 python3-pip
-    neovim xournalpp
+    git gh make cmake gcc clang python3 python3-pip xournalpp
     btop fd-find fzf ripgrep tree
     ffmpeg p7zip-full jq poppler-utils imagemagick mediainfo libimage-exiftool-perl chafa
     texlive-base keepassxc timeshift nodejs npm
@@ -28,8 +27,11 @@ FLATPAK_APPS=(
     com.discordapp.Discord
     org.cryptomator.Cryptomator
 )
-
-PPAS=(ppa:fish-shell/release-3)
+PPAS=(
+  ppa:fish-shell/release-3
+  ppa:lazygit-team/release
+  ppa:neovim-ppa/stable
+)
 
 # --- Funktionen ---
 install_apt_packages() {
