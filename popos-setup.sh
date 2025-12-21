@@ -19,7 +19,7 @@ APT_PACKAGES=(
     git gh make cmake gcc clang python3 python3-pip xournalpp
     btop fd-find fzf ripgrep tree
     ffmpeg p7zip-full jq poppler-utils imagemagick mediainfo libimage-exiftool-perl chafa
-    texlive-base keepassxc timeshift nodejs npm
+    texlive-base keepassxc timeshift nodejs npm steam lutris
 )
 
 FLATPAK_APPS=(
