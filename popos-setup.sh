@@ -17,7 +17,7 @@ APT_PACKAGES=(
     stow zathura
     fish kitty zoxide
     git gh make cmake gcc clang python3 python3-pip
-    lazygit neovim xournalpp
+    neovim xournalpp
     btop fd-find fzf ripgrep tree
     ffmpeg p7zip-full jq poppler-utils imagemagick mediainfo libimage-exiftool-perl chafa
     texlive-base keepassxc timeshift nodejs npm
@@ -29,9 +29,7 @@ FLATPAK_APPS=(
     org.cryptomator.Cryptomator
 )
 
-PPAS=(ppa:fish-shell/release-3
-  ppa:lazygit-team/release
-)
+PPAS=(ppa:fish-shell/release-3)
 
 # --- Funktionen ---
 install_apt_packages() {
@@ -54,6 +52,27 @@ install_ppas() {
         fi
     done
     sudo apt update
+}
+
+install_lazygit() {
+    log_info "Installiere Lazygit..."
+    LATEST_URL=$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest \
+        | grep "browser_download_url.*_Linux_x86_64.deb" \
+        | cut -d '"' -f 4)
+
+    if [ -z "$LATEST_URL" ]; then
+        log_warn "Konnte Lazygit Release-URL nicht ermitteln."
+        return
+    fi
+
+    TMP_DIR=$(mktemp -d)
+    cd "$TMP_DIR" || exit
+    FILE=$(basename "$LATEST_URL")
+    curl -LO "$LATEST_URL" || log_warn "Download von Lazygit fehlgeschlagen."
+    sudo dpkg -i "$FILE" || sudo apt -f install -y
+    cd - >/dev/null
+    rm -rf "$TMP_DIR"
+    log_success "Lazygit installiert!"
 }
 
 set_kitty_default_terminal() {
@@ -101,25 +120,11 @@ install_yazi() {
 
     TMP_DIR=$(mktemp -d)
     cd "$TMP_DIR" || exit
-
-    # Datei herunterladen
     curl -LO "$LATEST_URL" || log_warn "Download von Yazi fehlgeschlagen."
-
-    # Datei dynamisch finden
     FILE=$(ls | grep 'x86_64-unknown-linux-gnu')
-    if [ -z "$FILE" ]; then
-        log_warn "Yazi-Binary nicht gefunden."
-        cd - >/dev/null
-        rm -rf "$TMP_DIR"
-        return
-    fi
-
-    # ausführbar machen
+    [ -n "$FILE" ] || { log_warn "Yazi-Binary nicht gefunden."; cd - >/dev/null; rm -rf "$TMP_DIR"; return; }
     chmod +x "$FILE"
-
-    # nach /usr/local/bin verschieben
     sudo mv "$FILE" /usr/local/bin/yazi
-
     cd - >/dev/null
     rm -rf "$TMP_DIR"
     log_success "Yazi installiert!"
@@ -176,6 +181,7 @@ sudo apt update && sudo apt upgrade -y
 
 install_ppas
 install_apt_packages
+install_lazygit
 set_kitty_default_terminal
 setup_flatpak
 set_fish_default_shell
