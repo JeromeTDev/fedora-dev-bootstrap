@@ -29,7 +29,9 @@ FLATPAK_APPS=(
     org.cryptomator.Cryptomator
 )
 
-PPAS=(ppa:fish-shell/release-3)
+PPAS=(ppa:fish-shell/release-3
+  ppa:lazygit-team/release
+)
 
 # --- Funktionen ---
 install_apt_packages() {
@@ -97,21 +99,43 @@ install_yazi() {
         | grep "browser_download_url.*x86_64-unknown-linux-gnu" \
         | cut -d '"' -f 4)
 
-    if [ -z "$LATEST_URL" ]; then
-        log_warn "Konnte neueste Yazi-Version nicht ermitteln."
+    TMP_DIR=$(mktemp -d)
+    cd "$TMP_DIR" || exit
+
+    # Datei herunterladen
+    curl -LO "$LATEST_URL" || log_warn "Download von Yazi fehlgeschlagen."
+
+    # Datei dynamisch finden
+    FILE=$(ls | grep 'x86_64-unknown-linux-gnu')
+    if [ -z "$FILE" ]; then
+        log_warn "Yazi-Binary nicht gefunden."
+        cd - >/dev/null
+        rm -rf "$TMP_DIR"
         return
     fi
 
-    TMP_DIR=$(mktemp -d)
-    cd "$TMP_DIR" || exit
-    curl -LO "$LATEST_URL" || log_warn "Download von Yazi fehlgeschlagen."
-    chmod +x yazi-*-x86_64-unknown-linux-gnu
-    sudo mv yazi-*-x86_64-unknown-linux-gnu /usr/local/bin/yazi
+    # ausführbar machen
+    chmod +x "$FILE"
+
+    # nach /usr/local/bin verschieben
+    sudo mv "$FILE" /usr/local/bin/yazi
+
     cd - >/dev/null
     rm -rf "$TMP_DIR"
-
     log_success "Yazi installiert!"
-}
+} 
+
+
+# ausführbar machen
+chmod +x "$FILE"
+
+# nach /usr/local/bin verschieben
+sudo mv "$FILE" /usr/local/bin/yazi
+
+cd - >/dev/null
+rm -rf "$TMP_DIR"
+log_success "Yazi installiert!"
+
 
 install_fonts() {
     log_info "Installiere Fonts..."
@@ -123,7 +147,7 @@ setup_flatpak() {
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     for app in "${FLATPAK_APPS[@]}"; do
         if ! flatpak list | grep -q "$app"; then
-            flatpak install -y flathub "$app"
+            flatpak install -y --user flathub "$app"
         else
             log_info "Flatpak $app bereits installiert."
         fi
