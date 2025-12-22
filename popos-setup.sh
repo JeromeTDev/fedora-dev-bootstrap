@@ -55,27 +55,6 @@ install_ppas() {
     sudo apt update
 }
 
-
-install_lazygit() {
-    log_info "Installiere Lazygit..."
-
-    LAZYGIT_VERSION=$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest \
-    | grep '"tag_name":' | head -n1 | cut -d '"' -f4)
-
-TMP_DIR=$(mktemp -d)
-cd "$TMP_DIR"
-curl -LO "https://github.com/jesseduffield/lazygit/releases/download/${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-tar -xzf lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz
-sudo install */lazygit /usr/local/bin/
-cd - >/dev/null
-rm -rf "$TMP_DIR"
-
-
-    log_success "Lazygit $LAZYGIT_VERSION installiert!"
-
-}
-
-
 set_kitty_default_terminal() {
     if command -v kitty >/dev/null; then
         log_info "Setze Kitty als Standard-Terminal..."
@@ -172,7 +151,6 @@ setup_flatpak
 set_fish_default_shell
 activate_starship
 install_yazi
-install_lazygit
 install_fonts
 deploy_dotfiles
 
@@ -183,4 +161,5 @@ echo "- Terminal neu starten (Fish + Starship aktiv)"
 echo "- 'nvim' starten für LazyVim Setup"
 echo "- In Neovim :checkhealth ausführen"
 echo "- Große Dateien (Games/LLM) unter /data speichern"
+echo "- Lazygit noch manuell installieren"
 echo "--------------------------------------------------------"
