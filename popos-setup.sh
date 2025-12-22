@@ -20,7 +20,7 @@ APT_PACKAGES=(
     btop fd-find fzf ripgrep tree
     ffmpeg p7zip-full jq poppler-utils imagemagick mediainfo libimage-exiftool-perl chafa
     texlive-base keepassxc timeshift nodejs npm steam lutris
-    lazygit neovim  # <-- Jetzt aus Universe
+    neovim  # <-- Jetzt aus Universe
 )
 
 FLATPAK_APPS=(
