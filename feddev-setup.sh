@@ -296,41 +296,6 @@ setup_flatpak() {
 }
 
 
-install_gnome_extensions() {
-  log_info "Installiere GNOME Extensions..."
-
-  # Warten bis GNOME Shell & DBus verfügbar sind
-  sleep 5
-
-EXTENSIONS=(
-  "appindicatorsupport@rgcjonas.gmail.com"   # AppIndicator
-  "dash-to-dock@micxgx.gmail.com"            # Dash to Dock
-  "caffeine@patapon.info"                    # Caffeine
-  "clipboard-indicator@tudmotu.com"          # Clipboard Indicator
-  "tactile@lundal.io"                        # Tactile
-  "just-perfection@just-perfection.com"      # Just Perfection
-  "switcher@landau.fi"                        # Switcher
-  "blur-my-shell@aunetx"                     # Blur My Shell
-)
-
-  for ext in "${EXTENSIONS[@]}"; do
-    if ! gnome-extensions list | grep -q "$ext"; then
-      log_info "Installiere Extension: $ext"
-      busctl --user call org.gnome.Shell.Extensions \
-        /org/gnome/Shell/Extensions \
-        org.gnome.Shell.Extensions InstallRemoteExtension \
-        s "$ext" || log_warn "Konnte $ext nicht installieren."
-    else
-      log_info "Extension $ext ist bereits installiert."
-    fi
-  done
-
-  log_info "Aktiviere Extensions..."
-  for ext in "${EXTENSIONS[@]}"; do
-    gnome-extensions enable "$ext" 2>/dev/null || log_warn "Konnte $ext nicht aktivieren."
-  done
-}
-
 
 ###############################################################################
 # RUN SCRIPT
@@ -341,7 +306,6 @@ sudo dnf upgrade -y
 
 install_dnf_packages
 install_copr_packages
-install_gnome_extensions
 setup_starship
 install_fonts
 setup_npm
