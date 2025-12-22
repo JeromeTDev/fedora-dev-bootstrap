@@ -33,7 +33,10 @@ FLATPAK_APPS=(
 enable_universe() {
     log_info "Aktiviere Universe Repository..."
     sudo add-apt-repository universe -y
-    sudo apt update
+    log_info "Update der Paketlisten..."
+    sudo apt update -y
+    log_info "Upgrade der installierten Pakete..."
+    sudo apt upgrade -y
 }
 
 install_apt_packages() {
