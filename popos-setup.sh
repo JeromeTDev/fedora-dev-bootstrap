@@ -29,7 +29,6 @@ FLATPAK_APPS=(
 )
 PPAS=(
   ppa:fish-shell/release-3
-  ppa:lazygit-team/release
   ppa:neovim-ppa/stable
 )
 
@@ -56,6 +55,34 @@ install_ppas() {
     sudo apt update
 }
 
+
+install_lazygit() {
+    log_info "Installiere Lazygit..."
+
+    # GitHub API mit User-Agent nutzen, um die neueste x86_64-Binary zu bekommen
+    DOWNLOAD_URL=$(curl -s -H "User-Agent: bootstrap-script" \
+        https://api.github.com/repos/jesseduffield/lazygit/releases/latest \
+        | grep "browser_download_url.*Linux_.*x86_64.*tar.gz" \
+        | cut -d '"' -f 4)
+
+    if [ -z "$DOWNLOAD_URL" ]; then
+        log_warn "Konnte Lazygit-Download-URL nicht ermitteln."
+        return
+    fi
+
+    TMP_DIR=$(mktemp -d)
+    cd "$TMP_DIR" || exit
+
+    curl -LO "$DOWNLOAD_URL" || { log_warn "Download von Lazygit fehlgeschlagen."; cd -; rm -rf "$TMP_DIR"; return; }
+
+    tar -xzf lazygit_*_Linux_*.tar.gz
+    sudo install lazygit /usr/local/bin
+
+    cd - >/dev/null
+    rm -rf "$TMP_DIR"
+
+    log_success "Lazygit installiert!"
+}
 
 set_kitty_default_terminal() {
     if command -v kitty >/dev/null; then
@@ -153,6 +180,7 @@ setup_flatpak
 set_fish_default_shell
 activate_starship
 install_yazi
+install_lazygit
 install_fonts
 deploy_dotfiles
 
