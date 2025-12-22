@@ -57,32 +57,13 @@ install_ppas() {
 
 
 install_lazygit() {
-    log_info "Installiere Lazygit..."
+curl -Lo lazygit.tar.gz https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_$(uname -m)_Linux.tar.gz
+tar -xzf lazygit.tar.gz
+sudo install lazygit /usr/local/bin/
+rm lazygit.tar.gz
 
-    # GitHub API mit User-Agent nutzen, um die neueste x86_64-Binary zu bekommen
-    DOWNLOAD_URL=$(curl -s -H "User-Agent: bootstrap-script" \
-        https://api.github.com/repos/jesseduffield/lazygit/releases/latest \
-        | grep "browser_download_url.*Linux_.*x86_64.*tar.gz" \
-        | cut -d '"' -f 4)
-
-    if [ -z "$DOWNLOAD_URL" ]; then
-        log_warn "Konnte Lazygit-Download-URL nicht ermitteln."
-        return
-    fi
-
-    TMP_DIR=$(mktemp -d)
-    cd "$TMP_DIR" || exit
-
-    curl -LO "$DOWNLOAD_URL" || { log_warn "Download von Lazygit fehlgeschlagen."; cd -; rm -rf "$TMP_DIR"; return; }
-
-    tar -xzf lazygit_*_Linux_*.tar.gz
-    sudo install lazygit /usr/local/bin
-
-    cd - >/dev/null
-    rm -rf "$TMP_DIR"
-
-    log_success "Lazygit installiert!"
 }
+
 
 set_kitty_default_terminal() {
     if command -v kitty >/dev/null; then
