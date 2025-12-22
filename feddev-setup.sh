@@ -121,14 +121,6 @@ FLATPAK_APPS=(
   md.obsidian.Obsidian
 )
 
-declare -A GNOME_EXTENSIONS=(
-  [appindicatorsupport@rgcjonas.gmail.com]="dnf"
-  [pop-shell@system76.com]="dnf"
-  [dash-to-dock@micxgx.gmail.com]="dnf"
-  [caffeine@patapon.info]="dnf"
-  [clipboard-indicator@tudmotu.com]="zip:https://extensions.gnome.org/extension-data/clipboard-indicatortudmotu.com.v46.shell-extension.zip"
-  [blur-my-shell@aunetx]="zip:https://extensions.gnome.org/extension-data/blur-my-shellaunetx.v69.shell-extension.zip"
-)
 
 DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
 DOTFILES_DIR="$HOME/.dotfiles"
