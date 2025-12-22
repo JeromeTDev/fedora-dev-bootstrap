@@ -56,39 +56,6 @@ install_ppas() {
     sudo apt update
 }
 
-install_lazygit() {
-    log_info "Installiere Lazygit..."
-
-    DOWNLOAD_URL=$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest \
-        | grep "browser_download_url.*Linux_x86_64.tar.gz" \
-        | cut -d '"' -f 4)
-
-    if [ -z "$DOWNLOAD_URL" ]; then
-        log_warn "Konnte Lazygit-Download-URL nicht ermitteln."
-        return
-    fi
-
-    TMP_DIR=$(mktemp -d)
-    cd "$TMP_DIR" || exit
-
-    curl -LO "$DOWNLOAD_URL" || {
-        log_warn "Download von Lazygit fehlgeschlagen."
-        cd - >/dev/null
-        rm -rf "$TMP_DIR"
-        return
-    }
-
-    tar -xzf lazygit_*_Linux_x86_64.tar.gz
-    sudo install lazygit /usr/local/bin
-
-    cd - >/dev/null
-    rm -rf "$TMP_DIR"
-
-    log_success "Lazygit installiert!"
-}
-
-
-
 
 set_kitty_default_terminal() {
     if command -v kitty >/dev/null; then
@@ -181,7 +148,6 @@ sudo apt update && sudo apt upgrade -y
 
 install_ppas
 install_apt_packages
-install_lazygit
 set_kitty_default_terminal
 setup_flatpak
 set_fish_default_shell
