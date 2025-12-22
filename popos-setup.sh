@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Pop!_OS Dev Bootstrap - Clean Edition (Optimized)
+# Pop!_OS Dev Bootstrap - Universe Edition
 #
 
 set -euo pipefail
@@ -20,6 +20,7 @@ APT_PACKAGES=(
     btop fd-find fzf ripgrep tree
     ffmpeg p7zip-full jq poppler-utils imagemagick mediainfo libimage-exiftool-perl chafa
     texlive-base keepassxc timeshift nodejs npm steam lutris
+    lazygit  # <-- Jetzt aus Universe
 )
 
 FLATPAK_APPS=(
@@ -27,32 +28,21 @@ FLATPAK_APPS=(
     com.discordapp.Discord
     org.cryptomator.Cryptomator
 )
-PPAS=(
-  ppa:fish-shell/release-3
-  ppa:neovim-ppa/stable
-)
 
 # --- Funktionen ---
-install_apt_packages() {
-    log_info "Installiere APT-Pakete..."
+enable_universe() {
+    log_info "Aktiviere Universe Repository..."
+    sudo add-apt-repository universe -y
     sudo apt update
+}
+
+install_apt_packages() {
+    log_info "Installiere APT-Pakete aus Universe..."
     sudo apt install -y "${APT_PACKAGES[@]}" || log_warn "Einige Pakete konnten nicht installiert werden."
     # fd → fdfind Symlink setzen
     if command -v fdfind >/dev/null && ! command -v fd >/dev/null; then
         sudo ln -sf "$(command -v fdfind)" /usr/local/bin/fd
     fi
-}
-
-install_ppas() {
-    log_info "Füge PPAs hinzu..."
-    for ppa in "${PPAS[@]}"; do
-        if ! grep -R "$ppa" /etc/apt/sources.list.d &>/dev/null; then
-            sudo add-apt-repository -y "$ppa" || log_error "Konnte $ppa nicht hinzufügen."
-        else
-            log_info "PPA $ppa bereits vorhanden."
-        fi
-    done
-    sudo apt update
 }
 
 set_kitty_default_terminal() {
@@ -92,29 +82,6 @@ activate_starship() {
     esac
 }
 
-install_yazi() {
-    log_info "Installiere Yazi..."
-    LATEST_URL=$(curl -s https://api.github.com/repos/sxyazi/yazi/releases/latest \
-        | grep "browser_download_url.*x86_64-unknown-linux-gnu" \
-        | cut -d '"' -f 4)
-
-    TMP_DIR=$(mktemp -d)
-    cd "$TMP_DIR" || exit
-    curl -LO "$LATEST_URL" || log_warn "Download von Yazi fehlgeschlagen."
-    FILE=$(ls | grep 'x86_64-unknown-linux-gnu')
-    [ -n "$FILE" ] || { log_warn "Yazi-Binary nicht gefunden."; cd - >/dev/null; rm -rf "$TMP_DIR"; return; }
-    chmod +x "$FILE"
-    sudo mv "$FILE" /usr/local/bin/yazi
-    cd - >/dev/null
-    rm -rf "$TMP_DIR"
-    log_success "Yazi installiert!"
-}
-
-install_fonts() {
-    log_info "Installiere Fonts..."
-    sudo apt install -y fonts-jetbrains-mono fonts-noto-cjk fonts-droid-fallback
-}
-
 setup_flatpak() {
     log_info "Installiere Flatpak-Apps..."
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -126,7 +93,6 @@ setup_flatpak() {
         fi
     done
 }
-
 
 deploy_dotfiles() {
     DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
@@ -140,18 +106,14 @@ deploy_dotfiles() {
 }
 
 # --- Main ---
-echo "🚀 Starte Pop!_OS Dev Bootstrap..."
+echo "🚀 Starte Pop!_OS Dev Bootstrap mit Universe..."
 
-sudo apt update && sudo apt upgrade -y
-
-install_ppas
+enable_universe
 install_apt_packages
 set_kitty_default_terminal
 setup_flatpak
 set_fish_default_shell
 activate_starship
-install_yazi
-install_fonts
 deploy_dotfiles
 
 log_success "🎉 Pop!_OS Dev Bootstrap abgeschlossen!"
@@ -161,5 +123,4 @@ echo "- Terminal neu starten (Fish + Starship aktiv)"
 echo "- 'nvim' starten für LazyVim Setup"
 echo "- In Neovim :checkhealth ausführen"
 echo "- Große Dateien (Games/LLM) unter /data speichern"
-echo "- Lazygit noch manuell installieren"
 echo "--------------------------------------------------------"
