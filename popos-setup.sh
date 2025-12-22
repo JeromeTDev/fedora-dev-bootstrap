@@ -59,19 +59,17 @@ install_ppas() {
 install_lazygit() {
     log_info "Installiere Lazygit..."
 
-    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" \
-        | grep -Po '"tag_name": *"v\K[^"]*' || true)
-    [ -n "$LAZYGIT_VERSION" ] || log_error "Konnte Lazygit-Version nicht ermitteln"
+    LAZYGIT_VERSION=$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest \
+    | grep '"tag_name":' | head -n1 | cut -d '"' -f4)
 
-    TMP_DIR=$(mktemp -d)
-    cd "$TMP_DIR" || exit
+TMP_DIR=$(mktemp -d)
+cd "$TMP_DIR"
+curl -LO "https://github.com/jesseduffield/lazygit/releases/download/${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+tar -xzf lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz
+sudo install */lazygit /usr/local/bin/
+cd - >/dev/null
+rm -rf "$TMP_DIR"
 
-    curl -LO "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-    tar -xzf lazygit_*_Linux_*.tar.gz
-    sudo install */lazygit /usr/local/bin/
-
-    cd - >/dev/null
-    rm -rf "$TMP_DIR"
 
     log_success "Lazygit $LAZYGIT_VERSION installiert!"
 
