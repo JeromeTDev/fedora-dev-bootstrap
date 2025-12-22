@@ -97,6 +97,7 @@ DNF_PACKAGES=(
   zathura zathura-pdf-mupdf timeshift
   poppler-utils ImageMagick mediainfo perl-Image-ExifTool
   zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine keepassxc
+  gnome-extensions-app 
 )
 
 COPR_REPOS=(
@@ -118,6 +119,15 @@ FLATPAK_APPS=(
   com.discordapp.Discord
   org.cryptomator.Cryptomator
   md.obsidian.Obsidian
+)
+
+declare -A GNOME_EXTENSIONS=(
+  [appindicatorsupport@rgcjonas.gmail.com]="dnf"
+  [pop-shell@system76.com]="dnf"
+  [dash-to-dock@micxgx.gmail.com]="dnf"
+  [caffeine@patapon.info]="dnf"
+  [clipboard-indicator@tudmotu.com]="zip:https://extensions.gnome.org/extension-data/clipboard-indicatortudmotu.com.v46.shell-extension.zip"
+  [blur-my-shell@aunetx]="zip:https://extensions.gnome.org/extension-data/blur-my-shellaunetx.v69.shell-extension.zip"
 )
 
 DOTFILES_REPO="https://github.com/JeromeTDev/fedora-dev-bootstrap.git"
@@ -162,14 +172,6 @@ setup_npm() {
   npm install -g neovim @mermaid-js/mermaid-cli || log_warn "NPM-Tools konnten nicht installiert werden."
 }
 
-setup_flatpak() {
-  log_info "Richte Flatpak ein..."
-  mkdir -p "$HOME/.local/share/flatpak"
-  flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-  for app in "${FLATPAK_APPS[@]}"; do
-    flatpak install flathub "$app" -y || log_warn "Flatpak-App $app konnte nicht installiert werden."
-  done
-}
 
 configure_system() {
   log_info "Konfiguriere System..."
@@ -302,6 +304,42 @@ setup_flatpak() {
 }
 
 
+install_gnome_extensions() {
+  log_info "Installiere GNOME Extensions..."
+
+  # Warten bis GNOME Shell & DBus verfügbar sind
+  sleep 5
+
+EXTENSIONS=(
+  "appindicatorsupport@rgcjonas.gmail.com"   # AppIndicator
+  "dash-to-dock@micxgx.gmail.com"            # Dash to Dock
+  "caffeine@patapon.info"                    # Caffeine
+  "clipboard-indicator@tudmotu.com"          # Clipboard Indicator
+  "tactile@lundal.io"                        # Tactile
+  "just-perfection@just-perfection.com"      # Just Perfection
+  "switcher@landau.fi"                        # Switcher
+  "blur-my-shell@aunetx"                     # Blur My Shell
+)
+
+  for ext in "${EXTENSIONS[@]}"; do
+    if ! gnome-extensions list | grep -q "$ext"; then
+      log_info "Installiere Extension: $ext"
+      busctl --user call org.gnome.Shell.Extensions \
+        /org/gnome/Shell/Extensions \
+        org.gnome.Shell.Extensions InstallRemoteExtension \
+        s "$ext" || log_warn "Konnte $ext nicht installieren."
+    else
+      log_info "Extension $ext ist bereits installiert."
+    fi
+  done
+
+  log_info "Aktiviere Extensions..."
+  for ext in "${EXTENSIONS[@]}"; do
+    gnome-extensions enable "$ext" 2>/dev/null || log_warn "Konnte $ext nicht aktivieren."
+  done
+}
+
+
 ###############################################################################
 # RUN SCRIPT
 ###############################################################################
@@ -311,6 +349,7 @@ sudo dnf upgrade -y
 
 install_dnf_packages
 install_copr_packages
+install_gnome_extensions
 setup_starship
 install_fonts
 setup_npm
