@@ -41,13 +41,40 @@ install_copr_packages() {
 setup_starship() {
   log_info "Aktiviere Starship Prompt..."
   for shell in fish bash zsh; do
-    CONFIG="$HOME/.config/fish/config.fish"
-    [ "$shell" = bash ] && CONFIG="$HOME/.bashrc"
-    [ "$shell" = zsh ] && CONFIG="$HOME/.zshrc"
+    case "$shell" in
+      fish)
+        CONFIG="$HOME/.config/fish/config.fish"
+        INIT_CODE='
+# Starship Prompt
+if type starship >/dev/null 2>&1
+    starship init fish | source
+end
+'
+        ;;
+      bash)
+        CONFIG="$HOME/.bashrc"
+        INIT_CODE='
+# Starship Prompt
+if type starship >/dev/null 2>&1; then
+    eval "$(starship init bash)"
+fi
+'
+        ;;
+      zsh)
+        CONFIG="$HOME/.zshrc"
+        INIT_CODE='
+# Starship Prompt
+if type starship >/dev/null 2>&1; then
+    eval "$(starship init zsh)"
+fi
+'
+        ;;
+    esac
+
     mkdir -p "$(dirname "$CONFIG")"
     touch "$CONFIG"
     if ! grep -q "starship init $shell" "$CONFIG"; then
-      echo -e "\n# Starship Prompt\nif type starship >/dev/null 2>&1; then eval \"\$(starship init $shell)\"; fi" >>"$CONFIG"
+      echo "$INIT_CODE" >>"$CONFIG"
       log_success "Starship für $shell aktiviert."
     fi
   done
