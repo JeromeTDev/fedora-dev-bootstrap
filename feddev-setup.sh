@@ -19,53 +19,59 @@ sudo -v
 # --- Root prüfen ---
 FS_TYPE=$(findmnt -n -o FSTYPE /)
 [[ "$FS_TYPE" == "btrfs" ]] || log_error "Root-Dateisystem ist kein Btrfs. Abbruch."
-ROOT_DEV=$(findmnt -n -o SOURCE /)
+
+ROOT_DEV=$(findmnt -n -o SOURCE / | sed 's|\[.*||')
 UUID=$(blkid -s UUID -o value "$ROOT_DEV")
+[[ -n "$UUID" ]] || log_error "Konnte UUID des Root-Devices nicht bestimmen."
 log_info "Root-Device: $ROOT_DEV, UUID: $UUID"
 
-# 2. Btrfs Subvolumes & fstab (Zusammengefasst)
-setup_btrfs() {
-    log_info "Konfiguriere Btrfs Struktur..."
-    sudo mkdir -p /mnt/realtree
-    sudo mount -o subvolid=5 "$ROOT_DEV" /mnt/realtree
+# --- Btrfs Subvolumes erstellen ---
+sudo mkdir -p /mnt/tmp
+sudo mount -o subvolid=5 "$ROOT_DEV" /mnt/tmp
 
-    # Liste der Subvolumes und deren Mountpoints
-    # Format: "Subvolume_Name Mountpoint"
-    declare -a SUBS=("data /data" "games /games" "snapshots_root /.snapshots")
+SUBS=("data" "games" "snapshots_root")
+for sub in "${SUBS[@]}"; do
+    if ! sudo btrfs subvolume list /mnt/tmp | grep -q "path $sub$"; then
+        log_info "Erstelle Subvolume $sub"
+        sudo btrfs subvolume create "/mnt/tmp/$sub"
+    else
+        log_info "Subvolume $sub existiert bereits"
+    fi
+done
 
-    for entry in "${SUBS[@]}"; do
-        read -r sub mnt <<< "$entry"
-        
-        # Erstellen falls fehlt
-        if ! sudo btrfs subvolume list /mnt/realtree | grep -q "path $sub$"; then
-            sudo btrfs subvolume create "/mnt/realtree/$sub"
+sudo umount /mnt/tmp
+sudo rmdir /mnt/tmp
+
+# --- Mountpoints & fstab ---
+declare -A MOUNTS=( ["data"]="/data" ["games"]="/games" ["snapshots_root"]="/.snapshots" )
+for sub in "${!MOUNTS[@]}"; do
+    mnt=${MOUNTS[$sub]}
+    sudo mkdir -p "$mnt"
+    if ! grep -q " $mnt " /etc/fstab; then
+        if [[ "$sub" == "snapshots_root" ]]; then
+            opts="noatime,discard=async"
+        else
+            opts="compress=zstd:1,noatime,discard=async"
         fi
+        echo "UUID=$UUID $mnt btrfs subvol=$sub,$opts 0 0" | sudo tee -a /etc/fstab
+    fi
+done
 
-        # fstab Eintrag falls fehlt
-        if ! grep -qx ".* $mnt .*" /etc/fstab; then
-            # Snapshots brauchen keine Kompression, data/games schon (wird bei NO-COW ignoriert)
-            echo "UUID=$UUID $mnt btrfs subvol=$sub,compress=zstd:1,noatime,discard=async 0 0" | sudo tee -a /etc/fstab
-        fi
-        sudo mkdir -p "$mnt"
-    done
+sudo mount -a
 
-    sudo umount /mnt/realtree
-    sudo mount -a
-    sudo chattr +C /data /games 2>/dev/null
-    sudo chown "$USER:$USER" /data /games
-}
+# --- NO-COW für data & games ---
+sudo chattr +C /data /games
+sudo chown "$USER:$USER" /data /games
 
-# --- Snapper konfigurieren ---
-configure_snapper() {
-    log_info "Konfiguriere Snapper für /..."
-    sudo snapper -c root delete-config 2>/dev/null || true
-    sudo snapper -c root create-config /
-    sudo snapper -c root set-config "TIMELINE_LIMIT_HOURLY=5" "TIMELINE_LIMIT_DAILY=7" "TIMELINE_CLEANUP=yes"
-    sudo systemctl enable --now snapper-timeline.timer snapper-cleanup.timer
-    log_success "Snapper für / eingerichtet."
-}
+# --- Snapper für / ---
+sudo snapper -c root delete-config 2>/dev/null || true
+sudo snapper -c root create-config /
+sudo snapper -c root set-config "TIMELINE_LIMIT_HOURLY=5" "TIMELINE_LIMIT_DAILY=7" "TIMELINE_CLEANUP=yes"
+sudo systemctl enable --now snapper-timeline.timer snapper-cleanup.timer
 
-# --- Dev Pakete ---
+log_success "Subvolumes erstellt, NO-COW gesetzt und Snapper für / konfiguriert."
+
+# --- Dev Pakete & Tools ---
 DNF_PACKAGES=(git gh make cmake gcc clang python3 nodejs fish kitty neovim fzf tree ripgrep btop zoxide fd-find ncdu stow jq zathura zathura-pdf-mupdf snapper python3-dnf-plugin-snapper btrfs-assistant poppler-utils ImageMagick mediainfo perl-Image-ExifTool zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine keepassxc gnome-extensions-app)
 COPR_REPOS=(atim/lazygit atim/starship lihaohong/yazi)
 COPR_PACKAGES=(lazygit starship yazi)
@@ -157,10 +163,6 @@ EOF
 log_info "System aktualisieren..."
 sudo dnf upgrade -y
 
-# --- Btrfs Subvolumes & fstab ---
-# Nutzt jetzt die kombinierte Funktion für data, games und snapshots_root
-setup_btrfs  
-
 # --- Pakete & Tools installieren ---
 install_dnf_packages
 install_copr_packages
@@ -169,9 +171,6 @@ install_fonts
 setup_flatpak
 deploy_dotfiles
 configure_system
-
-# --- Snapper konfigurieren ---
-configure_snapper
 
 log_success "🎉 Fedora Dev + Btrfs Setup abgeschlossen!"
 echo "--------------------------------------------------------"
