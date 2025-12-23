@@ -16,61 +16,6 @@ sudo -v
   done
 ) &
 
-# --- Root prüfen ---
-FS_TYPE=$(findmnt -n -o FSTYPE /)
-[[ "$FS_TYPE" == "btrfs" ]] || log_error "Root-Dateisystem ist kein Btrfs. Abbruch."
-
-ROOT_DEV=$(findmnt -n -o SOURCE / | sed 's|\[.*||')
-UUID=$(blkid -s UUID -o value "$ROOT_DEV")
-[[ -n "$UUID" ]] || log_error "Konnte UUID des Root-Devices nicht bestimmen."
-log_info "Root-Device: $ROOT_DEV, UUID: $UUID"
-
-# --- Btrfs Subvolumes erstellen ---
-sudo mkdir -p /mnt/tmp
-sudo mount -o subvolid=5 "$ROOT_DEV" /mnt/tmp
-
-SUBS=("data" "games" "snapshots_root")
-for sub in "${SUBS[@]}"; do
-    if ! sudo btrfs subvolume list /mnt/tmp | grep -q "path $sub$"; then
-        log_info "Erstelle Subvolume $sub"
-        sudo btrfs subvolume create "/mnt/tmp/$sub"
-    else
-        log_info "Subvolume $sub existiert bereits"
-    fi
-done
-
-sudo umount /mnt/tmp
-sudo rmdir /mnt/tmp
-
-# --- Mountpoints & fstab ---
-declare -A MOUNTS=( ["data"]="/data" ["games"]="/games" ["snapshots_root"]="/.snapshots" )
-for sub in "${!MOUNTS[@]}"; do
-    mnt=${MOUNTS[$sub]}
-    sudo mkdir -p "$mnt"
-    if ! grep -q " $mnt " /etc/fstab; then
-        if [[ "$sub" == "snapshots_root" ]]; then
-            opts="noatime,discard=async"
-        else
-            opts="compress=zstd:1,noatime,discard=async"
-        fi
-        echo "UUID=$UUID $mnt btrfs subvol=$sub,$opts 0 0" | sudo tee -a /etc/fstab
-    fi
-done
-
-sudo mount -a
-
-# --- NO-COW für data & games ---
-sudo chattr +C /data /games
-sudo chown "$USER:$USER" /data /games
-
-# --- Snapper für / ---
-sudo snapper -c root delete-config 2>/dev/null || true
-sudo snapper -c root create-config /
-sudo snapper -c root set-config "TIMELINE_LIMIT_HOURLY=5" "TIMELINE_LIMIT_DAILY=7" "TIMELINE_CLEANUP=yes"
-sudo systemctl enable --now snapper-timeline.timer snapper-cleanup.timer
-
-log_success "Subvolumes erstellt, NO-COW gesetzt und Snapper für / konfiguriert."
-
 # --- Dev Pakete & Tools ---
 DNF_PACKAGES=(git gh make cmake gcc clang python3 nodejs fish kitty neovim fzf tree ripgrep btop zoxide fd-find ncdu stow jq zathura zathura-pdf-mupdf snapper python3-dnf-plugin-snapper btrfs-assistant poppler-utils ImageMagick mediainfo perl-Image-ExifTool zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine keepassxc gnome-extensions-app)
 COPR_REPOS=(atim/lazygit atim/starship lihaohong/yazi)
