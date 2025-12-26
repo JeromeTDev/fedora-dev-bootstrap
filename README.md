@@ -3,12 +3,12 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Fedora](https://img.shields.io/badge/Fedora-Btrfs-blue.svg)](https://getfedora.org/)
 
-
 A **fully automated Fedora developer bootstrap** for power users who want  
 a **clean Btrfs layout**, **lean snapshots**, and a **ready-to-use dev environment**  
 without manual post-install fiddling.
 
 Designed to be run **once on a fresh Fedora system**.
+![Fedora Dev Bootstrap – Terminal](screenshots/terminal.png)
 
 ---
 
@@ -38,6 +38,7 @@ Designed to be run **once on a fresh Fedora system**.
 ## 📦 What gets installed
 
 ### 🧱 System & Filesystem
+
 - Btrfs subvolumes with NO-COW:
   - ~/.cache
   - /var/cache
@@ -47,6 +48,7 @@ Designed to be run **once on a fresh Fedora system**.
 - btrfs-assistant for GUI snapshot management
 
 ### 🛠 Developer Toolchain
+
 - git, gh
 - gcc, clang
 - make, cmake
@@ -55,12 +57,14 @@ Designed to be run **once on a fresh Fedora system**.
 - jq, fd, ripgrep, ncdu
 
 ### 🧑‍💻 Shell, Editor & Terminal
+
 - fish (default shell)
 - starship prompt
 - kitty terminal
 - Neovim (LazyVim-ready)
 
 ### 🧰 CLI Utilities
+
 - fzf
 - zoxide
 - btop
@@ -69,6 +73,7 @@ Designed to be run **once on a fresh Fedora system**.
 - fastfetch
 
 ### 📦 Flatpak Apps
+
 - Discord
 - Obsidian
 - Cryptomator
@@ -77,15 +82,18 @@ Designed to be run **once on a fresh Fedora system**.
 - Extension Manager
 
 ### 🔧 Runtime Management
+
 - mise
   - Global latest Node.js installed
   - Shell activation for Fish, Bash & Zsh
   - Own Btrfs subvolume (snapshot-excluded)
 
 ### 🎨 Fonts
+
 - JetBrainsMono Nerd Font
 
 ### 🗂 Dotfiles
+
 - Automatic deployment via GNU Stow
 
 ---
@@ -93,6 +101,7 @@ Designed to be run **once on a fresh Fedora system**.
 ## 🚀 Features in Detail
 
 ### 🧠 Smart Snapshots
+
 - Root (/)
   - Daily snapshots only
   - DNF plugin handles transactional snapshots
@@ -101,16 +110,19 @@ Designed to be run **once on a fresh Fedora system**.
 - User access enabled (ALLOW_USERS)
 
 ### 🛡 Snapshot Shield
+
 Cache-heavy paths are isolated into separate subvolumes so that:
+
 - Snapshots stay small
 - Rollbacks are fast
 - Toolchains don’t pollute history
 
 ### 🐚 Multi-Shell Support
+
 - Fish (default)
 - Bash
 - Zsh  
-Starship & mise activation injected automatically.
+  Starship & mise activation injected automatically.
 
 ---
 
@@ -138,13 +150,17 @@ chmod +x feddev-setup.sh
 - Restart your terminal
 - Fish + Starship should be active
 - Verify runtimes:
+
 ```bash
 mise ls
 ```
+
 - Open Neovim:
+
 ```bash
 nvim
 ```
+
 - Snapshots:
   - /.snapshots
   - /home/.snapshots
