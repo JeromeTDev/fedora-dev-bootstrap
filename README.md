@@ -2,7 +2,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Fedora](https://img.shields.io/badge/Fedora-Btrfs-blue.svg)](https://getfedora.org/)
-[![Shell](https://img.shields.io/badge/Shell-Bash-green.svg)]()
+
 
 A **fully automated Fedora developer bootstrap** for power users who want  
 a **clean Btrfs layout**, **lean snapshots**, and a **ready-to-use dev environment**  
