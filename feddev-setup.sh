@@ -23,7 +23,7 @@ sudo -v
 DNF_PACKAGES=(git gh make cmake gcc clang python3 fish kitty neovim fzf tree ripgrep btop zoxide fd-find ncdu stow jq zathura zathura-pdf-mupdf snapper python3-dnf-plugin-snapper btrfs-assistant poppler-utils ImageMagick mediainfo perl-Image-ExifTool zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine keepassxc gnome-extensions-app fastfetch)
 COPR_REPOS=(atim/lazygit atim/starship lihaohong/yazi)
 COPR_PACKAGES=(lazygit starship yazi)
-FLATPAK_APPS=(com.mattjakeman.ExtensionManager com.github.caffeine-ng.Caffeine com.teamspeak.TeamSpeak com.discordapp.Discord org.cryptomator.Cryptomator md.obsidian.Obsidian)
+FLATPAK_APPS=(com.mattjakeman.ExtensionManager com.teamspeak.TeamSpeak com.discordapp.Discord org.cryptomator.Cryptomator md.obsidian.Obsidian)
 
 install_dnf_packages() {
   log_info "Installiere DNF-Pakete..."
