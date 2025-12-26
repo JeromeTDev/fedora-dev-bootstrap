@@ -61,7 +61,7 @@ Designed to be run **once on a fresh Fedora system**.
 - fish (default shell)
 - starship prompt
 - kitty terminal
-- Neovim (LazyVim-ready)
+- LazyVim
 
 ### 🧰 CLI Utilities
 
@@ -78,7 +78,6 @@ Designed to be run **once on a fresh Fedora system**.
 - Obsidian
 - Cryptomator
 - TeamSpeak
-- Caffeine
 - Extension Manager
 
 ### 🔧 Runtime Management
