@@ -1,4 +1,4 @@
-# Fedora Dev Bootstrap Pro
+# FedDev
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Fedora](https://img.shields.io/badge/Fedora-Btrfs-blue.svg)](https://getfedora.org/)
