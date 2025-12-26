@@ -87,7 +87,6 @@ Designed to be run **once on a fresh Fedora system**.
 
 ### 🗂 Dotfiles
 - Automatic deployment via GNU Stow
-- Source: https://github.com/JeromeTDev/.dotfiles
 
 ---
 
