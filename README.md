@@ -1,49 +1,95 @@
-
 # Fedora Dev Bootstrap Pro
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Fedora](https://img.shields.io/badge/Fedora-43-blue.svg)](https://getfedora.org/)
 
 ---
+
 [🇺🇸 English](#english) | [🇩🇪 Deutsch](#deutsch)
 
 ---
 
 ## 🇺🇸 English <a name="english"></a>
 
-A fully automated **Fedora developer bootstrap** for a clean, developer-friendly environment. 
+A fully automated **Fedora developer bootstrap** designed for power users.  
+It optimizes your filesystem for **Btrfs**, sets up modular runtime management,  
+and deploys a complete, opinionated **developer stack**.
 
-### Requirements:
+### Requirements
+- Fresh Fedora installation (recommended **Fedora 43+**)
+- Active internet connection
 
-- A fresh Fedora installation (recommended Fedora 43 or newer)
-- Internet connection
+### FedDev includes
+- **Btrfs Optimization**
+  - Dedicated subvolumes for:
+    - `~/.cache`
+    - `/var/cache`
+    - `~/.local/share/mise`
+  - Snapshot-excluded & **NO-COW** optimized
 
-#### FedDev includes:
+- **Runtime Management**
+  - **mise** (modern replacement for asdf / nvm)
+  - Node.js, Python, and more
 
-- **Btrfs subvolumes** for `/data` and snapshots (`/.snapshots`) with NO-COW optimization
-- **Developer tools:** git, gcc/clang, cmake, make, python3, nodejs, lua 5.1 + luarocks
-- **Shell & terminal:** fish, starship, kitty
-- **Editors:** neovim with LazyVim
-- **PDF/LaTeX & multimedia:** texlive-scheme-basic, zathura, ImageMagick, mediainfo
-- **Flatpak apps:** Discord, Obsidian, Cryptomator, TeamSpeak, Caffeine
-- **Dotfiles deployment** with stow
-- **Fonts:** JetBrainsMono Nerd Font
-- **NPM global tools:** `neovim`, `@mermaid-js/mermaid-cli`
+- **Developer Tools**
+  - git, gh
+  - make, cmake
+  - gcc / clang
+  - python3
+  - lua 5.1 + luarocks
+
+- **Shell & Terminal**
+  - fish (default shell)
+  - starship prompt
+  - kitty terminal
+
+- **Editors**
+  - Neovim (LazyVim-ready)
+
+- **Utilities & CLI**
+  - fzf, zoxide, ripgrep
+  - btop, fd, yazi
+  - lazygit
+
+- **Flatpak Apps**
+  - Discord
+  - Obsidian
+  - Cryptomator
+  - TeamSpeak
+  - Caffeine
+
+- **Dotfiles**
+  - Automated deployment via **GNU Stow**
+  - Source: `JeromeTDev/.dotfiles`
+
+- **Fonts**
+  - JetBrainsMono Nerd Font
 
 ### 🚀 Features
-- Automatic Btrfs checks & subvolume creation  
-- Idempotent `/etc/fstab` entries (`compress=zstd:1`)  
-- Starship prompt configured for fish, bash, zsh  
-- Kitty set as default GNOME terminal  
+- **Smart Snapshots**
+  - Automated Snapper configuration for `/` and `/home`
+  - Lean retention policies
+
+- **Mise Integration**
+  - Automatically installs the latest Node.js
+  - Shell activation handled automatically
+
+- **Btrfs Subvolume Shield**
+  - Prevents snapshot bloat from caches & toolchains
+  - Uses nested subvolumes
+
+- **Multi-Shell Support**
+  - Fish, Bash & Zsh
+  - Starship + mise preconfigured
 
 ### 🧩 Installation
 
+#### One-liner (recommended)
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/JeromeTDev/fedora-dev-bootstrap/main/feddev-setup.sh)
 ```
 
-**Alternative: Clone & run**
-
+#### Alternative: Clone & Run
 ```bash
 git clone https://github.com/JeromeTDev/fedora-dev-bootstrap.git ~/fedora-dev-bootstrap
 cd ~/fedora-dev-bootstrap
@@ -51,49 +97,94 @@ chmod +x feddev-setup.sh
 ./feddev-setup.sh
 ```
 
-### 🧪 After installation
-
-- Restart your terminal (Fish + Starship active)  
-- Run `nvim` → LazyVim installs automatically  
-- Inside Neovim: `:checkhealth`  
-- Store large files, VMs, LLMs under `/data`  
+### 🧪 After Installation
+- Restart your terminal (Fish + Starship enabled by default)
+- Run `mise ls` to see installed runtimes
+- Start `nvim` to load your personal configuration via dotfiles
 
 ---
 
 ## 🇩🇪 Deutsch <a name="deutsch"></a>
 
-Vollautomatisiertes **Fedora-Developer-Bootstrap**, ideal für Entwickler:
+Vollautomatisiertes **Fedora Developer Bootstrap** für Power-User.  
+Optimiert **Btrfs**, richtet modulares Runtime-Management ein  
+und installiert einen vollständigen Developer-Stack.
 
-### Voraussetzungen:
-- Eine frisch installierte Fedora-Version (empfohlen: Fedora 43 oder neuer)
-- Internetverbindung
+### Voraussetzungen
+- Frische Fedora-Installation (empfohlen **Fedora 43+**)
+- Aktive Internetverbindung
 
-FedDev beinhaltet:
+### FedDev beinhaltet
+- **Btrfs-Optimierung**
+  - Eigene Subvolumes für:
+    - `~/.cache`
+    - `/var/cache`
+    - `~/.local/share/mise`
+  - Snapshot-exkludiert & **NO-COW** optimiert
 
-- **Btrfs-Subvolumes:** `/data` & `/.snapshots` (NO-COW optimiert)  
-- **Dev-Tools:** git, gcc/clang, cmake, make, python3, nodejs, lua 5.1 + luarocks  
-- **Shell & Terminal:** fish, starship, kitty  
-- **Editoren:** neovim + LazyVim  
-- **PDF/LaTeX & Multimedia:** texlive-scheme-basic, zathura, ImageMagick, mediainfo  
-- **Flatpak-Apps:** Discord, Obsidian, Cryptomator, TeamSpeak, Caffeine  
-- **Dotfiles Deployment** via stow  
-- **Fonts:** JetBrainsMono Nerd Font  
-- **Globale NPM-Tools:** `neovim`, `@mermaid-js/mermaid-cli`
+- **Runtime-Management**
+  - **mise** (moderner Ersatz für asdf / nvm)
+  - Node.js, Python u.v.m.
+
+- **Developer-Tools**
+  - git, gh
+  - make, cmake
+  - gcc / clang
+  - python3
+  - lua 5.1 + luarocks
+
+- **Shell & Terminal**
+  - fish (Standard-Shell)
+  - starship prompt
+  - kitty terminal
+
+- **Editoren**
+  - Neovim (LazyVim-ready)
+
+- **Utilities & CLI**
+  - fzf, zoxide, ripgrep
+  - btop, fd, yazi
+  - lazygit
+
+- **Flatpak-Apps**
+  - Discord
+  - Obsidian
+  - Cryptomator
+  - TeamSpeak
+  - Caffeine
+
+- **Dotfiles**
+  - Automatisches Deployment via **GNU Stow**
+  - Quelle: `JeromeTDev/.dotfiles`
+
+- **Fonts**
+  - JetBrainsMono Nerd Font
 
 ### 🚀 Features
-- Automatische Btrfs-Prüfung & Subvolume-Erstellung  
-- Idempotente `/etc/fstab`-Einträge (`compress=zstd:1`)  
-- Starship Prompt für fish, bash, zsh  
-- Kitty als Standard-GNOME-Terminal  
+- **Intelligente Snapshots**
+  - Snapper für `/` und `/home`
+  - Schlanke Aufbewahrungsregeln
+
+- **Mise Integration**
+  - Installiert automatisch die neueste Node.js-Version
+  - Shell-Aktivierung inklusive
+
+- **Btrfs Subvolume Shield**
+  - Verhindert aufgeblähte Snapshots durch Caches
+  - Nutzt verschachtelte Subvolumes
+
+- **Multi-Shell Support**
+  - Fish, Bash & Zsh
+  - Starship + mise vorkonfiguriert
 
 ### 🧩 Installation
 
+#### Einzeiler (empfohlen)
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/JeromeTDev/fedora-dev-bootstrap/main/feddev-setup.sh)
 ```
 
-**Alternative: Klonen & Ausführen**
-
+#### Alternative: Klonen & Ausführen
 ```bash
 git clone https://github.com/JeromeTDev/fedora-dev-bootstrap.git ~/fedora-dev-bootstrap
 cd ~/fedora-dev-bootstrap
@@ -102,11 +193,9 @@ chmod +x feddev-setup.sh
 ```
 
 ### 🧪 Nach der Installation
-
-- Terminal neu starten (Fish + Starship aktiv)  
-- `nvim` starten → LazyVim installiert automatisch  
-- In Neovim `:checkhealth` ausführen  
-- Große Dateien/VMs/LLMs unter `/data` speichern  
+- Terminal neu starten (Fish + Starship aktiv)
+- `mise ls` ausführen, um installierte Runtimes zu sehen
+- `nvim` starten, um die Dotfile-Konfiguration zu laden
 
 ---
 
