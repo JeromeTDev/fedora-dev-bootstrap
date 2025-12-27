@@ -184,6 +184,12 @@ setup_snapper() {
   sudo snapper -c home set-config "ALLOW_USERS=$USER"
   sudo chmod a+rx /.snapshots
   sudo chmod a+rx /home/.snapshots
+
+  # Snapshots löschen, wenn der Platz knapp wird (z.B. 10% des Platzes für Snapshots)
+sudo btrfs quota enable /
+sudo btrfs quota enable /home
+sudo snapper -c root set-config "SPACE_LIMIT=0.1" "FREE_LIMIT=0.2"
+sudo snapper -c home set-config "SPACE_LIMIT=0.1" "FREE_LIMIT=0.2"
   
   log_success "Snapper minimalistisch konfiguriert!"
 }
