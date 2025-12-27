@@ -20,7 +20,7 @@ sudo -v
 ) &
 
 # --- Dev Pakete & Tools ---
-DNF_PACKAGES=(git gh make cmake gcc clang python3 fish kitty neovim fzf tree ripgrep btop zoxide fd-find ncdu stow jq zathura zathura-pdf-mupdf snapper python3-dnf-plugin-snapper btrfs-assistant poppler-utils ImageMagick mediainfo perl-Image-ExifTool zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine keepassxc gnome-extensions-app fastfetch)
+DNF_PACKAGES=(git gh make cmake gcc clang python3 fish kitty neovim wl-clipboard fzf tree ripgrep btop zoxide fd-find ncdu stow jq zathura zathura-pdf-mupdf snapper python3-dnf-plugin-snapper btrfs-assistant poppler-utils ImageMagick mediainfo perl-Image-ExifTool zeal xournalpp texlive-scheme-basic lua-5.1 luarocks caffeine keepassxc gnome-extensions-app ueberzugpp fastfetch)
 COPR_REPOS=(atim/lazygit atim/starship lihaohong/yazi)
 COPR_PACKAGES=(lazygit starship yazi)
 FLATPAK_APPS=(com.mattjakeman.ExtensionManager com.teamspeak.TeamSpeak com.discordapp.Discord org.cryptomator.Cryptomator md.obsidian.Obsidian)
@@ -194,7 +194,7 @@ install_mise() {
   # Pfad definieren
   MISE_DATA_DIR="$HOME/.local/share/mise"
   
-  # Falls das Verzeichnis existiert, aber kein Subvolume ist: sichern und neu anlegen
+  # Falls das Verzeichnis existiert, aber kein Subvolume ist: sichern
   if [ -d "$MISE_DATA_DIR" ] && ! sudo btrfs subvolume show "$MISE_DATA_DIR" >/dev/null 2>&1; then
     mv "$MISE_DATA_DIR" "${MISE_DATA_DIR}_old"
   fi
@@ -204,12 +204,11 @@ install_mise() {
     mkdir -p "$(dirname "$MISE_DATA_DIR")"
     sudo btrfs subvolume create "$MISE_DATA_DIR"
     sudo chown "$USER:$USER" "$MISE_DATA_DIR"
-    # NO-COW setzen (gut für viele kleine Binaries/Datenbanken in Runtimes)
     sudo chattr +C "$MISE_DATA_DIR"
-    log_success "Subvolume für mise unter $MISE_DATA_DIR erstellt (Snapshot-Excl)."
+    log_success "Subvolume für mise erstellt (Snapshot-Excl)."
   fi
 
-  # Alte Daten zurückschieben, falls vorhanden
+  # Alte Daten zurückschieben
   if [ -d "${MISE_DATA_DIR}_old" ]; then
     cp -a "${MISE_DATA_DIR}_old/." "$MISE_DATA_DIR/"
     rm -rf "${MISE_DATA_DIR}_old"
@@ -219,7 +218,7 @@ install_mise() {
   sudo dnf config-manager --add-repo https://mise.jdx.dev/rpm/mise.repo
   sudo dnf install -y mise
 
-  # Shell-Aktivierung (wie gehabt)
+  # Shell-Aktivierung
   for shell in fish bash zsh; do
     case "$shell" in
       fish) CONFIG="$HOME/.config/fish/config.fish"; INIT_CODE='if type mise >/dev/null 2>&1; mise activate fish | source; end' ;;
@@ -234,7 +233,17 @@ install_mise() {
     fi
   done
 
+  # Node installieren (NPM nutzt jetzt automatisch den Symlink)
   sudo -u "$USER" mise use --global node@latest
+}
+
+# Hilfsfunktion für Umleitungen
+redirect_to_cache() {
+  local dir="$1"
+  local name="${dir#.}"
+  mkdir -p "$HOME/.cache/$name"
+  [ -d "$HOME/$dir" ] && [ ! -L "$HOME/$dir" ] && rm -rf "$HOME/$dir"
+  [ ! -L "$HOME/$dir" ] && ln -s "$HOME/.cache/$name" "$HOME/$dir"
 }
 
 ###############################################################################
@@ -261,6 +270,9 @@ setup_snapper
 install_fonts
 setup_flatpak
 install_mise
+redirect_to_cache ".npm"
+redirect_to_cache ".cargo"
+redirect_to_cache ".node-gyp"
 setup_starship
 deploy_dotfiles
 configure_system
