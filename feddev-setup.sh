@@ -131,15 +131,16 @@ EOF
   fi
 }
 
-
-create_subvolume(){
+create_subvolume() {
   log_info "Richte BTRFS Subvolumes (Cache & Tmp) ein..."
 
   # --- User Cache ---
-  rm -rf "$HOME/.cache"
-  sudo btrfs subvolume create "$HOME/.cache"
-  sudo chown "$USER:$USER" "$HOME/.cache"
-  sudo chattr +C "$HOME/.cache"
+  if ! sudo btrfs subvolume show "$HOME/.cache" >/dev/null 2>&1; then
+    rm -rf "$HOME/.cache"
+    sudo btrfs subvolume create "$HOME/.cache"
+    sudo chown "$USER:$USER" "$HOME/.cache"
+    sudo chattr +C "$HOME/.cache"
+  fi
 
   # --- /var/cache ---
   # Prüfen, ob es bereits ein Subvolume ist, um Fehler bei Doppel-Ausführung zu vermeiden
@@ -161,13 +162,13 @@ create_subvolume(){
     sudo chown root:root /var/tmp
     [ -d "/var/tmp_old" ] && sudo rm -rf /var/tmp_old
   fi
-  
+
   log_success "BTRFS Struktur optimiert."
 }
 # snapshots
 setup_snapper() {
   log_info "Initialisiere Snapper-Konfiguration (Lean Setup)..."
-  
+
   # Config für root erstellen
   [ ! -f "/etc/snapper/configs/root" ] && sudo snapper -c root create-config /
   # Config für home erstellen
@@ -175,7 +176,7 @@ setup_snapper() {
 
   # Limits für ROOT (Nur täglich, da DNF-Plugin extra sichert)
   sudo snapper -c root set-config "TIMELINE_LIMIT_HOURLY=0" "TIMELINE_LIMIT_DAILY=3" "TIMELINE_LIMIT_WEEKLY=0"
-  
+
   # Limits für HOME (Kurzfristiger Schutz für Config-Fehler)
   sudo snapper -c home set-config "TIMELINE_LIMIT_HOURLY=3" "TIMELINE_LIMIT_DAILY=3" "TIMELINE_LIMIT_WEEKLY=0"
 
@@ -186,20 +187,20 @@ setup_snapper() {
   sudo chmod a+rx /home/.snapshots
 
   # Snapshots löschen, wenn der Platz knapp wird (z.B. 10% des Platzes für Snapshots)
-sudo btrfs quota enable /
-sudo btrfs quota enable /home
-sudo snapper -c root set-config "SPACE_LIMIT=0.1" "FREE_LIMIT=0.2"
-sudo snapper -c home set-config "SPACE_LIMIT=0.1" "FREE_LIMIT=0.2"
-  
+  sudo btrfs quota enable /
+  sudo btrfs quota enable /home
+  sudo snapper -c root set-config "SPACE_LIMIT=0.1" "FREE_LIMIT=0.2"
+  sudo snapper -c home set-config "SPACE_LIMIT=0.1" "FREE_LIMIT=0.2"
+
   log_success "Snapper minimalistisch konfiguriert!"
 }
 
 install_mise() {
   log_info "Bereite BTRFS Subvolume für mise vor..."
-  
+
   # Pfad definieren
   MISE_DATA_DIR="$HOME/.local/share/mise"
-  
+
   # Falls das Verzeichnis existiert, aber kein Subvolume ist: sichern
   if [ -d "$MISE_DATA_DIR" ] && ! sudo btrfs subvolume show "$MISE_DATA_DIR" >/dev/null 2>&1; then
     mv "$MISE_DATA_DIR" "${MISE_DATA_DIR}_old"
@@ -227,14 +228,23 @@ install_mise() {
   # Shell-Aktivierung
   for shell in fish bash zsh; do
     case "$shell" in
-      fish) CONFIG="$HOME/.config/fish/config.fish"; INIT_CODE='if type mise >/dev/null 2>&1; mise activate fish | source; end' ;;
-      bash) CONFIG="$HOME/.bashrc"; INIT_CODE='if type mise >/dev/null 2>&1; eval "$(mise activate bash)"; fi' ;;
-      zsh)  CONFIG="$HOME/.zshrc"; INIT_CODE='if type mise >/dev/null 2>&1; eval "$(mise activate zsh)"; fi' ;;
+    fish)
+      CONFIG="$HOME/.config/fish/config.fish"
+      INIT_CODE='if type mise >/dev/null 2>&1; mise activate fish | source; end'
+      ;;
+    bash)
+      CONFIG="$HOME/.bashrc"
+      INIT_CODE='if type mise >/dev/null 2>&1; eval "$(mise activate bash)"; fi'
+      ;;
+    zsh)
+      CONFIG="$HOME/.zshrc"
+      INIT_CODE='if type mise >/dev/null 2>&1; eval "$(mise activate zsh)"; fi'
+      ;;
     esac
 
     mkdir -p "$(dirname "$CONFIG")"
     if ! grep -q "mise activate $shell" "$CONFIG" 2>/dev/null; then
-      echo -e "\n# Mise Runtime Manager\n$INIT_CODE" >> "$CONFIG"
+      echo -e "\n# Mise Runtime Manager\n$INIT_CODE" >>"$CONFIG"
       log_success "Mise für $shell aktiviert."
     fi
   done
@@ -246,10 +256,23 @@ install_mise() {
 # Hilfsfunktion für Umleitungen
 redirect_to_cache() {
   local dir="$1"
+
+  # Safety checks
+  [[ -z "$dir" || "$dir" == "/" || "$dir" == "." ]] && return 1
+
+  local src="$HOME/$dir"
   local name="${dir#.}"
-  mkdir -p "$HOME/.cache/$name"
-  [ -d "$HOME/$dir" ] && [ ! -L "$HOME/$dir" ] && rm -rf "$HOME/$dir"
-  [ ! -L "$HOME/$dir" ] && ln -s "$HOME/.cache/$name" "$HOME/$dir"
+  local dst="$HOME/.cache/$name"
+
+  mkdir -p "$dst"
+
+  if [[ -e "$src" && ! -L "$src" ]]; then
+    rm -rf -- "$src"
+  fi
+
+  if [[ ! -L "$src" ]]; then
+    ln -s -- "$dst" "$src"
+  fi
 }
 
 ###############################################################################
@@ -288,6 +311,6 @@ echo "--------------------------------------------------------"
 echo "Struktur-Check:"
 echo "- System-Snapshots: /.snapshots (Nur täglich + DNF-Events)"
 echo "- Home-Snapshots: /home/.snapshots (Stündlich + Täglich)"
-echo "- NO-COW & Snapshot-Excl: ~/.cache, /var/cache, /var/tmp"
+echo "- NO-COW & Snapshot-Excl: ~/.cache, /var/cache, /var/tmp /.local/share/mise'"
 echo "- Externe Daten: /data & /games (Symlinked/Subvolumes)"
 echo "--------------------------------------------------------"
