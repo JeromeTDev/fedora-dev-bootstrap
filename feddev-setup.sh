@@ -119,16 +119,38 @@ deploy_dotfiles() {
 
 configure_system() {
   log_info "System konfigurieren..."
-  sudo tee -a /etc/dnf/dnf.conf >/dev/null <<EOF
-fastestmirror=True
-max_parallel_downloads=15
-defaultyes=True
-install_weak_deps=False
-clean_requirements_on_remove=True
-EOF
+
+  DNF_CONF="/etc/dnf/dnf.conf"
+  # Optionen, die wir setzen wollen
+  declare -A OPTIONS=(
+    [fastestmirror]=True
+    [max_parallel_downloads]=15
+    [defaultyes]=True
+    [install_weak_deps]=False
+    [clean_requirements_on_remove]=True
+    [plugins]=1
+  )
+
+  # Stelle sicher, dass [main] existiert
+  if ! grep -q '^\[main\]' "$DNF_CONF"; then
+    sudo bash -c "echo '[main]' >> $DNF_CONF"
+  fi
+
+  # Jede Option hinzufügen oder ersetzen
+  for key in "${!OPTIONS[@]}"; do
+    if grep -q "^$key=" "$DNF_CONF"; then
+      sudo sed -i "s|^$key=.*|$key=${OPTIONS[$key]}|" "$DNF_CONF"
+    else
+      sudo sed -i "/^\[main\]/a $key=${OPTIONS[$key]}" "$DNF_CONF"
+    fi
+  done
+
+  # Wechsel auf fish, falls nötig
   if command -v fish &>/dev/null && [ "$SHELL" != "$(command -v fish)" ]; then
     chsh -s "$(command -v fish)"
   fi
+
+  log_success "System konfiguriert und DNF-Plugins aktiviert."
 }
 
 create_subvolume() {
