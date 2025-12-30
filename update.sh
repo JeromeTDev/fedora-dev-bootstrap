@@ -16,7 +16,7 @@ update_dnf() {
 update_mise() {
   log_info "Starte Mise-Upgrade..."
   # Upgrade nur der konfigurierten Versionen
-  mise upgrade || log_info "Keine Mise-Upgrades nötig."
+  mise upgrade --bump || log_info "Keine Mise-Upgrades nötig."
   # Optional: für alle Tools auf die neueste Version
   # mise upgrade --bump || log_info "Alle Mise-Tools sind aktuell."
   log_info "Mise-Upgrade abgeschlossen."
