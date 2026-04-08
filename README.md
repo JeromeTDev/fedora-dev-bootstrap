@@ -8,7 +8,7 @@ a **clean Btrfs layout**, **lean snapshots**, and a **ready-to-use dev environme
 without manual post-install fiddling.
 
 Designed to be run **once on a fresh Fedora system**.
-![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/9a8fbf9a-4fbd-4859-b16a-70298524113f)
+![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/58df73b9-9492-4b25-9bbd-38b9af24d120))
 
 ---
 
