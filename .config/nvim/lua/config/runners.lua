@@ -10,7 +10,7 @@ end
 -- Map filetypes to run commands
 M.commands = {
   python = function(file)
-    return python .. " -i " .. file
+    return python .. " " .. file
   end,
 
   lua = function(file)
@@ -106,6 +106,6 @@ function M.run_file()
   end
 end
 
-vim.keymap.set("n", "<leader>r", M.run_file, { noremap = true, silent = true })
+vim.keymap.set("n", "<leader>r", M.run_file, { desc = "▶ Run file", silent = true })
 
 return M

@@ -1,26 +1,42 @@
+# ==============================
+# PROGRAMME DEFINIEREN
+# ==============================
+
 [opener]
-edit = [{ run = 'nvim "$@"', block = true }]
 
-[git]
-enabled = true
+edit = [{ run = 'nvim %s', block = true, for = "unix" }]
+
+pdf = [{ run = 'zathura %s', orphan = true, for = "unix" }]
+
+md_preview = [{ run = 'glow %s', block = true, for = "unix" }]
+
+image = [{ run = 'imv %s', orphan = true, for = "unix" }]
+
+video = [{ run = 'mpv %s', orphan = true, for = "unix" }]
 
 
-# Keymaps
-[bindings]
-save = "ctrl+s"
-quit = "ctrl+q"
-undo = "ctrl+z"
-redo = "ctrl+y"
-copy = "ctrl+c"
-paste = "ctrl+v"
+# ==============================
+# REGELN: WAS WIRD WOMIT GEÖFFNET
+# ==============================
 
-# Plugins / Extensions
-enable_spellcheck = true
-enable_markdown_preview = true
+[open]
+rules = [
+  # PDFs IMMER mit zathura
+  { url = "*.pdf", use = "pdf" },
 
-# Editor Verhalten
-wrap = true                   # Zeilen umbrechen
-show_line_numbers = true
-tab_size = 4
-auto_save = true              # Speichert automatisch beim Wechsel der Datei
-highlight_current_line = true
+  # Markdown im Preview
+  { url = "*.md", use = "md_preview" },
+
+  # Medien extern
+  { url = "*.png", use = "image" },
+  { url = "*.jpg", use = "image" },
+  { url = "*.jpeg", use = "image" },
+  { url = "*.gif", use = "image" },
+
+  { url = "*.mp4", use = "video" },
+  { url = "*.mkv", use = "video" },
+  { url = "*.webm", use = "video" },
+
+  # ALLES ANDERE → nvim
+  { url = "*", use = "edit" },
+]

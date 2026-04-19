@@ -1,4 +1,4 @@
--- ~/.config/nvim/lua/config/autosave.lua
+-- ~ /.config/nvim/lua/config/autosave.lua
 
 -- Gruppe für Auto-Save
 local autosave_group = vim.api.nvim_create_augroup("AutoSave", { clear = true })

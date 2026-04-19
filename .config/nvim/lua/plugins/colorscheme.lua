@@ -50,6 +50,9 @@ return {
       --   bold = false
       -- })
       --
+      vim.api.nvim_set_hl(0, "CursorLine", { bg = "#2a2a2a" })
+      vim.opt.cursorcolumn = false
+
       vim.api.nvim_set_hl(0, "StatusLineNC", {
         bg = "#1C2021", -- Darker background for inactive windows
         fg = "#928374", -- Muted text

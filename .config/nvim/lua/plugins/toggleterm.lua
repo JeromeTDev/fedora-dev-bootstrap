@@ -4,7 +4,7 @@ return {
   opts = {
     direction = "float",
     -- open_mapping = [[<C-^>]],
-    open_mapping = { [[<c-\>]], [[<c-'>]] },
+    open_mapping = { [[<c-\>]] },
 
     shade_terminals = true,
     shading_factor = 2,

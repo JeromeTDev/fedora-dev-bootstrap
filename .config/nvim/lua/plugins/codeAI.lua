@@ -1,80 +1,51 @@
 return {
-
   -------------------------------------------------------------------
   -- CODECOMPANION
   -------------------------------------------------------------------
   {
     "olimorris/codecompanion.nvim",
-    version = "v17.33.0",
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
     },
-
     config = function()
-      local cc = require("codecompanion")
-
-      cc.setup({
+      require("codecompanion").setup({
         strategies = {
           chat = {
-            adapter = "ollama",
-            prompt_prefix = "Bitte antworte ausschließlich auf Deutsch:\n\n",
-            window = { wrap = true, syntax_highlight = true },
-          },
-          inline = {
-            adapter = "ollama",
-            prompt_prefix = "Bitte erkläre oder verbessere folgenden Code auf Deutsch:\n\n",
-            schema = {
-              temperature = 0.2,
-              max_tokens = 300,
-            },
+            adapter = "ollama", -- nutzt automatisch alle verfügbaren LM-Studio Modelle
           },
         },
         adapters = {
           ollama = function()
             return require("codecompanion.adapters").extend("openai_compatible", {
               env = {
-                url = "http://localhost:1234/v1",
-                api_key = "dummy",
+                url = "http://127.0.0.1:1234", -- LM-Studio Server
               },
             })
           end,
         },
       })
 
-      -------------------------------------------------------------------
-      -- 🔥 KEYMAPS (CodeCompanion)
-      -------------------------------------------------------------------
+      -- 🔥 Keymaps
       local map = vim.keymap.set
-
-      -- Hauptmenü
       map({ "n", "v" }, "<leader>a", "", { desc = "AI" })
-
-      -- CodeCompanion
-      map("n", "<leader>ac", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "CC Chat" })
-      map("n", "<leader>ai", "<cmd>CodeCompanion<cr>", { desc = "CC Inline Edit" })
-      map({ "n", "v" }, "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = "CC Actions" })
-      map("n", "<leader>cl", "<cmd>CodeCompanionInline<cr>", { desc = "CC Inline Line" })
-      map("v", "<leader>ce", "<cmd>CodeCompanionActions<cr>", { desc = "CC Actions (Selection)" })
+      map("n", "<leader>ac", "<cmd>CodeCompanionChat Toggle<cr>", { desc = "Open CodeCompanion Chat" })
+      map("n", "<leader>ai", "<cmd>CodeCompanion<cr>", { desc = "Inline CodeCompanion" })
+      map("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = "CodeCompanion Actions" })
     end,
   },
 
   -------------------------------------------------------------------
-  -- OPENCODE (unter <leader>a Menü einsortiert)
+  -- OPENCODE
   -------------------------------------------------------------------
   {
     "NickvanDyke/opencode.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
-
-    config = function()
+    config = function() -- <- hier die Klammer schließen, keine Parameter
       local op = require("opencode")
       local map = vim.keymap.set
-      -- Required for `opts.events.reload`.
       vim.o.autoread = true
 
-      -------------------------------------------------------------------
-      -- 🔥 OpenCode Keymaps unter <leader>a
-      -------------------------------------------------------------------
       -- Ask (Cursor oder Visual)
       map({ "n", "x" }, "<leader>ao", function()
         op.ask("@this: ", { submit = true })
@@ -110,4 +81,4 @@ return {
       end, { desc = "OC Scroll Down" })
     end,
   },
-}
+} -- <--- hier die äußere return Tabelle korrekt schließen

@@ -20,6 +20,8 @@ vim.opt.breakindent = true -- Umgebrochene Zeilen behalten Einrückung
 -- 🖥️ UI / TABS / FENSTER
 -- ==============================
 vim.opt.showtabline = 0 -- Klassische Tab-Leiste ausblenden
+vim.opt.cursorline = true -- aktuelle Zeile markieren
+vim.opt.cursorcolumn = false -- aktuelle Spalte nicht markieren (auf Ultrawide angenehmer)
 -- vim.opt.splitbelow = true                   -- Neue horizontale Splits unten öffnen
 -- vim.opt.splitright = true                   -- Neue vertikale Splits rechts öffnen
 -- vim.opt.termguicolors = true                -- Verbesserte Farbdarstellung aktivieren

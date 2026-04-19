@@ -64,6 +64,28 @@ return {
       opts = { stop = false, replace = true },
     })
 
+    opts.routes = opts.routes or {}
+
+    -- Dein bereits vorhandener Route-Eintrag
+    table.insert(opts.routes, 1, {
+      filter = { event = "notify", find = "No information available" },
+      cond = function()
+        return focused
+      end,
+      view = "notify_send",
+      opts = { stop = false, replace = true },
+    })
+
+    -- 🔥 jdtls Progress-Filter hinzufügen
+    table.insert(opts.routes, 1, {
+      filter = {
+        event = "lsp",
+        kind = "progress",
+        find = "jdtls",
+      },
+      opts = { skip = true },
+    })
+
     -- Markdown interaktiv
     vim.api.nvim_create_autocmd("FileType", {
       pattern = "markdown",
