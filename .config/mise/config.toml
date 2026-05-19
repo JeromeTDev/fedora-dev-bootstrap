@@ -1,6 +1,6 @@
 [tools]
 java = "26"
-node = "25"
+node = "26"
 python = "3.14"
 rust = "latest"
 uv = "latest"

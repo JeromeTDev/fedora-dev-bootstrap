@@ -1,27 +1,24 @@
 font-size = 14
-background-blur-radius = 20
-mouse-hide-while-typing = true
-window-decoration = false
-language= de
+font-family = "JetBrainsMono Nerd Font"
+font-thicken = true
+
+
+# Performance & Display
 background-blur = true
+background-blur-radius = 20
 background-opacity = 0.96
 
+# UI & Style
 theme = "Gruvbox Dark"
-
-# Verhindert, dass Ghostty das Padding mit einer festen Farbe füllt
+window-decoration = false
+window-padding-x = 5 
+window-padding-y = 0 
 window-padding-color = background
-
-# Verteilt den restlichen Platz (den "nicht-transparenten" Streifen) 
-# gleichmäßig, sodass er oben und unten kaum noch auffällt
 window-padding-balance = true
+mouse-hide-while-typing = true
 
-# Minimiert das Padding auf 0, damit das Raster so nah wie möglich 
-# an den Rand rückt
-# window-padding-x = 0
-window-padding-y = 0
-
-
-font-family = JetBrainsMono Nerd Font
-
-font-thicken = true
+# Interaction
+confirm-close-surface = false
+copy-on-select = true
+cursor-style-blink = true
 command = tmux

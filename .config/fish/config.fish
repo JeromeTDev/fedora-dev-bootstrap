@@ -45,6 +45,9 @@ alias v="nvim" # Neovim als Standard-Editor
 alias lg="lazygit" # Git im Terminal
 alias fast="fastfetch"
 
+alias ld="lazydocker"
+alias dcd="docker compose -f docker/compose.yml"
+
 alias dot="cd ~/.dotfiles"
 alias c="clear"
 

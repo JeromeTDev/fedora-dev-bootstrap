@@ -8,8 +8,6 @@ edit = [{ run = 'nvim %s', block = true, for = "unix" }]
 
 pdf = [{ run = 'zathura %s', orphan = true, for = "unix" }]
 
-md_preview = [{ run = 'glow %s', block = true, for = "unix" }]
-
 image = [{ run = 'imv %s', orphan = true, for = "unix" }]
 
 video = [{ run = 'mpv %s', orphan = true, for = "unix" }]
@@ -25,7 +23,7 @@ rules = [
   { url = "*.pdf", use = "pdf" },
 
   # Markdown im Preview
-  { url = "*.md", use = "md_preview" },
+  # { url = "*.md", use = "md_preview" },
 
   # Medien extern
   { url = "*.png", use = "image" },
