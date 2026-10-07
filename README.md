@@ -6,6 +6,23 @@
 > **Status: Wird erweitert** – Das Projekt wird gerade auf ein **Ansible-basiertes Setup** umgebaut.  
 > Das originale Bash-Script findet sich unter [`legacy/feddev-setup.sh`](legacy/feddev-setup.sh) und kann weiterhin genutzt werden.
 
+```
+status:
+  roles:
+    - base
+    - packages
+    # - dnf
+    # - copr
+    # - btrfs
+    # - snapper
+    # - fonts
+    # - flatpak
+    # - mise
+    # - cache_redirects
+    # - shell
+    # - dotfiles
+```
+
 A **fully automated Fedora developer bootstrap** for power users who want  
 a **clean Btrfs layout**, **lean snapshots**, and a **ready-to-use dev environment**  
 without manual post-install fiddling.

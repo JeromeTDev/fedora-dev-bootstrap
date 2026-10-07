@@ -1,0 +1,83 @@
+---
+dev_packages:
+  - git
+  - gh
+  - make
+  - cmake
+  - gcc
+  - clang
+  - python3
+  - fish
+  - kitty
+  - neovim
+  - wl-clipboard
+  - fzf
+  - tree
+  - ripgrep
+  - btop
+  - zoxide
+  - fd-find
+  - ncdu
+  - stow
+  - jq
+  - zathura
+  - zathura-pdf-mupdf
+  - snapper
+  - python3-dnf-plugin-snapper
+  - btrfs-assistant
+  - poppler-utils
+  - ImageMagick
+  - mediainfo
+  - perl-Image-ExifTool
+  - xournalpp
+  - texlive-scheme-full
+  - luarocks
+  - keepassxc
+  - gnome-extensions-app
+  - fastfetch
+
+copr_repositories:
+  - atim/lazygit
+  - atim/starship
+  - lihaohong/yazi
+
+copr_packages:
+  - lazygit
+  - starship
+  - yazi
+
+flatpak_apps:
+  - com.mattjakeman.ExtensionManager
+  - com.teamspeak.TeamSpeak
+  - com.discordapp.Discord
+  - org.cryptomator.Cryptomator
+  - md.obsidian.Obsidian
+
+dnf_settings:
+  - key: fastestmirror
+    value: "True"
+
+  - key: max_parallel_downloads
+    value: "15"
+
+  - key: defaultyes
+    value: "True"
+
+  - key: install_weak_deps
+    value: "False"
+
+  - key: clean_requirements_on_remove
+    value: "True"
+
+  - key: plugins
+    value: "1"
+
+nerd_font_name: JetBrainsMono
+
+cache_redirects:
+  - .npm
+  - .cargo
+  - .node-gyp
+
+mise_tools:
+  - "github:anomalyco/opencode"

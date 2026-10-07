@@ -1,0 +1,6 @@
+---
+- name: Upgrade installed packages
+  become: true
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest

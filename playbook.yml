@@ -1,0 +1,17 @@
+---
+- name: Configure Fedora development workstation
+  hosts: fedora
+
+  roles:
+    - base
+    - packages
+    # - dnf
+    # - copr
+    # - btrfs
+    # - snapper
+    # - fonts
+    # - flatpak
+    # - mise
+    # - cache_redirects
+    # - shell
+    # - dotfiles

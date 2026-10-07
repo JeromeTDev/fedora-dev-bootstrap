@@ -1,0 +1,6 @@
+---
+- name: Install development packages
+  become: true
+  ansible.builtin.dnf:
+    name: "{{ dev_packages }}"
+    state: present
