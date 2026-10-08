@@ -113,9 +113,8 @@ Host/User werden in der lokalen `inventory.ini` gesetzt (siehe
 ### Shell, Editor & Terminal
 
 - `fish` (Default-Shell), `starship`-Prompt
-- `kitty` als Terminal, LazyVim (Neovim)
-- Configs für `ghostty` und `tmux` (inkl. TPM-Plugins) – die Pakete werden
-  vorausgesetzt und **nicht** vom Script installiert
+- `kitty` und `ghostty` als Terminals
+- LazyVim (Neovim), `tmux` (mit TPM-Plugins)
 
 ### Desktop (Sway)
 
