@@ -25,6 +25,7 @@ und ist aktuell der einzige **vollständige** Installationsweg.
 | ------------------ | ------ |
 | `base`             | ✅ fertig |
 | `packages`         | ✅ fertig |
+| `sway`             | ✅ fertig (nur wenn Sway vorhanden) |
 | `dnf`              | 🚧 geplant |
 | `copr`             | 🚧 geplant |
 | `btrfs`            | 🚧 geplant |
@@ -118,12 +119,15 @@ Host/User werden in der lokalen `inventory.ini` gesetzt (siehe
 
 ### Desktop (Sway)
 
-Das Script **installiert keine** Desktop-Pakete; die Configs für
-`sway`, `waybar`, `rofi`, `mako`, `swaybg`, `swayidle`, `swaylock`, `grim`,
-`slurp`, `wl-clipboard` und `xdg-desktop-portal-wlr`/`-gtk` werden nur deployt.
+Die Sway-Configs (`sway`, `waybar`, `rofi`, `mako`, `swaybg`, …) werden per Stow
+deployt; die Desktop-Pakete kommen i. d. R. vom **Fedora Sway Spin**.
 
-> Ideal passend zum **Fedora Sway Spin** (Pakete bereits vorhanden). Das
-> Sway-Config-Format ist zu **SwayFX** (Drop-in-Fork) kompatibel.
+Die Ansible-Rolle `sway` läuft **nur, wenn Sway installiert ist**, und
+- installiert `rofi` + `mako` (im Spin nicht enthalten),
+- ersetzt `sway` durch `swayfx` (SwayFX, `Provides: sway`).
+
+> SwayFX ist ein Drop-in-Fork mit gleichem Config-Format. Das Bash-Script
+> installiert **keine** Desktop-Pakete.
 
 ### CLI-Utilities
 

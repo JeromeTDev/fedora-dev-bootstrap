@@ -2,9 +2,17 @@
 - name: Configure Fedora development workstation
   hosts: fedora
 
+  pre_tasks:
+    - name: Paket-Fakten sammeln (fuer bedingte Rollen)
+      ansible.builtin.package_facts:
+        manager: auto
+
   roles:
     - base
     - packages
+    # Nur auf Systemen mit Sway (z. B. Fedora Sway Spin / SwayFX)
+    - role: sway
+      when: "'sway' in ansible_facts.packages or 'swayfx' in ansible_facts.packages"
     # - dnf
     # - copr
     # - btrfs

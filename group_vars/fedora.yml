@@ -35,6 +35,10 @@ dev_packages:
   - keepassxc
   - gnome-extensions-app
   - fastfetch
+  # Terminal/Multiplexer (allgemein)
+  - ghostty
+  - tmux
+  # rofi/mako installiert die sway-Rolle (nur auf Sway-Systemen)
 
 copr_repositories:
   - atim/lazygit
