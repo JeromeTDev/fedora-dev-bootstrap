@@ -35,7 +35,7 @@ und ist aktuell der einzige **vollständige** Installationsweg.
 | `mise`             | 🚧 geplant |
 | `cache_redirects`  | 🚧 geplant |
 | `shell`            | 🚧 geplant |
-| `dotfiles`         | 🚧 geplant |
+| `dotfiles`         | ✅ fertig |
 
 ---
 
@@ -153,17 +153,35 @@ Die Ansible-Rolle `sway` läuft **nur, wenn Sway installiert ist**, und
 
 ## Dotfiles
 
-Alle geteilten Configs liegen im Unterordner [`dotfiles/.config/`](dotfiles/.config)
-und werden per Stow nach `~/.config` verlinkt:
+Alle geteilten Configs liegen im Unterordner [`dotfiles/.config/`](dotfiles/.config).
+Die gleichnamige Ansible-Rolle bringt sie nach `~/.dotfiles` und verlinkt sie von
+dort per Stow nach `$HOME`:
 
-```bash
-# Variante A: aus dem Repo-Root
-stow --adopt -t "$HOME" dotfiles
-
-# Variante B: direkt im dotfiles-Ordner
-cd dotfiles && stow --adopt -t "$HOME" .
+```
+dotfiles/  ->  ~/.dotfiles  --stow-->  ~/.config/...
 ```
 
+**Eigene/private Dotfiles nutzen:** einfach die Rolle auf das eigene Repo zeigen
+lassen (in `group_vars/all.yml`, `host_vars` oder per `-e`):
+
+```yaml
+# group_vars/all.yml
+dotfiles_repo: "git@github.com:du/private-dotfiles.git"   # statt eingebaute Configs
+dotfiles_version: "main"                                  # optional (Default main)
+```
+
+| Variable          | Default                                  | Bedeutung                          |
+| ----------------- | ---------------------------------------- | ---------------------------------- |
+| `dotfiles_repo`   | `""`                                     | Git-URL; leer = eingebaute Configs |
+| `dotfiles_version`| `main`                                   | Branch/Tag des Repos               |
+| `dotfiles_dir`    | `{{ ansible_env.HOME }}/.dotfiles`       | Zielverzeichnis                    |
+| `dotfiles_src`    | `{{ playbook_dir }}/dotfiles`            | eingebaute Quelle                  |
+
+Ablauf: `dotfiles_repo` gesetzt → Repo klonen/aktualisieren, sonst eingebaute
+Configs kopieren; danach `stow --adopt` aus `~/.dotfiles`. **Kein** Mischen beider
+Quellen im selben Ordner.
+
+> Manuell (ohne Ansible): `cd dotfiles && stow --adopt -t "$HOME" .`
 > Nicht `stow .` auf das **Repo-Root** anwenden – sonst landen `roles/`,
 > `playbook.yml`, `inventory.ini` usw. im Home-Verzeichnis.
 

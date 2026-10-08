@@ -22,4 +22,4 @@
     # - mise
     # - cache_redirects
     # - shell
-    # - dotfiles
+    - dotfiles

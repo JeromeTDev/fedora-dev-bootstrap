@@ -1,0 +1,29 @@
+---
+# Kein "become": Stow muss als der Ziel-User nach $HOME linken.
+
+- name: Zielverzeichnis fuer Dotfiles anlegen
+  ansible.builtin.file:
+    path: "{{ dotfiles_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Dotfiles aus Git holen/aktualisieren
+  ansible.builtin.git:
+    repo: "{{ dotfiles_repo }}"
+    dest: "{{ dotfiles_dir }}"
+    version: "{{ dotfiles_version }}"
+    update: true
+  when: dotfiles_repo | length > 0
+
+- name: Eingebaute Dotfiles kopieren
+  ansible.builtin.copy:
+    src: "{{ dotfiles_src }}/"
+    dest: "{{ dotfiles_dir }}/"
+  when: dotfiles_repo | length == 0
+
+- name: Dotfiles nach $HOME stowen
+  ansible.builtin.command:
+    cmd: stow -v --adopt -t "{{ ansible_env.HOME }}" .
+    chdir: "{{ dotfiles_dir }}"
+  register: dotfiles_stow
+  changed_when: "'LINK:' in dotfiles_stow.stdout or 'UNLINK:' in dotfiles_stow.stdout"

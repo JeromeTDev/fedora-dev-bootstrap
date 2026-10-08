@@ -1,0 +1,8 @@
+---
+# Quelle der Dotfiles (siehe README):
+#   dotfiles_repo gesetzt (Git-URL) -> Repo nach dotfiles_dir klonen/aktualisieren
+#   dotfiles_repo leer              -> eingebaute Configs aus dotfiles_src kopieren
+dotfiles_repo: ""
+dotfiles_version: "main"
+dotfiles_dir: "{{ ansible_env.HOME }}/.dotfiles"
+dotfiles_src: "{{ playbook_dir }}/dotfiles"
