@@ -1,0 +1,21 @@
+[[mgr.prepend_keymap]]
+on = ["g", "t"]
+run = "cd ~/.local/share/Cryptomator/mnt/Tresor_Dokumente"
+desc = "Tresor"
+
+[[mgr.prepend_keymap]]
+on = ["g", "d"]
+run = 'cd ~/dev'
+
+
+##Arbeit##
+#
+[[mgr.prepend_keymap]]
+on = ["g", "o"]
+run = 'cd "/mnt/c/Users/tenggj/OneDrive - msg systems ag"'
+desc = "OneDrive"
+
+[[mgr.prepend_keymap]]
+on = ["g", "s"]
+run = 'cd "/mnt/c/Users/tenggj/msg systems ag"'
+desc = "Sharepoint"

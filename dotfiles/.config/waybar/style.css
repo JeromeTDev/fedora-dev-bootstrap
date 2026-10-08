@@ -1,0 +1,174 @@
+/* ===============================
+   Everforest Dark - Waybar
+   =============================== */
+
+@define-color bg0       #1e2326;
+@define-color bg1       #343f44;
+@define-color bg2       #434f55;
+
+@define-color fg0       #d3c6aa;
+@define-color fg1       #d3c6aa;
+@define-color gray      #9da9a0;
+
+@define-color red       #e67e80;
+@define-color green     #a7c080;
+@define-color yellow    #dbbc7f;
+@define-color blue      #7fbbb3;
+@define-color purple    #d699b6;
+@define-color aqua      #83c092;
+@define-color orange    #e69875;
+
+/* ---------- General ---------- */
+
+* {
+  font-family: "JetBrainsMono Nerd Font";
+  font-size: 13px;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+}
+
+/* ---------- Entire Bar ---------- */
+
+window#waybar {
+  background: rgba(30, 35, 38, 0.82);
+  color: @fg1;
+}
+
+/* ---------- Workspaces ---------- */
+
+#workspaces {
+  background: @bg1;
+  margin: 5px 4px;
+  padding: 2px 4px;
+  border-radius: 10px;
+}
+
+#workspaces button {
+  padding: 0 8px;
+  margin: 1px 2px;
+
+  color: @gray;
+  background: transparent;
+
+  border-radius: 7px;
+}
+
+#workspaces button:hover {
+  background: @bg2;
+  color: @fg0;
+}
+
+#workspaces button.focused {
+  background: @yellow;
+  color: @bg0;
+  font-weight: bold;
+}
+
+#workspaces button.urgent {
+  background: @red;
+  color: @bg0;
+}
+
+/* ---------- Clock ---------- */
+
+#clock {
+  background: @bg1;
+  color: @yellow;
+
+  margin: 5px 3px;
+  padding: 0 12px;
+
+  border-radius: 10px;
+
+  font-weight: bold;
+}
+
+/* ---------- Right modules ---------- */
+
+#cpu,
+#memory,
+#network,
+#pulseaudio,
+#pulseaudio#microphone,
+#bluetooth,
+#tray,
+#custom-power {
+  background: @bg1;
+
+  margin: 5px 2px;
+  padding: 0 8px;
+
+  border-radius: 10px;
+  min-width: 0;
+}
+
+/* Individual Gruvbox colors */
+
+#cpu {
+  color: @purple;
+}
+
+#memory {
+  color: @aqua;
+}
+
+#network {
+  color: @green;
+}
+
+#pulseaudio {
+  color: @blue;
+}
+
+#pulseaudio.muted {
+  color: @gray;
+}
+
+#pulseaudio#microphone {
+  color: @green;
+}
+
+/* muted = sink, source-muted = mikrofon - beide abdecken + beide GTK-Schreibweisen */
+#pulseaudio#microphone.muted,
+#pulseaudio#microphone.source-muted,
+#pulseaudio.microphone.muted,
+#pulseaudio.microphone.source-muted,
+label#pulseaudio.microphone.muted,
+label#pulseaudio.microphone.source-muted {
+  color: @gray;
+}
+
+#bluetooth {
+  color: @blue;
+}
+
+#bluetooth.disabled {
+  color: @gray;
+}
+
+#bluetooth.off {
+  color: @gray;
+}
+
+/* ---------- Tray ---------- */
+
+#tray {
+  color: @fg1;
+}
+
+/* ---------- Power ---------- */
+
+#custom-power {
+  color: @red;
+
+  margin-right: 6px;
+  padding: 0 11px;
+
+  font-size: 14px;
+}
+
+#custom-power:hover {
+  background: @red;
+  color: @bg0;
+}

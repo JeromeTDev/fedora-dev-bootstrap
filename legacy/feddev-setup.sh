@@ -105,16 +105,32 @@ setup_flatpak() {
 }
 
 deploy_dotfiles() {
-  DOTFILES_REPO="https://github.com/JeromeTDev/.dotfiles.git"
-  DOTFILES_DIR="$HOME/.dotfiles"
   log_info "Deploy Dotfiles..."
-  if [ ! -d "$DOTFILES_DIR" ]; then
-    git clone "$DOTFILES_REPO" "$DOTFILES_DIR" || log_warn "Dotfiles-Repo konnte nicht geklont werden."
-  else
-    cd "$DOTFILES_DIR" && git pull --rebase || log_warn "Dotfiles-Repo konnte nicht aktualisiert werden."
+  # Repo-Root: Checkout, aus dem das Script gestartet wurde (One-Liner: Clone).
+  local repo_dir
+  repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)"
+  if [ -z "$repo_dir" ] || [ ! -d "$repo_dir/dotfiles/.config" ]; then
+    repo_dir="$HOME/.local/share/fedora-dev-bootstrap"
+    if [ ! -d "$repo_dir/.git" ]; then
+      git clone "https://github.com/JeromeTDev/fedora-dev-bootstrap.git" "$repo_dir" \
+        || { log_warn "Dotfiles-Repo konnte nicht geklont werden."; return; }
+    fi
   fi
-  cd "$DOTFILES_DIR" || return
-  stow --adopt . || log_warn "Fehler beim Setzen der Symlinks."
+  # Package "dotfiles" nach ~ stowen (enthaelt .config/).
+  # In dotfiles/ geht auch `stow --adopt -t "$HOME" .`, da das Package dort liegt.
+  (cd "$repo_dir" && stow --adopt -t "$HOME" dotfiles) \
+    || log_warn "Fehler beim Setzen der Symlinks."
+
+  # tmux-Plugins liegen nicht im Repo (siehe .gitignore) und werden
+  # beim ersten Start von TPM nach ~/.tmux/plugins installiert.
+  local tpm_dir="$HOME/.tmux/plugins/tpm"
+  if [ ! -d "$tpm_dir" ]; then
+    git clone --depth 1 https://github.com/tmux-plugins/tpm "$tpm_dir" \
+      || log_warn "TPM konnte nicht geklont werden."
+  fi
+  if [ -x "$tpm_dir/bin/install_plugins" ]; then
+    "$tpm_dir/bin/install_plugins" || log_warn "tmux-Plugins konnten nicht installiert werden."
+  fi
 }
 
 configure_system() {

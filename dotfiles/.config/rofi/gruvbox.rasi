@@ -1,0 +1,95 @@
+configuration {
+    modi: "drun,run";
+    show-icons: true;
+    drun-display-format: "{name}";
+    display-drun: "Apps";
+}
+* {
+    bg:      #282828d9;
+    bg-alt:  #3c3836de;
+    fg:      #ebdbb2;
+    fg-dim:  #928374;
+    green:   #b8bb26;
+    yellow:  #fabd2f;
+    red:     #fb4934;
+
+    font: "JetBrainsMono Nerd Font 13";
+
+    background-color: transparent;
+    text-color: @fg;
+}
+
+window {
+    width: 15%;
+    border: 2px;
+    border-color: @yellow;
+    border-radius: 12px;
+    background-color: @bg;
+    padding: 12px;
+    transparency: "real";
+}
+
+mainbox {
+    spacing: 12px;
+    background-color: transparent;
+}
+
+inputbar {
+    background-color: @bg-alt;
+    border-radius: 10px;
+    padding: 10px 12px;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    background-color: transparent;
+    text-color: @yellow;
+    padding: 0 10px 0 0;
+}
+
+entry {
+    background-color: transparent;
+    text-color: @fg;
+    placeholder: "Suchen …";
+    placeholder-color: @fg-dim;
+}
+
+listview {
+    lines: 8;
+    columns: 1;
+    spacing: 6px;
+    fixed-height: false;
+    background-color: transparent;
+}
+
+element {
+    padding: 9px 12px;
+    border-radius: 9px;
+    background-color: transparent;
+    text-color: @fg;
+}
+
+element normal.normal,
+element alternate.normal {
+    background-color: transparent;
+    text-color: @fg;
+}
+
+element selected.normal,
+element selected.alternate {
+    background-color: #504945e6;
+    text-color: @fg;
+}
+
+element-icon {
+    background-color: transparent;
+    size: 24px;
+    margin: 0 10px 0 0;
+    text-color: @green;
+}
+
+element-text {
+    background-color: transparent;
+    text-color: inherit;
+    vertical-align: 0.5;
+}

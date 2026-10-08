@@ -1,0 +1,202 @@
+# vim:fileencoding=utf-8:foldmethod=marker
+
+
+# ─────────────────────────────
+# : Manager
+# ─────────────────────────────
+
+[mgr]
+cwd = { fg = "#83a598" }
+
+find_keyword = { fg = "#b8bb26", bold = true, italic = true, underline = true }
+find_position = { fg = "#fe8019", bg = "reset", bold = true, italic = true }
+
+symlink_target = { italic = true }
+
+marker_copied = { fg = "#8ec07c" }
+marker_cut = { fg = "#d3869b" }
+marker_marked = { fg = "#83a598" }
+marker_selected = { fg = "#fbf1c7" }
+marker_symbol = "●"
+
+count_copied = { fg = "#282828", bg = "#8ec07c" }
+count_cut = { fg = "#282828", bg = "#d3869b" }
+count_selected = { fg = "#282828", bg = "#fbf1c7" }
+
+border_symbol = "│"
+border_style = { fg = "#665c54" }
+
+
+# ─────────────────────────────
+# : Tabs
+# ─────────────────────────────
+
+[tabs]
+active = { fg = "#282828", bg = "#a89984" }
+inactive = { fg = "#a89984", bg = "#504945" }
+
+
+# ─────────────────────────────
+# : Mode
+# ─────────────────────────────
+
+[mode]
+normal_main = { fg = "#282828", bg = "#a89984", bold = true }
+normal_alt = { fg = "#a89984", bg = "#504945" }
+
+select_main = { fg = "#282828", bg = "#fe8019", bold = true }
+select_alt = { fg = "#a89984", bg = "#504945" }
+
+unset_main = { fg = "#282828", bg = "#b8bb26", bold = true }
+unset_alt = { fg = "#a89984", bg = "#504945" }
+
+
+# ─────────────────────────────
+# : Indicator
+# ─────────────────────────────
+
+[indicator]
+parent = { reversed = true }
+current = { reversed = true }
+preview = { underline = true }
+padding = { open = "█", close = "█" }
+
+
+# ─────────────────────────────
+# : Status
+# ─────────────────────────────
+
+[status]
+sep_left = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+
+perm_sep = { fg = "#665c54" }
+perm_type = { fg = "#504945" }
+perm_read = { fg = "#b8bb26" }
+perm_write = { fg = "#fb4934" }
+perm_exec = { fg = "#b8bb26" }
+
+progress_label = { fg = "#ebdbb2", bold = true }
+progress_normal = { fg = "#504945", bg = "#3c3836" }
+progress_error = { fg = "#fb4934", bg = "#3c3836" }
+
+
+# ─────────────────────────────
+# : Which-key
+# ─────────────────────────────
+
+[which]
+cols = 3
+mask = { bg = "#3c3836" }
+cand = { fg = "#83a598" }
+rest = { fg = "#928374" }
+desc = { fg = "#fe8019" }
+separator = "  "
+separator_style = { fg = "#504945" }
+
+
+# ─────────────────────────────
+# : Confirmation
+# ─────────────────────────────
+
+[confirm]
+border = { fg = "#a89984" }
+title = { fg = "#83a598" }
+body = { fg = "#fbf1c7" }
+list = { fg = "#ebdbb2" }
+
+btn_yes = { reversed = true, fg = "#ebdbb2" }
+btn_no = {}
+
+btn_labels = ["  [Y]es  ", "  (N)o  "]
+
+
+# ─────────────────────────────
+# : Notifications
+# ─────────────────────────────
+
+[notify]
+title_info = { fg = "#8ec07c" }
+title_warn = { fg = "#fabd2f" }
+title_error = { fg = "#d3869b" }
+
+
+# ─────────────────────────────
+# : Picker
+# ─────────────────────────────
+
+[pick]
+border = { fg = "#458588" }
+active = { fg = "#d3869b", bold = true }
+inactive = {}
+
+
+# ─────────────────────────────
+# : Input
+# ─────────────────────────────
+
+[input]
+border = { fg = "#ebdbb2" }
+selected = { reversed = true }
+
+
+# ─────────────────────────────
+# : Completion
+# ─────────────────────────────
+
+[cmp]
+border = { fg = "#a89984" }
+active = { fg = "#83a598", reversed = true }
+inactive = { fg = "#ebdbb2" }
+
+
+# ─────────────────────────────
+# : Tasks
+# ─────────────────────────────
+
+[tasks]
+border = { fg = "#504945" }
+hovered = { underline = true }
+
+
+# ─────────────────────────────
+# : Help
+# ─────────────────────────────
+
+[help]
+on = { fg = "#83a598" }
+run = { fg = "#d3869b" }
+hovered = { reversed = true, bold = true }
+footer = { fg = "#3c3836", bg = "#a89984" }
+
+
+# ─────────────────────────────
+# : Filetype rules (FIXED 2026)
+# ─────────────────────────────
+
+[filetype]
+rules = [
+
+  # Images
+  { mime = "image/*", fg = "#d3869b" },
+
+  # Audio / Video
+  { mime = "audio/*", fg = "#fabd2f" },
+  { mime = "video/*", fg = "#fabd2f" },
+
+  # Archives
+  { mime = "application/*zip", fg = "#fb4934" },
+  { mime = "application/x-{tar,bzip*,7z-compressed,xz,rar}", fg = "#fb4934" },
+
+  # Documents
+  { mime = "application/{pdf,doc,rtf,vnd.*}", fg = "#689d6a" },
+
+  # Code / Text fallback
+  { mime = "text/*", fg = "#ebdbb2" },
+
+  # Directories (IMPORTANT FIX)
+  { mime = "inode/directory", fg = "#83a598" },
+
+  # Default fallback (IMPORTANT FIX)
+  { mime = "*/*", fg = "#ebdbb2" },
+]

@@ -1,0 +1,225 @@
+#!/usr/bin/env bash
+# Bluetooth-Menü für Rofi (Basierend auf nickclyde/rofi-bluetooth)
+# Quelle: https://github.com/nickclyde/rofi-bluetooth
+# Angepasst: Gruvbox-Rofi-Theme, dynamische Breite, Gruvbox-Icons,
+# Sanitized bluetoothctl-Aufrufe, per-Gerät-Untermenü (Verbinden/Paaren/Löschen/Trust).
+
+set -uo pipefail
+
+# Konstanten
+divider="---------"
+goback="Back"
+ICONS="$HOME/.config/rofi/icons"
+ICON_CONNECTED="$ICONS/check-green.png"
+ICON_PAIRED="$ICONS/bt-paired-green.png"
+ICON_NEW="$ICONS/bt-new-green.png"
+ROFI_CONFIG="$HOME/.config/rofi/everforest.rasi"
+
+# Rofi-Breite dynamisch an Textlänge anpassen (wie andere Waybar-Skripte)
+em_width() {
+  awk -v m="$1" 'BEGIN{ w=m*0.48+6; if(w<12) w=12; if(w>28) w=28; printf "%.0f", w }'
+}
+
+# Controller-Status prüfen
+flag_on() {
+  timeout 5 bluetoothctl show 2>/dev/null | grep -q "$1"
+}
+
+power_on() {
+  flag_on "Powered: yes"
+}
+
+scan_on() {
+  flag_on "Discovering: yes"
+}
+
+# Controller an/aus
+toggle_power() {
+  if power_on; then
+    timeout 5 bluetoothctl power off >/dev/null
+  else
+    if rfkill list bluetooth 2>/dev/null | grep -q 'blocked: yes'; then
+      rfkill unblock bluetooth 2>/dev/null && sleep 3
+    fi
+    timeout 5 bluetoothctl power on >/dev/null
+  fi
+  show_menu
+}
+
+# Scanning an/aus (mit --timeout läuft der Scan begrenzt, ohne Client zu hängen)
+toggle_scan() {
+  if scan_on; then
+    pkill -f "bluetoothctl --timeout 5 scan on" 2>/dev/null || true
+    timeout 5 bluetoothctl scan off >/dev/null 2>&1 || true
+  else
+    bluetoothctl --timeout 5 scan on >/tmp/bt-scan.log 2>&1
+  fi
+  show_menu
+}
+
+toggle_pairable() {
+  if flag_on "Pairable: yes"; then
+    timeout 5 bluetoothctl pairable off >/dev/null
+  else
+    timeout 5 bluetoothctl pairable on >/dev/null
+  fi
+  show_menu
+}
+
+toggle_discoverable() {
+  if flag_on "Discoverable: yes"; then
+    timeout 5 bluetoothctl discoverable off >/dev/null
+  else
+    timeout 5 bluetoothctl discoverable on >/dev/null
+  fi
+  show_menu
+}
+
+# Gerätestatus
+device_connected() {
+  timeout 5 bluetoothctl info "$1" 2>/dev/null | grep -q "Connected: yes"
+}
+
+device_paired() {
+  timeout 5 bluetoothctl info "$1" 2>/dev/null | grep -q "Paired: yes"
+}
+
+device_trusted() {
+  timeout 5 bluetoothctl info "$1" 2>/dev/null | grep -q "Trusted: yes"
+}
+
+toggle_connection() {
+  if device_connected "$1"; then
+    timeout 10 bluetoothctl disconnect "$1" >/dev/null 2>&1 || true
+  else
+    timeout 20 bluetoothctl connect "$1" >/dev/null 2>&1 || true
+  fi
+  show_menu
+}
+
+# Toggle paired state (Paired: yes -> bluetoothctl remove = Gerät einzeln löschen)
+toggle_paired() {
+  if device_paired "$1"; then
+    timeout 10 bluetoothctl remove "$1" >/dev/null 2>&1 || true
+  else
+    timeout 30 bluetoothctl pair "$1" >/dev/null 2>&1 || true
+  fi
+  show_menu
+}
+
+toggle_trust() {
+  if device_trusted "$1"; then
+    timeout 5 bluetoothctl untrust "$1" >/dev/null 2>&1 || true
+  else
+    timeout 5 bluetoothctl trust "$1" >/dev/null 2>&1 || true
+  fi
+  show_menu
+}
+
+# Gerätezeilen mit Gruvbox-Icons (rofi-\0icon\x1f-Markup)
+device_rows() {
+  while IFS= read -r line; do
+    local mac name icon
+    mac=$(echo "$line" | awk '{print $2}')
+    name=$(echo "$line" | cut -d' ' -f3-)
+    [[ -z "$mac" ]] && continue
+    if device_connected "$mac"; then
+      icon="$ICON_CONNECTED"
+    elif device_paired "$mac"; then
+      icon="$ICON_PAIRED"
+    else
+      icon="$ICON_NEW"
+    fi
+    printf '%s\0icon\x1f%s\n' "$name" "$icon"
+  done < <(timeout 5 bluetoothctl devices 2>/dev/null | grep Device)
+}
+
+# Untermenü für ein einzelnes Gerät
+device_menu() {
+  local device=$1
+  local device_name mac connected paired trusted c_icon p_icon t_icon w
+  device_name=$(echo "$device" | cut -d' ' -f3-)
+  mac=$(echo "$device" | awk '{print $2}')
+
+  if device_connected "$mac"; then
+    connected="Connected: yes"; c_icon="$ICON_CONNECTED"
+  else
+    connected="Connected: no"; c_icon="$ICON_NEW"
+  fi
+  if device_paired "$mac"; then
+    paired="Paired: yes"; p_icon="$ICON_CONNECTED"
+  else
+    paired="Paired: no"; p_icon="$ICON_NEW"
+  fi
+  if device_trusted "$mac"; then
+    trusted="Trusted: yes"; t_icon="$ICON_CONNECTED"
+  else
+    trusted="Trusted: no"; t_icon="$ICON_NEW"
+  fi
+
+  w=$(em_width "${#device_name}")
+
+  chosen="$({
+    printf '%s\0icon\x1f%s\n' "$connected" "$c_icon"
+    printf '%s\0icon\x1f%s\n' "$paired" "$p_icon"
+    printf '%s\0icon\x1f%s\n' "$trusted" "$t_icon"
+    printf '%s\n%s\nExit\n' "$divider" "$goback"
+  } | rofi -dmenu -i -config "$ROFI_CONFIG" -theme-str "window {width: ${w}em;}" -p "$device_name")"
+
+  case "$chosen" in
+    "" | "$divider") return ;;
+    "$connected") toggle_connection "$mac" ;;
+    "$paired") toggle_paired "$mac" ;;
+    "$trusted") toggle_trust "$mac" ;;
+    "$goback") show_menu ;;
+  esac
+}
+
+# Hauptmenü
+show_menu() {
+  local power scan pairable discoverable maxlen w chosen
+  if power_on; then
+    power="Power: on"
+    scan="Scan: on";  scan_on      || scan="Scan: off"
+    pairable="Pairable: on"; flag_on "Pairable: yes"   || pairable="Pairable: off"
+    discoverable="Discoverable: on"; flag_on "Discoverable: yes" || discoverable="Discoverable: off"
+  else
+    power="Power: off"
+    scan=""
+    pairable=""
+    discoverable=""
+  fi
+
+  # Breite an längsten Gerätenamen anpassen
+  maxlen=12
+  while IFS= read -r line; do
+    local n
+    n=$(echo "$line" | cut -d' ' -f3-)
+    [[ ${#n} -gt $maxlen ]] && maxlen=${#n}
+  done < <(timeout 5 bluetoothctl devices 2>/dev/null | grep Device)
+  w=$(em_width "$maxlen")
+
+  chosen="$({
+    device_rows
+    if power_on; then
+      printf '%s\n%s\n%s\n%s\n%s\nExit\n' "$divider" "$power" "$scan" "$pairable" "$discoverable"
+    else
+      printf '%s\nExit\n' "$power"
+    fi
+  } | rofi -dmenu -i -config "$ROFI_CONFIG" -theme-str "window {width: ${w}em;}" -p "Bluetooth")"
+
+  case "$chosen" in
+    "" | "$divider") return ;;
+    "$power") toggle_power ;;
+    "$scan") toggle_scan ;;
+    "$discoverable") toggle_discoverable ;;
+    "$pairable") toggle_pairable ;;
+    *)
+      local device
+      device=$(timeout 5 bluetoothctl devices 2>/dev/null | grep "$chosen")
+      [[ -n "$device" ]] && device_menu "$device"
+      ;;
+  esac
+}
+
+show_menu

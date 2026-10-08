@@ -1,0 +1,183 @@
+# sway-Konfiguration
+# Referenz: man 5 sway
+
+### Variablen
+
+set $mod Mod4
+set $left h
+set $down j
+set $up k
+set $right l
+
+set $term ghostty
+set $browser brave-browser
+set $files ghostty -e yazi
+set $menu rofi -show drun -config ~/.config/rofi/everforest.rasi
+
+# Eigenes Wallpaper hier ablegen (sonst bleibt der Desktop grau)
+set $wallpaper $HOME/Pictures/wallpaper.png
+
+### Tastenkürzel
+
+# Apps
+bindsym $mod+Return exec $term
+bindsym $mod+d exec $menu
+bindsym $mod+Shift+b exec $browser
+bindsym $mod+Shift+f exec $files
+
+# Fenster schließen
+bindsym $mod+q kill
+
+# Fenster mit $mod + linker Maustaste ziehen, rechter Maustaste skalieren
+floating_modifier $mod normal
+
+# Sway-Konfiguration neu laden
+bindsym $mod+Shift+c reload
+
+# Sway beenden
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+
+# System
+bindsym $mod+Ctrl+l exec swaylock -i $wallpaper
+bindsym $mod+Ctrl+p exec ~/.config/waybar/scripts/powermenu.sh
+
+# Fokus bewegen
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+# Fokussiertes Fenster bewegen (zusätzlich Shift)
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+bindsym $mod+Shift+Left move left
+bindsym $mod+Shift+Down move down
+bindsym $mod+Shift+Up move up
+bindsym $mod+Shift+Right move right
+
+# Workspace wechseln
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+
+# Fenster zu Workspace verschieben
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
+
+# Layout
+bindsym $mod+b splith
+bindsym $mod+v splitv
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+bindsym $mod+f fullscreen
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+bindsym $mod+a focus parent
+
+# Scratchpad
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
+
+# Größe ändern (Pfeil-/HJKL-Tasten, Enter/Escape zum Beenden)
+mode "resize" {
+    bindsym $left resize shrink width 10px
+    bindsym $down resize grow height 10px
+    bindsym $up resize shrink height 10px
+    bindsym $right resize grow width 10px
+    bindsym Left resize shrink width 10px
+    bindsym Down resize grow height 10px
+    bindsym Up resize shrink height 10px
+    bindsym Right resize grow width 10px
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"
+
+### Eingabe
+
+input type:keyboard {
+    xkb_layout us
+    xkb_variant altgr-intl
+    repeat_delay 250
+    repeat_rate 40
+}
+
+### Monitor
+
+output DP-2 {
+    mode 3840x2160@100Hz
+    scale 1.5
+}
+
+# Standardwallpaper für weitere Ausgaben
+output * bg $wallpaper fill
+
+### Systemweite Konfiguration laden (/usr/share/sway/config.d, /etc/sway/config.d, ~/.config/sway/config.d)
+
+include '$(/usr/libexec/sway/layered-include "/usr/share/sway/config.d/*.conf" "/etc/sway/config.d/*.conf" "${XDG_CONFIG_HOME:-$HOME/.config}/sway/config.d/*.conf")'
+
+### Screenshots
+
+# In die Zwischenablage kopieren
+bindsym --no-warn Print exec grimshot copy area
+bindsym --no-warn $mod+Print exec grimshot copy screen
+
+# Speichern
+bindsym Shift+Print exec grimshot save area ~/Bilder/Screenshots/$(date +%Y%m%d-%H%M%S).png
+bindsym $mod+Shift+Print exec grimshot save screen ~/Bilder/Screenshots/$(date +%Y%m%d-%H%M%S).png
+
+### SwayFX
+
+corner_radius 12
+smart_corner_radius enable
+
+gaps inner 2
+gaps outer 3
+
+blur enable
+blur_xray disable
+blur_passes 3
+blur_radius 6
+blur_noise 0.05
+
+shadows enable
+shadows_on_csd enable
+shadow_blur_radius 20
+shadow_color #00000066
+shadow_inactive_color #00000033
+
+default_dim_inactive 0.05
+dim_inactive_colors.urgent #ff0000
+
+layer_effects "waybar" {
+    blur enable
+    blur_xray enable
+    blur_ignore_transparent enable
+    shadows enable
+    corner_radius 6
+}
+
+default_border pixel 2
+default_floating_border pixel 2

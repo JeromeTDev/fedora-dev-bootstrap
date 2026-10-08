@@ -1,0 +1,3 @@
+# Kopieren nach inventory.ini und anpassen.
+[fedora]
+fedora-dev ansible_host=CHANGE_ME ansible_user=CHANGE_ME

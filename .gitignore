@@ -1,0 +1,12 @@
+# Laufzeit-Artefakte (werden lokal erzeugt, nicht geteilt)
+dotfiles/.config/tmux/plugins/
+dotfiles/.config/fish/fish_variables
+dotfiles/.config/**/node_modules/
+
+# Editor/Backup-Kram
+*.bak
+*.save
+*.log
+
+# Lokale Ansible-Inventory (aus inventory.ini.example erzeugen)
+inventory.ini

@@ -1,0 +1,57 @@
+# ==============================
+# PROGRAMME DEFINIEREN
+# ==============================
+
+[opener]
+
+edit = [{ run = 'nvim %s', block = true, for = "unix" }]
+
+pdf = [{ run = 'zathura %s', orphan = true, for = "unix" }]
+
+image = [{ run = 'imv %s', orphan = true, for = "unix" }]
+
+video = [{ run = 'mpv %s', orphan = true, for = "unix" }]
+
+powerpoint = [{ run = 'flatpak run org.onlyoffice.desktopeditors %s', orphan = true, for = "unix" }]
+
+word = [{ run = 'flatpak run org.onlyoffice.desktopeditors %s', orphan = true, for = "unix" }]
+
+excel = [{ run = 'flatpak run org.onlyoffice.desktopeditors %s', orphan = true, for = "unix" }]
+
+
+# ==============================
+# REGELN: WAS WIRD WOMIT GEÖFFNET
+# ==============================
+
+[open]
+rules = [
+  # PDFs IMMER mit zathura
+  { url = "*.pdf", use = "pdf" },
+
+  # Markdown im Preview
+  # { url = "*.md", use = "md_preview" },
+
+  # Medien extern
+  { url = "*.png", use = "image" },
+  { url = "*.jpg", use = "image" },
+  { url = "*.jpeg", use = "image" },
+  { url = "*.gif", use = "image" },
+
+  { url = "*.mp4", use = "video" },
+  { url = "*.mkv", use = "video" },
+  { url = "*.webm", use = "video" },
+
+  { url = "*.ppt", use = "powerpoint" },
+  { url = "*.pptx", use = "powerpoint" },
+
+  { url = "*.doc", use = "word" },
+  { url = "*.docx", use = "word" },
+  { url = "*.odt", use = "word" },
+
+  { url = "*.xls", use = "excel" },
+  { url = "*.xlsx", use = "excel" },
+  { url = "*.ods", use = "excel" },
+
+  # ALLES ANDERE → nvim
+  { url = "*", use = "edit" },
+]

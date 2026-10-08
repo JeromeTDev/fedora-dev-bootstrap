@@ -1,0 +1,26 @@
+# Notifications automatisch verschwinden lassen
+default-timeout=6000
+ignore-timeout=1
+
+# Bis zu 5 Notifications sichtbar, Rest wandert in den History-Puffer
+max-visible=5
+max-history=20
+
+# Optik passend zum Gruvbox-Look
+font=JetBrainsMono Nerd Font 11
+background-color=#282828ee
+text-color=#ebdbb2
+border-color=#8ec07c
+border-size=2
+border-radius=10
+padding=10
+margin=8
+width=340
+icons=1
+max-icon-size=48
+markup=1
+layer=overlay
+anchor=top-right
+
+[urgency=critical]
+default-timeout=0
