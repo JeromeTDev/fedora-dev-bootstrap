@@ -21,21 +21,21 @@ Das Projekt wird auf ein **Ansible-basiertes Setup** umgebaut. Das vollständige
 Bash-Script liegt weiterhin unter [`legacy/feddev-setup.sh`](legacy/feddev-setup.sh)
 und ist aktuell der einzige **vollständige** Installationsweg.
 
-| Rolle              | Status |
-| ------------------ | ------ |
-| `base`             | ✅ fertig |
-| `packages`         | ✅ fertig |
-| `sway`             | ✅ fertig (nur wenn Sway vorhanden) |
-| `dnf`              | 🚧 geplant |
-| `copr`             | 🚧 geplant |
-| `btrfs`            | 🚧 geplant |
-| `snapper`          | 🚧 geplant |
-| `fonts`            | 🚧 geplant |
-| `flatpak`          | 🚧 geplant |
-| `mise`             | 🚧 geplant |
-| `cache_redirects`  | 🚧 geplant |
-| `shell`            | 🚧 geplant |
-| `dotfiles`         | ✅ fertig |
+| Rolle             | Status                              |
+| ----------------- | ----------------------------------- |
+| `base`            | ✅ fertig                           |
+| `packages`        | ✅ fertig                           |
+| `sway`            | ✅ fertig (nur wenn Sway vorhanden) |
+| `dnf`             | ✅ fertig                           |
+| `copr`            | ✅ fertig                           |
+| `btrfs`           | 🚧 geplant                          |
+| `snapper`         | 🚧 geplant                          |
+| `fonts`           | ✅ fertig                           |
+| `flatpak`         | 🚧 geplant                          |
+| `mise`            | 🚧 geplant                          |
+| `cache_redirects` | 🚧 geplant                          |
+| `shell`           | ✅ fertig                           |
+| `dotfiles`        | ✅ fertig                           |
 
 ---
 
@@ -123,6 +123,7 @@ Die Sway-Configs (`sway`, `waybar`, `rofi`, `mako`, `swaybg`, …) werden per St
 deployt; die Desktop-Pakete kommen i. d. R. vom **Fedora Sway Spin**.
 
 Die Ansible-Rolle `sway` läuft **nur, wenn Sway installiert ist**, und
+
 - installiert `rofi` + `mako` (im Spin nicht enthalten),
 - ersetzt `sway` durch `swayfx` (SwayFX, `Provides: sway`).
 
@@ -166,16 +167,16 @@ lassen (in `group_vars/all.yml`, `host_vars` oder per `-e`):
 
 ```yaml
 # group_vars/all.yml
-dotfiles_repo: "git@github.com:du/private-dotfiles.git"   # statt eingebaute Configs
-dotfiles_version: "main"                                  # optional (Default main)
+dotfiles_repo: "git@github.com:du/private-dotfiles.git" # statt eingebaute Configs
+dotfiles_version: "main" # optional (Default main)
 ```
 
-| Variable          | Default                                  | Bedeutung                          |
-| ----------------- | ---------------------------------------- | ---------------------------------- |
-| `dotfiles_repo`   | `""`                                     | Git-URL; leer = eingebaute Configs |
-| `dotfiles_version`| `main`                                   | Branch/Tag des Repos               |
-| `dotfiles_dir`    | `{{ ansible_env.HOME }}/.dotfiles`       | Zielverzeichnis                    |
-| `dotfiles_src`    | `{{ playbook_dir }}/dotfiles`            | eingebaute Quelle                  |
+| Variable           | Default                            | Bedeutung                          |
+| ------------------ | ---------------------------------- | ---------------------------------- |
+| `dotfiles_repo`    | `""`                               | Git-URL; leer = eingebaute Configs |
+| `dotfiles_version` | `main`                             | Branch/Tag des Repos               |
+| `dotfiles_dir`     | `{{ ansible_env.HOME }}/.dotfiles` | Zielverzeichnis                    |
+| `dotfiles_src`     | `{{ playbook_dir }}/dotfiles`      | eingebaute Quelle                  |
 
 Ablauf: `dotfiles_repo` gesetzt → Repo klonen/aktualisieren, sonst eingebaute
 Configs kopieren; danach `stow --adopt` aus `~/.dotfiles`. **Kein** Mischen beider
@@ -212,3 +213,4 @@ Manuell: `~/.tmux/plugins/tpm/bin/install_plugins` oder in tmux `Prefix + I`.
 ## License
 
 MIT License – (c) JeromeTDev
+
