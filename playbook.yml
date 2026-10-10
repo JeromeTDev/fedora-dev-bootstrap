@@ -13,8 +13,8 @@
     # Nur auf Systemen mit Sway (z. B. Fedora Sway Spin / SwayFX)
     - role: sway
       when: "'sway' in ansible_facts.packages or 'swayfx' in ansible_facts.packages"
-    # - dnf
-    # - copr
+    - dnf
+    - copr
     # - btrfs
     # - snapper
     # - fonts

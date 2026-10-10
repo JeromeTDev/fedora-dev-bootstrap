@@ -1,0 +1,13 @@
+---
+- name: Enable COPR repositories
+  become: true
+  community.general.copr:
+    name: "{{ item }}"
+    state: enabled
+  loop: "{{ copr_repositories }}"
+
+- name: Install COPR packages
+  become: true
+  ansible.builtin.dnf:
+    name: "{{ copr_packages }}"
+    state: present

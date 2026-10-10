@@ -23,7 +23,7 @@
 
 - name: Dotfiles nach $HOME stowen
   ansible.builtin.command:
-    cmd: stow -v --adopt -t "{{ ansible_env.HOME }}" .
+    cmd: stow -v --adopt -t "{{ ansible_facts['env']['HOME'] }}" .
     chdir: "{{ dotfiles_dir }}"
   register: dotfiles_stow
   changed_when: "'LINK:' in dotfiles_stow.stdout or 'UNLINK:' in dotfiles_stow.stdout"

@@ -1,6 +1,5 @@
 ---
-# Wird nur eingebunden, wenn das Zielsystem Sway nutzt (siehe playbook.yml).
-- name: Sway-Pakete installieren (nicht Teil des Fedora Sway Spin)
+- name: Install additional Sway packages
   become: true
   ansible.builtin.dnf:
     name:
@@ -8,12 +7,22 @@
       - mako
     state: present
 
-- name: sway durch swayfx ersetzen (SwayFX als Drop-in)
+- name: Enable SwayFX COPR
+  become: true
+  community.general.copr:
+    name: swayfx/swayfx
+    state: enabled
+
+- name: Remove sway-systemd
+  become: true
+  ansible.builtin.dnf:
+    name: sway-systemd
+    state: absent
+
+- name: Replace Sway with SwayFX
   become: true
   ansible.builtin.command:
-    cmd: dnf -y swap sway swayfx
-  register: sway_swap
-  changed_when: sway_swap.rc == 0
+    cmd: dnf -y --setopt=protected_packages= swap sway swayfx
   when:
     - "'sway' in ansible_facts.packages"
     - "'swayfx' not in ansible_facts.packages"
