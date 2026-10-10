@@ -77,6 +77,8 @@ dnf_settings:
     value: "1"
 
 nerd_font_name: JetBrainsMono
+nerd_font_archive: "/tmp/{{ nerd_font_name }}.zip"
+nerd_font_dir: "{{ ansible_facts['env']['HOME'] }}/.local/share/fonts"
 
 cache_redirects:
   - .npm

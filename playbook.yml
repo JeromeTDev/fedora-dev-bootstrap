@@ -17,9 +17,9 @@
     - copr
     # - btrfs
     # - snapper
-    # - fonts
+    - fonts
     # - flatpak
     # - mise
     # - cache_redirects
-    # - shell
+    - shell
     - dotfiles
