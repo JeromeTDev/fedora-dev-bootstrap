@@ -1,3 +1,6 @@
-# Kopieren nach inventory.ini und anpassen.
+# Kopieren nach inventory.ini und anpassen: inventory.ini wird automatisch
+# erkannt, sobald sie im Repo-Root liegt (kein -i noetig).
+# Ohne inventory.ini ist der lokale Rechner das Ziel.
+
 [fedora]
-fedora-dev ansible_host=CHANGE_ME ansible_user=CHANGE_ME
+fedora-vm ansible_host=CHANGE_ME ansible_user=CHANGE_ME

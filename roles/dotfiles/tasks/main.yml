@@ -1,29 +1,90 @@
 ---
 # Kein "become": Stow muss als der Ziel-User nach $HOME linken.
+# Ein vorhandenes dotfiles_dir (z. B. eigenes Repo) wird nie angefasst.
 
-- name: Zielverzeichnis fuer Dotfiles anlegen
-  ansible.builtin.file:
+- name: Eingebaute Dotfiles pruefen
+  ansible.builtin.stat:
+    path: "{{ dotfiles_src }}"
+  register: dotfiles_src_stat
+
+- name: Vorhandene Dotfiles pruefen
+  ansible.builtin.stat:
     path: "{{ dotfiles_dir }}"
-    state: directory
-    mode: "0755"
+  register: dotfiles_dir_stat
 
-- name: Dotfiles aus Git holen/aktualisieren
-  ansible.builtin.git:
-    repo: "{{ dotfiles_repo }}"
-    dest: "{{ dotfiles_dir }}"
-    version: "{{ dotfiles_version }}"
-    update: true
-  when: dotfiles_repo | length > 0
+- name: Dotfiles vorhanden
+  ansible.builtin.set_fact:
+    dotfiles_present: >-
+      {{ dotfiles_src_stat.stat.exists or dotfiles_dir_stat.stat.exists }}
 
 - name: Eingebaute Dotfiles kopieren
   ansible.builtin.copy:
     src: "{{ dotfiles_src }}/"
     dest: "{{ dotfiles_dir }}/"
-  when: dotfiles_repo | length == 0
+    mode: preserve
+  when:
+    - dotfiles_src_stat.stat.exists
+    - not dotfiles_dir_stat.stat.exists
 
-- name: Dotfiles nach $HOME stowen
-  ansible.builtin.command:
-    cmd: stow -v --adopt -t "{{ ansible_facts['env']['HOME'] }}" .
-    chdir: "{{ dotfiles_dir }}"
-  register: dotfiles_stow
-  changed_when: "'LINK:' in dotfiles_stow.stdout or 'UNLINK:' in dotfiles_stow.stdout"
+- name: Vorhandene Dotfiles als Quelle melden
+  ansible.builtin.debug:
+    msg: >-
+      {{ dotfiles_dir }} existiert bereits und wird unveraendert verwendet -
+      die eingebauten Configs aus {{ dotfiles_src }} werden nicht kopiert.
+  when:
+    - dotfiles_dir_stat.stat.exists
+    - dotfiles_src_stat.stat.exists
+
+- name: Hinweis, wenn es keine Dotfiles zum Stowen gibt
+  ansible.builtin.debug:
+    msg: >-
+      Weder {{ dotfiles_src }} (mitgelieferte Configs) noch {{ dotfiles_dir }}
+      sind vorhanden - es wird nichts gestowt. Eigene Dotfiles unter
+      {{ dotfiles_dir }} ablegen und das Playbook erneut ausfuehren.
+  when: not dotfiles_present | bool
+
+- name: Stow-Ziel anlegen
+  ansible.builtin.file:
+    path: "{{ dotfiles_stow_target }}"
+    state: directory
+    mode: "0755"
+  when: dotfiles_present | bool
+
+# "stow ." verlinkt jeden Top-Level-Eintrag aus dotfiles_dir einzeln nach $HOME.
+# Ein echtes Verzeichnis wie ~/.config wird dabei nicht ersetzt, sondern mit
+# --adopt hinein gemischt; --ignore haelt VCS-/Repo-Metadaten zurueck.
+- name: Dotfiles stowen
+  when: dotfiles_present | bool
+  block:
+    - name: Stow ausfuehren
+      become: false
+      ansible.builtin.command:
+        cmd: >-
+          stow -v --adopt
+          --ignore={{ dotfiles_stow_ignore | quote }}
+          -t {{ dotfiles_stow_target | quote }} .
+        chdir: "{{ dotfiles_dir }}"
+      register: dotfiles_stow
+      changed_when: >
+        'LINK:' in dotfiles_stow.stderr or
+        'UNLINK:' in dotfiles_stow.stderr or
+        'MV:' in dotfiles_stow.stderr
+
+  rescue:
+    - name: Stow-Konflikt melden
+      ansible.builtin.debug:
+        msg: |-
+          {{ dotfiles_stow.stderr }}
+
+          Meist steckt ein fremder Symlink in {{ dotfiles_stow_target }}:
+          {{ dotfiles_stow_target }}/.config/<app> zeigt auf ein anderes
+          Dotfiles-Verzeichnis als {{ dotfiles_dir }}.
+
+          Alte Links vorher aufloesen, z. B.
+            cd <altes-dotfiles-verzeichnis> && stow -D -t {{ dotfiles_stow_target }} .
+          danach das Playbook erneut ausfuehren.
+
+    - name: Stow-Konflikt abbrechen
+      ansible.builtin.fail:
+        msg: >-
+          Dotfiles wurden nicht gestowt (Konflikt in {{ dotfiles_stow_target }}).

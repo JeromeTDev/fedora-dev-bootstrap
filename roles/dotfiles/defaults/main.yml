@@ -1,8 +1,24 @@
 ---
 # Quelle der Dotfiles (siehe README):
-#   dotfiles_repo gesetzt (Git-URL) -> Repo nach dotfiles_dir klonen/aktualisieren
-#   dotfiles_repo leer              -> eingebaute Configs aus dotfiles_src kopieren
-dotfiles_repo: ""
-dotfiles_version: "main"
+#   dotfiles_src da, dotfiles_dir fehlt -> eingebaute Configs werden nach
+#                                            dotfiles_dir kopiert
+#   dotfiles_dir da                         -> unveraendert verwendet
+#                                            (z. B. eigenes Git-Repo)
+#   beides fehlt                            -> nichts wird gestowt; der Nutzer
+#                                              legt eigene Dotfiles in
+#                                              dotfiles_dir ab
 dotfiles_dir: "{{ ansible_facts['env']['HOME'] }}/.dotfiles"
 dotfiles_src: "{{ playbook_dir }}/dotfiles"
+
+# Ziel der Symlinks ist $HOME: "stow ." verlinkt jeden Top-Level-Eintrag aus
+# dotfiles_dir einzeln nach $HOME (.config, .local, .gitconfig, ...). Ein schon
+# vorhandenes echtes Verzeichnis wie ~/.config wird dabei nicht ersetzt, sondern
+# mit --adopt hinein gemischt.
+dotfiles_stow_target: "{{ ansible_facts['env']['HOME'] }}"
+
+# Von stow auszulassende Top-Level-Eintraege aus dotfiles_dir, falls dort neben
+# den Configs auch VCS-/Repo-Metadaten liegen (README, LICENSE, .github).
+# Wirkt nicht rekursiv: landet .config als ganzer Link im Home, ist der Inhalt
+# davon unberuehrt. Ueberschreibbar in group_vars/fedora.yml oder per
+# -e dotfiles_stow_ignore="...".
+dotfiles_stow_ignore: '^\.git$|^\.github$|^\.gitignore$|^\.gitattributes$|^\.gitmodules$|^README|^LICENSE'

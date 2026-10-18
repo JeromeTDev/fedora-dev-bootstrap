@@ -3,12 +3,9 @@ dev_packages:
   - git
   - gh
   - make
-  - cmake
   - gcc
-  - clang
-  - python3
   - fish
-  - kitty
+  # - kitty
   - neovim
   - wl-clipboard
   - fzf
@@ -22,21 +19,18 @@ dev_packages:
   - jq
   - zathura
   - zathura-pdf-mupdf
-  - snapper
-  - python3-dnf-plugin-snapper
-  - btrfs-assistant
   - poppler-utils
   - ImageMagick
   - mediainfo
   - perl-Image-ExifTool
   - xournalpp
-  - texlive-scheme-full
+  - texlive-scheme-medium
   - luarocks
   - keepassxc
-  - gnome-extensions-app
   - fastfetch
   - tmux
   - gammastep
+  - dolphin
 
 copr_repositories:
   - atim/lazygit
@@ -51,11 +45,13 @@ copr_packages:
   - ghostty
 
 flatpak_apps:
-  - com.mattjakeman.ExtensionManager
   - com.teamspeak.TeamSpeak
   - com.discordapp.Discord
   - org.cryptomator.Cryptomator
   - md.obsidian.Obsidian
+  - org.onlyoffice.desktopeditors
+  - org.telegram.desktop
+  - org.signal.Signal
 
 dnf_settings:
   - key: fastestmirror
@@ -80,10 +76,7 @@ nerd_font_name: JetBrainsMono
 nerd_font_archive: "/tmp/{{ nerd_font_name }}.zip"
 nerd_font_dir: "{{ ansible_facts['env']['HOME'] }}/.local/share/fonts"
 
-cache_redirects:
-  - .npm
-  - .cargo
-  - .node-gyp
-
 mise_tools:
-  - "github:anomalyco/opencode"
+  - uv@latest
+  - python@latest
+  - opencode

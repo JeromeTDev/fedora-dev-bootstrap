@@ -1,4 +1,34 @@
 ---
+# Zielhost-Bestimmung:
+#   * Inventory mit Gruppe "fedora" vorhanden -> diese Hosts sind das Ziel
+#   * kein Inventory bzw. keine Gruppe "fedora" -> dieser lokale Host ist das Ziel
+# Damit reicht "git clone && ansible-playbook playbook.yml" ohne jedes Inventory.
+- name: Zielhost bestimmen
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Hosts aus dem Inventory uebernehmen
+      ansible.builtin.debug:
+        msg: "Ziel aus Inventory: {{ groups['fedora'] | join(', ') }}"
+      when: "'fedora' in groups"
+
+    - name: Lokalen Host als Ziel setzen (kein Inventory-Ziel vorhanden)
+      ansible.builtin.add_host:
+        name: localhost
+        groups: fedora
+        ansible_connection: local
+        ansible_python_interpreter: /usr/bin/python3
+      when: "'fedora' not in groups"
+
+    - name: Hinweis zur Inventory-Nutzung ausgeben
+      ansible.builtin.debug:
+        msg: >-
+          Kein Inventory mit Gruppe 'fedora' gefunden - Ziel ist dieser Host.
+          Fuer andere Maschinen: cp inventory.ini.example inventory.ini
+      when: "'fedora' not in groups"
+
 - name: Configure Fedora development workstation
   hosts: fedora
 
@@ -15,11 +45,8 @@
       when: "'sway' in ansible_facts.packages or 'swayfx' in ansible_facts.packages"
     - dnf
     - copr
-    # - btrfs
-    # - snapper
     - fonts
-    # - flatpak
-    # - mise
-    # - cache_redirects
+    - flatpak
     - shell
     - dotfiles
+    - mise

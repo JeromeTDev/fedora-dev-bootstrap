@@ -1,0 +1,30 @@
+---
+- name: Add mise repository
+  become: true
+  ansible.builtin.get_url:
+    url: https://mise.jdx.dev/rpm/mise.repo
+    dest: /etc/yum.repos.d/mise.repo
+    mode: "0644"
+
+- name: Install mise
+  become: true
+  ansible.builtin.dnf:
+    name: mise
+    state: present
+
+- name: Check if mise config exists
+  ansible.builtin.stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/mise/config.toml"
+  register: mise_config
+
+- name: Install tools from mise config
+  ansible.builtin.command:
+    cmd: mise install
+  when: mise_config.stat.exists
+  changed_when: false
+
+- name: Install default mise tools if no config exists
+  ansible.builtin.command:
+    cmd: "mise use --global {{ item }}"
+  loop: "{{ mise_tools }}"
+  when: not mise_config.stat.exists

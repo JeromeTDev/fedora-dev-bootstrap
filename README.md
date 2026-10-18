@@ -1,216 +1,130 @@
 # FedDev
 
+[![Fedora Developer Bootstrap](https://img.shields.io/badge/Fedora%20Developer%20Bootstrap-Fedora-blue.svg)](https://getfedora.org/)
+[![Ansible](https://img.shields.io/badge/Ansible-ee-blue.svg)](https://www.ansible.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Fedora](https://img.shields.io/badge/Fedora-Btrfs-blue.svg)](https://getfedora.org/)
 
-Ein **vollautomatischer Fedora-Developer-Bootstrap** für Power-User: sauberes
-**Btrfs-Layout**, schlanke **Snapper**-Snapshots und eine sofort einsatzbereite
-**Dev-Umgebung** – gedacht für die **einmalige** Ausführung auf einer frischen
-Fedora-Installation.
+Ein **vollautomatischer Fedora-Developer-Bootstrap** auf **Ansible**-Basis –
+gedacht für die **einmalige** Ausführung auf einer frischen Fedora-Installation.
 
-> **Inklusive Dotfiles:** Fish, Kitty/Ghostty, Sway, Neovim, tmux, Yazi u. v. m.
-> liegen unter [`dotfiles/`](dotfiles) und werden per **GNU Stow** deployt.
+System-Setup, Pakete, Schriften, Flatpak-Apps, mise-Runtimes und per **GNU Stow**
+deployte **Dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway u. v. m.).
 
-![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/58df73b9-9492-4b25-9bbd-38b9af24d120)
-
----
-
-## Status
-
-Das Projekt wird auf ein **Ansible-basiertes Setup** umgebaut. Das vollständige
-Bash-Script liegt weiterhin unter [`legacy/feddev-setup.sh`](legacy/feddev-setup.sh)
-und ist aktuell der einzige **vollständige** Installationsweg.
-
-| Rolle             | Status                              |
-| ----------------- | ----------------------------------- |
-| `base`            | ✅ fertig                           |
-| `packages`        | ✅ fertig                           |
-| `sway`            | ✅ fertig (nur wenn Sway vorhanden) |
-| `dnf`             | ✅ fertig                           |
-| `copr`            | ✅ fertig                           |
-| `btrfs`           | 🚧 geplant                          |
-| `snapper`         | 🚧 geplant                          |
-| `fonts`           | ✅ fertig                           |
-| `flatpak`         | 🚧 geplant                          |
-| `mise`            | 🚧 geplant                          |
-| `cache_redirects` | 🚧 geplant                          |
-| `shell`           | ✅ fertig                           |
-| `dotfiles`        | ✅ fertig                           |
-
----
-
-## Was das macht
-
-- Optimiert Fedora für **Btrfs + Snapper** (NO-COW-Caches, Snapshot-Excludes)
-- Installiert eine moderne **Developer-Toolchain**
-- Richtet **mise** für Runtime-Management ein (Node, Lua, …)
-- Deployt **Dotfiles automatisch** via GNU Stow
-- Hinterlässt ein sauberes, **rollback-fähiges** System
-
----
-
-## Voraussetzungen
-
-- Fedora Linux (Workstation oder Minimal), aktuell getestet auf **Fedora 44**
-- **Btrfs** als Root-Filesystem
-- Frische Installation **empfohlen**
-- Aktive Internetverbindung
-- `sudo`-Zugang
-
-> Warnung: Nicht für stark angepasste oder seit Langem laufende Systeme gedacht.
-> Das Script ändert das Dateisystem-Layout und wird nur für frische Setups
-> getestet.
-
----
+## ![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/58df73b9-9492-4b25-9bbd-38b9af24d120)
 
 ## Installation
 
-### One-liner (legacy, empfohlen)
+Voraussetzung: Fedora Linux (Workstation oder Minimal), getestet auf **Fedora 44**.
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/JeromeTDev/fedora-dev-bootstrap/main/legacy/feddev-setup.sh)
-```
+sudo dnf install -y ansible-core git
 
-### Clone & Run (legacy)
-
-```bash
 git clone https://github.com/JeromeTDev/fedora-dev-bootstrap.git
 cd fedora-dev-bootstrap
-./legacy/feddev-setup.sh
+
+ansible-galaxy collection install -r requirements.yml # einmalig: copr + flatpak
+ansible-playbook playbook.yml -K
 ```
 
-### Ansible (in Arbeit)
-
-Deckt bisher nur `base` und `packages` ab:
+Ohne `inventory.ini` ist der Rechner, auf dem du das Playbook startest, das Ziel.
+Für eine andere Maschine:
 
 ```bash
-cp inventory.ini.example inventory.ini   # Host/User anpassen
-ansible-galaxy collection install -r requirements.yml
-ansible-playbook playbook.yml
+cp inventory.ini.example inventory.ini
+$EDITOR inventory.ini          # Gruppe muss "fedora" heißen
+ansible-playbook playbook.yml -K
 ```
 
-Host/User werden in der lokalen `inventory.ini` gesetzt (siehe
-[`inventory.ini.example`](inventory.ini.example)).
+```ini
+[fedora]
+fedora-vm ansible_host=192.168.1.xxx ansible_user=InsertUserName
+```
 
----
+Die `inventory.ini` wird über `ansible.cfg` automatisch erkannt und ist in
+`.gitignore`, wird also nie mit committet.
 
-## Was wird installiert?
+Gut zu wissen:
 
-### System & Filesystem
+- `-K` fragt das sudo-Passwort ab; bei passwortlosem sudo entfällt es. Nach ~15 Min.
+  ohne sudo-Timestamp bricht der Play beim ersten `become`-Task ab (vorher `sudo -v`)
+- `--check --diff` zeigt nur, was passieren würde
+- das Playbook ist idempotent, ein zweiter Lauf ist unkritisch
+- gesetzt werden **Fish als Standard-Shell** und die Dotfiles per `stow --adopt`
 
-- Btrfs-Subvolumes mit NO-COW für `~/.cache`, `/var/cache`, `/var/tmp` und
-  `~/.local/share/mise`
-- Snapper mit schlanken Snapshot-Policies
-- `btrfs-assistant` für GUI-Snapshot-Management
+## Tools
 
-### Developer-Toolchain
+Alles Anpassbare liegt in [`group_vars/fedora.yml`](group_vars/fedora.yml).
 
-- `git`, `gh`
-- `gcc`, `clang`, `make`, `cmake`
-- `python3`
-- `lua` 5.1 + `luarocks`
-- `jq`, `fd`, `ripgrep`, `ncdu`
+| Kategorie          | Quelle               | Tools                                                                                                             |
+| ------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Dev & Build        | Fedora               | `git`, `gh`, `make`, `gcc`, `luarocks`, `texlive-scheme-medium`                                                   |
+| Shell & Editor     | Fedora               | `fish` (Default-Shell), `neovim` (LazyVim), `tmux`                                                                |
+| CLI                | Fedora               | `fzf`, `zoxide`, `btop`, `tree`, `ripgrep`, `fd-find`, `jq`, `ncdu`, `stow`, `fastfetch`                          |
+| Medien & PDF       | Fedora               | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                |
+| Desktop            | Fedora               | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                  |
+| Prompt & Terminals | COPR                 | `starship`, `lazygit`, `yazi`, `ghostty`                                                                          |
+| Window Manager     | COPR – nur wenn Sway | `rofi`, `mako`, `swayfx` (ersetzt `sway` und `sway-systemd`)                                                      |
+| Apps               | Flatpak, systemweit  | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                           |
+| Schriften          | GitHub-Release       | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                  |
+| Runtimes           | mise                 | `python`, `rust`, `uv`, `opencode`                                                                               |
+| System             | DNF                  | `fastestmirror`, 15 Paralleldownloads, `defaultyes`, keine weak-deps, `clean_requirements_on_remove`, `plugins=1` |
 
-### Shell, Editor & Terminal
-
-- `fish` (Default-Shell), `starship`-Prompt
-- `kitty` und `ghostty` als Terminals
-- LazyVim (Neovim), `tmux` (mit TPM-Plugins)
-
-### Desktop (Sway)
-
-Die Sway-Configs (`sway`, `waybar`, `rofi`, `mako`, `swaybg`, …) werden per Stow
-deployt; die Desktop-Pakete kommen i. d. R. vom **Fedora Sway Spin**.
-
-Die Ansible-Rolle `sway` läuft **nur, wenn Sway installiert ist**, und
-
-- installiert `rofi` + `mako` (im Spin nicht enthalten),
-- ersetzt `sway` durch `swayfx` (SwayFX, `Provides: sway`).
-
-> SwayFX ist ein Drop-in-Fork mit gleichem Config-Format. Das Bash-Script
-> installiert **keine** Desktop-Pakete.
-
-### CLI-Utilities
-
-- `fzf`, `zoxide`, `btop`, `lazygit`, `yazi`, `fastfetch`
-
-### Flatpak-Apps
-
-- Discord, Obsidian, Cryptomator, TeamSpeak, Extension Manager
-
-### Runtime-Management
-
-- `mise` mit globalem Node.js und Shell-Aktivierung (Fish, Bash, Zsh)
-
-### Fonts
-
-- JetBrainsMono Nerd Font
-
-### Dotfiles
-
-- Deployment aller Configs via **GNU Stow** (siehe unten)
-
----
+Zusätzlich läuft ein vollständiges `dnf upgrade`. Die Runtimes kommen aus
+[`dotfiles/.config/mise/config.toml`](dotfiles/.config/mise/config.toml); gibt es
+die Datei nicht, greift `mise_tools` aus `group_vars/fedora.yml`.
 
 ## Dotfiles
 
-Alle geteilten Configs liegen im Unterordner [`dotfiles/.config/`](dotfiles/.config).
-Die gleichnamige Ansible-Rolle bringt sie nach `~/.dotfiles` und verlinkt sie von
-dort per Stow nach `$HOME`:
+Die mitgelieferten Configs liegen unter [`dotfiles/`](dotfiles) und werden beim
+ersten Lauf nach `~/.dotfiles` kopiert und von dort in dein Home verlinkt:
 
 ```
-dotfiles/  ->  ~/.dotfiles  --stow-->  ~/.config/...
+dotfiles/  ->  ~/.dotfiles  --stow .-->  ~/.config/...
 ```
 
-**Eigene/private Dotfiles nutzen:** einfach die Rolle auf das eigene Repo zeigen
-lassen (in `group_vars/all.yml`, `host_vars` oder per `-e`):
+- Ein **vorhandenes** `~/.dotfiles` wird nie angefasst – deine Dotfiles gewinnen
+- Gibt es den Ordner `dotfiles/` nicht, wird nichts gestowt: lege deine eigenen
+  Dotfiles unter `~/.dotfiles` ab und führe das Playbook erneut aus
+- Jeder Top-Level-Eintrag wird einzeln verlinkt (`.config`, `.local`, `.gitconfig`, …);
+  ein vorhandenes echtes Verzeichnis wie `~/.config` wird dabei **nicht** ersetzt,
+  sondern mit `--adopt` hinein gemischt
 
-```yaml
-# group_vars/all.yml
-dotfiles_repo: "git@github.com:du/private-dotfiles.git" # statt eingebaute Configs
-dotfiles_version: "main" # optional (Default main)
+Eigene Dotfiles, die woanders liegen, vor dem ersten Lauf nach `~/.dotfiles`
+umziehen, sonst zeigen die alten Symlinks ins Leere:
+
+```bash
+git clone git@github.com:dein-user/private-dotfiles.git ~/.dotfiles
 ```
 
-| Variable           | Default                            | Bedeutung                          |
-| ------------------ | ---------------------------------- | ---------------------------------- |
-| `dotfiles_repo`    | `""`                               | Git-URL; leer = eingebaute Configs |
-| `dotfiles_version` | `main`                             | Branch/Tag des Repos               |
-| `dotfiles_dir`     | `{{ ansible_env.HOME }}/.dotfiles` | Zielverzeichnis                    |
-| `dotfiles_src`     | `{{ playbook_dir }}/dotfiles`      | eingebaute Quelle                  |
+Pfade sind in [`roles/dotfiles/defaults/main.yml`](roles/dotfiles/defaults/main.yml)
+überschreibbar (`dotfiles_dir`, `dotfiles_src`, `dotfiles_stow_target`).
 
-Ablauf: `dotfiles_repo` gesetzt → Repo klonen/aktualisieren, sonst eingebaute
-Configs kopieren; danach `stow --adopt` aus `~/.dotfiles`. **Kein** Mischen beider
-Quellen im selben Ordner.
+> **Achtung:** `--adopt` übernimmt vorhandene Dateien (z. B. ein vom Desktop
+> angelegtes `~/.config/fontconfig/fonts.conf`) – vorher ggf. sichern. Und `stow .`
+> niemals auf das **Repo-Root** anwenden, sonst landen `roles/` und `playbook.yml`
+> in deinem Home.
 
-> Manuell (ohne Ansible): `cd dotfiles && stow --adopt -t "$HOME" .`
-> Nicht `stow .` auf das **Repo-Root** anwenden – sonst landen `roles/`,
-> `playbook.yml`, `inventory.ini` usw. im Home-Verzeichnis.
+**tmux-Plugins** sind nicht mitgeliefert (siehe [`.gitignore`](.gitignore)); `TPM`
+installiert sie beim ersten `Prefix + I`, manuell:
 
-Verwaltete Configs (Auszug): `fish`, `kitty`, `ghostty`, `tmux`, `nvim`, `sway`,
-`waybar`, `rofi`, `mako`, `btop`, `yazi`, `mise`, `zathura`, `fontconfig`,
-`autostart`, `starship.toml`, `xdg-desktop-portal`.
+```bash
+git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+~/.tmux/plugins/tpm/bin/install_plugins
+```
 
-**Nicht** im Repo (bewusst): jegliche persönliche oder geheime Konfiguration –
-z. B. `keepassxc/`, `Cryptomator/`, `~/.gitconfig`, SSH-Keys oder MEGA-/Cloud-Pfade.
-Diese Dateien müssen lokal bleiben.
+## Updates
 
-**tmux-Plugins** werden nicht mitgeliefert (siehe [`.gitignore`](.gitignore));
-das Deploy-Script installiert `tpm` und die Plugins nach `~/.tmux/plugins`.
-Manuell: `~/.tmux/plugins/tpm/bin/install_plugins` oder in tmux `Prefix + I`.
+[`update.sh`](update.sh) aktualisiert DNF, mise und Flatpak in einem Durchgang:
+
+```bash
+./update.sh
+```
 
 ---
 
-## Wichtige Hinweise
-
-- Ändert das **Filesystem-Layout** (Btrfs-Subvolumes, Snapper)
-- Für **frische** Fedora-Installationen gedacht
-- Dotfiles werden mit `stow --adopt` deployed – **vorhandene Configs können
-  überschrieben bzw. übernommen werden**
-- Lest das Script vor dem Ausführen durch, wenn ihr unsicher seid
-
----
+Altes Bash-Script mit Btrfs-/Snapper-Strategie: [`legacy/feddev-setup.sh`](legacy/feddev-setup.sh)
+– historische Referenz, nicht Teil des Ansible-Setups und nicht mehr gepflegt.
 
 ## License
 
 MIT License – (c) JeromeTDev
-

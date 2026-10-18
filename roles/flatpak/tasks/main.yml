@@ -1,0 +1,18 @@
+---
+- name: install Flatpak
+  become: true
+  ansible.builtin.dnf:
+    name: flatpak
+    state: present
+
+- name: add Flathub repository
+  become: true
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
+
+- name: install Flatpak Apps
+  become: true
+  community.general.flatpak:
+    name: "{{ flatpak_apps }}"
