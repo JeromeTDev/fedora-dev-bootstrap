@@ -12,7 +12,7 @@ one-shot run on a fresh Fedora installation.
 System setup, packages, fonts, Flatpak apps, mise runtimes and **GNU Stow**-deployed
 **dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway and more).
 
-## ![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/01be7aec-2c3d-4e6f-91c0-f5ac7aa2fe2b)
+## ![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/3b4ebb88-04e9-4a28-9643-2f09996787b9)
 
 ## Installation
 
