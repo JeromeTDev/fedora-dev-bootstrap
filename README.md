@@ -12,7 +12,7 @@ one-shot run on a fresh Fedora installation.
 System setup, packages, fonts, Flatpak apps, mise runtimes and **GNU Stow**-deployed
 **dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway and more).
 
-## ![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/58df73b9-9492-4b25-9bbd-38b9af24d120)
+## ![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/01be7aec-2c3d-4e6f-91c0-f5ac7aa2fe2b)
 
 ## Installation
 
@@ -92,15 +92,11 @@ MIT License – (c) JeromeTDev
 
 # Deutsch
 
-[↑ English](#feddev)
-
 Ein **vollautomatischer Fedora-Developer-Bootstrap** auf **Ansible**-Basis –
 gedacht für die **einmalige** Ausführung auf einer frischen Fedora-Installation.
 
 System-Setup, Pakete, Schriften, Flatpak-Apps, mise-Runtimes und per **GNU Stow**
 deployte **Dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway u. v. m.).
-
-## ![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/58df73b9-9492-4b25-9bbd-38b9af24d120)
 
 ## Installation
 
