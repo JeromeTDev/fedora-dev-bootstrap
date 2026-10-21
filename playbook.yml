@@ -40,9 +40,9 @@
   roles:
     - base
     - packages
-    # Nur auf Systemen mit Sway (z. B. Fedora Sway Spin / SwayFX)
+    # Sway/SwayFX-Rolle (opt-in via install_swayfx, Default: aus)
     - role: sway
-      when: "'sway' in ansible_facts.packages or 'swayfx' in ansible_facts.packages"
+      when: install_swayfx | bool
     - dnf
     - copr
     - fonts

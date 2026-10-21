@@ -16,7 +16,7 @@ System setup, packages, fonts, Flatpak apps, mise runtimes and **GNU Stow**-depl
 
 ## Installation
 
-Requires Fedora Linux (Workstation or Minimal), tested on **Fedora 44**.
+Requires Fedora Linux (Workstation or Sway Spin), tested on **Fedora 44**.
 
 ```bash
 sudo dnf install -y ansible-core git
@@ -43,7 +43,7 @@ Everything configurable lives in [`group_vars/fedora.yml`](group_vars/fedora.yml
 | Media & PDF        | Fedora              | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                |
 | Desktop            | Fedora              | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                  |
 | Prompt & Terminals | COPR                | `starship`, `lazygit`, `yazi`, `ghostty`                                                                          |
-| Window Manager     | COPR – only with Sway | `rofi`, `mako`, `swayfx` (replaces `sway` and `sway-systemd`)                                                      |
+| Window Manager     | COPR – opt-in        | `rofi`, `mako`, `swayfx` (replaces `sway`)                                                                      |
 | Apps               | Flatpak, system-wide | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                           |
 | Fonts              | GitHub release      | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                  |
 | Runtimes           | mise                | `python`, `rust`, `uv`, `opencode`                                                                                |
@@ -52,6 +52,24 @@ Everything configurable lives in [`group_vars/fedora.yml`](group_vars/fedora.yml
 A full `dnf upgrade` runs on top of that. Runtimes come from
 [`dotfiles/.config/mise/config.toml`](dotfiles/.config/mise/config.toml), falling
 back to `mise_tools` in `group_vars/fedora.yml`.
+
+### Sway / SwayFX
+
+The `sway` role is opt-in and controlled by `install_swayfx` (default `false`,
+see [`roles/sway/defaults/main.yml`](roles/sway/defaults/main.yml)). Enable it in
+[`group_vars/fedora.yml`](group_vars/fedora.yml) or per host in `inventory.ini`:
+
+```ini
+[fedora:vars]
+install_swayfx=true
+```
+
+- `sway` installed → replaced by `swayfx` from COPR
+- no `sway` installed → `swayfx` is installed directly
+
+The role also installs `rofi`, `mako`, `sway-config-fedora` (greetd session and
+`layered-include` for the dotfiles), `sway-systemd` (`XDG_CURRENT_DESKTOP`,
+`sway-session.target`) and `xdg-desktop-portal-wlr` (portal backend).
 
 ## Dotfiles
 
@@ -100,7 +118,7 @@ deployte **Dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway u. 
 
 ## Installation
 
-Voraussetzung: Fedora Linux (Workstation oder Minimal), getestet auf **Fedora 44**.
+Voraussetzung: Fedora Linux (Workstation oder Sway Spin), getestet auf **Fedora 44**.
 
 ```bash
 sudo dnf install -y ansible-core git
@@ -127,7 +145,7 @@ Alles Anpassbare liegt in [`group_vars/fedora.yml`](group_vars/fedora.yml).
 | Medien & PDF       | Fedora               | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                |
 | Desktop            | Fedora               | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                  |
 | Prompt & Terminals | COPR                 | `starship`, `lazygit`, `yazi`, `ghostty`                                                                          |
-| Window Manager     | COPR – nur wenn Sway | `rofi`, `mako`, `swayfx` (ersetzt `sway` und `sway-systemd`)                                                      |
+| Window Manager     | COPR – opt-in        | `rofi`, `mako`, `swayfx` (ersetzt `sway`)                                                                          |
 | Apps               | Flatpak, systemweit  | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                           |
 | Schriften          | GitHub-Release       | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                  |
 | Runtimes           | mise                 | `python`, `rust`, `uv`, `opencode`                                                                                |
@@ -136,6 +154,25 @@ Alles Anpassbare liegt in [`group_vars/fedora.yml`](group_vars/fedora.yml).
 Zusätzlich läuft ein `dnf upgrade`. Runtimes kommen aus
 [`dotfiles/.config/mise/config.toml`](dotfiles/.config/mise/config.toml), sonst aus
 `mise_tools` in `group_vars/fedora.yml`.
+
+### Sway / SwayFX
+
+Die `sway`-Rolle ist opt-in und wird über `install_swayfx` gesteuert (Standard
+`false`, siehe [`roles/sway/defaults/main.yml`](roles/sway/defaults/main.yml)).
+Aktivieren in [`group_vars/fedora.yml`](group_vars/fedora.yml) oder pro Host in
+`inventory.ini`:
+
+```ini
+[fedora:vars]
+install_swayfx=true
+```
+
+- `sway` installiert → wird durch `swayfx` aus COPR ersetzt
+- kein `sway` installiert → `swayfx` wird direkt installiert
+
+Die Rolle installiert außerdem `rofi`, `mako`, `sway-config-fedora` (greetd-Session
+und `layered-include` für die Dotfiles), `sway-systemd` (`XDG_CURRENT_DESKTOP`,
+`sway-session.target`) und `xdg-desktop-portal-wlr` (Portal-Backend).
 
 ## Dotfiles
 

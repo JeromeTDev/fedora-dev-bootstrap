@@ -13,16 +13,53 @@
     name: swayfx/swayfx
     state: enabled
 
-- name: Remove sway-systemd
+# Ohne Sway auf dem System: swayfx liefert "sway" mit, damit sway-systemd
+# nicht plain "sway" nachzieht. sway-config-fedora muss in derselben
+# Transaktion mit - sonst installiert dnf swayfx-config-upstream und
+# sway-config-fedora wird wegen des "sway-config"-Konflikts abgelehnt.
+- name: Install SwayFX and sway-config-fedora
   become: true
   ansible.builtin.dnf:
-    name: sway-systemd
-    state: absent
+    name:
+      - swayfx
+      - sway-config-fedora
+    state: present
+  when: "'sway' not in ansible_facts.packages"
 
+# Mit Sway auf dem System: sway-config-fedora verdraengt sway-config-upstream,
+# das "sway" auf eine exakte Version pinnt und damit den Swap blockieren wuerde.
+# Liefert zudem /usr/share/wayland-sessions/sway.desktop (greetd-Eintrag) und
+# /usr/libexec/sway/layered-include (von der Dotfile-Config included).
+- name: Install sway-config-fedora
+  become: true
+  ansible.builtin.dnf:
+    name: sway-config-fedora
+    state: present
+  when: "'sway' in ansible_facts.packages"
+
+# "sway" muss weg, sonst kollidieren sway und swayfx (beide liefern /usr/bin/sway).
 - name: Replace Sway with SwayFX
   become: true
   ansible.builtin.command:
     cmd: dnf -y --setopt=protected_packages= swap sway swayfx
+  register: sway_swap
+  changed_when: sway_swap.rc == 0
   when:
     - "'sway' in ansible_facts.packages"
     - "'swayfx' not in ansible_facts.packages"
+
+# Liefert /etc/sway/config.d/10-systemd-session.conf: setzt XDG_CURRENT_DESKTOP
+# und startet sway-session.target - die Dotfiles haengen daran.
+- name: Install sway-systemd
+  become: true
+  ansible.builtin.dnf:
+    name: sway-systemd
+    state: present
+
+# Backend fuer xdg-desktop-portal unter Sway (Secret-Service, ScreenCast).
+# Ohne das Paket greift die Dotfile-portals.conf ins Leere.
+- name: Install xdg-desktop-portal-wlr
+  become: true
+  ansible.builtin.dnf:
+    name: xdg-desktop-portal-wlr
+    state: present

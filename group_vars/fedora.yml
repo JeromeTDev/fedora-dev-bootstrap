@@ -1,4 +1,9 @@
 ---
+# Sway/SwayFX-Rolle aktivieren (siehe roles/sway/defaults/main.yml).
+# true  -> swayfx wird installiert bzw. ersetzt ein vorhandenes "sway"
+# false -> Rolle wird komplett uebersprungen
+install_swayfx: true
+
 dev_packages:
   - git
   - gh

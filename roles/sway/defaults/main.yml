@@ -1,0 +1,7 @@
+---
+# Aktiviert die sway-Rolle in playbook.yml.
+# Standard ist false, damit das Playbook nie an einer undefinierten Variablen
+# scheitert. Ueberschreiben in group_vars/fedora.yml oder inventory.ini:
+#   [fedora:vars]
+#   install_swayfx=true
+install_swayfx: false
