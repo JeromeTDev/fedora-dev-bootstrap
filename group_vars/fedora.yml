@@ -79,8 +79,12 @@ dnf_settings:
     value: "1"
 
 nerd_font_name: JetBrainsMono
+nerd_font_url: "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{ nerd_font_name }}.zip"
 nerd_font_archive: "/tmp/{{ nerd_font_name }}.zip"
 nerd_font_dir: "{{ ansible_facts['env']['HOME'] }}/.local/share/fonts"
+# Marker fuer die Idempotenz der fonts-Rolle: existiert diese Datei, gelten die
+# Fonts als installiert und werden nicht erneut heruntergeladen/entpackt.
+nerd_font_marker: "{{ nerd_font_dir }}/{{ nerd_font_name }}NerdFont-Regular.ttf"
 
 mise_tools:
   - uv@latest

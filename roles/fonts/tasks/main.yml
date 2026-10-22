@@ -5,19 +5,31 @@
     state: directory
     mode: "0755"
 
+# Marker-Datei statt "immer neu entpacken": existiert die Regular-Datei des
+# Fonts bereits, werden Download und Entpacken komplett uebersprungen. Das
+# macht den Lauf idempotent und vermeidet den Re-Download bei jedem Playbook.
+- name: Check whether Nerd Font is already installed
+  ansible.builtin.stat:
+    path: "{{ nerd_font_marker }}"
+  register: nerd_font_installed
+
 - name: Download Nerd Font
   ansible.builtin.get_url:
-    url: "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/{{ nerd_font_name }}.zip"
+    url: "{{ nerd_font_url }}"
     dest: "{{ nerd_font_archive }}"
     mode: "0644"
+    force: false
+  when: not nerd_font_installed.stat.exists
 
 - name: Extract Nerd Font
   ansible.builtin.unarchive:
     src: "{{ nerd_font_archive }}"
     dest: "{{ nerd_font_dir }}"
     remote_src: true
+    creates: "{{ nerd_font_marker }}"
+  register: nerd_font_extracted
 
 - name: Refresh font cache
   ansible.builtin.command:
     cmd: fc-cache -f
-  changed_when: false
+  when: nerd_font_extracted is changed
