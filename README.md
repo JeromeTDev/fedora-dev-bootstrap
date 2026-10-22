@@ -10,7 +10,7 @@ A fully automated Fedora developer bootstrap built on **Ansible** – designed f
 one-shot run on a fresh Fedora installation.
 
 System setup, packages, fonts, Flatpak apps, mise runtimes and **GNU Stow**-deployed
-**dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway and more).
+**dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway, niri and more).
 
 ## ![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/1e2692f9-ed51-4e78-bc4c-8d889fd377e2)
 
@@ -43,7 +43,7 @@ Everything configurable lives in [`group_vars/fedora.yml`](group_vars/fedora.yml
 | Media & PDF        | Fedora              | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                |
 | Desktop            | Fedora              | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                  |
 | Prompt & Terminals | COPR                | `starship`, `lazygit`, `yazi`, `ghostty`                                                                          |
-| Window Manager     | COPR – opt-in        | `rofi`, `mako`, `swayfx` (replaces `sway`)                                                                      |
+| Window Manager     | Fedora/COPR – opt-in | `rofi`, `mako`, `swayfx` (replaces `sway`), `niri`                                                                 |
 | Apps               | Flatpak, system-wide | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                           |
 | Fonts              | GitHub release      | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                  |
 | Runtimes           | mise                | `python`, `rust`, `uv`, `opencode`                                                                                |
@@ -71,6 +71,21 @@ The role also installs `rofi`, `mako`, `sway-config-fedora` (greetd session and
 `layered-include` for the dotfiles), `sway-systemd` (`XDG_CURRENT_DESKTOP`,
 `sway-session.target`) and `xdg-desktop-portal-wlr` (portal backend).
 
+### Niri (testing)
+
+The `niri` role is enabled by default for testing and controlled by `install_niri`
+(default `true`, see [`group_vars/fedora.yml`](group_vars/fedora.yml) and
+[`roles/niri/defaults/main.yml`](roles/niri/defaults/main.yml)). Disable it in
+[`group_vars/fedora.yml`](group_vars/fedora.yml) or per host in `inventory.ini`:
+
+```ini
+[fedora:vars]
+install_niri=false
+```
+
+- Installs `niri` from Fedora repositories
+- Dotfiles are provided in [`dotfiles/.config/niri/`](dotfiles/.config/niri/) and stowed automatically
+
 ## Dotfiles
 
 `dotfiles/` is copied to `~/.dotfiles` on the first run and stowed from there
@@ -87,13 +102,7 @@ The role also installs `rofi`, `mako`, `sway-config-fedora` (greetd session and
 > created by the desktop) – back them up first if needed. Never run `stow .` on the
 > **repo root**, or `roles/` and `playbook.yml` end up in your home directory.
 
-**tmux plugins** are not bundled (see [`.gitignore`](.gitignore)); `TPM` installs them
-on the first `Prefix + I`, or manually:
-
-```bash
-git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-~/.tmux/plugins/tpm/bin/install_plugins
-```
+**tmux plugins** are managed by `TPM` and will be installed automatically on first launch of tmux (via `run '~/.tmux/plugins/tpm/tpm'` in the config). If needed, they can also be installed with `Prefix + I`.
 
 ## Updates
 
@@ -145,7 +154,7 @@ Alles Anpassbare liegt in [`group_vars/fedora.yml`](group_vars/fedora.yml).
 | Medien & PDF       | Fedora               | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                |
 | Desktop            | Fedora               | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                  |
 | Prompt & Terminals | COPR                 | `starship`, `lazygit`, `yazi`, `ghostty`                                                                          |
-| Window Manager     | COPR – opt-in        | `rofi`, `mako`, `swayfx` (ersetzt `sway`)                                                                          |
+| Window Manager     | Fedora/COPR – opt-in | `rofi`, `mako`, `swayfx` (ersetzt `sway`), `niri`                                                                 |
 | Apps               | Flatpak, systemweit  | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                           |
 | Schriften          | GitHub-Release       | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                  |
 | Runtimes           | mise                 | `python`, `rust`, `uv`, `opencode`                                                                                |
@@ -174,6 +183,21 @@ Die Rolle installiert außerdem `rofi`, `mako`, `sway-config-fedora` (greetd-Ses
 und `layered-include` für die Dotfiles), `sway-systemd` (`XDG_CURRENT_DESKTOP`,
 `sway-session.target`) und `xdg-desktop-portal-wlr` (Portal-Backend).
 
+### Niri (Test)
+
+Die `niri`-Rolle ist zum Testen standardmäßig aktiviert und wird über `install_niri`
+gesteuert (Standard `true`, siehe [`group_vars/fedora.yml`](group_vars/fedora.yml) und
+[`roles/niri/defaults/main.yml`](roles/niri/defaults/main.yml)). Deaktivieren in
+[`group_vars/fedora.yml`](group_vars/fedora.yml) oder pro Host in `inventory.ini`:
+
+```ini
+[fedora:vars]
+install_niri=false
+```
+
+- Installiert `niri` aus den Fedora-Repositories
+- Dotfiles liegen in [`dotfiles/.config/niri/`](dotfiles/.config/niri/) und werden automatisch gestowt
+
 ## Dotfiles
 
 `dotfiles/` wird beim ersten Lauf nach `~/.dotfiles` kopiert und von dort per Stow
@@ -190,13 +214,7 @@ verlinkt (`dotfiles/ -> ~/.dotfiles --stow .--> ~/.config/...`).
 > `~/.config/fontconfig/fonts.conf`) – vorher ggf. sichern. `stow .` niemals auf das
 > **Repo-Root** anwenden, sonst landen `roles/` und `playbook.yml` in deinem Home.
 
-**tmux-Plugins** sind nicht mitgeliefert (siehe [`.gitignore`](.gitignore)); `TPM`
-installiert sie beim ersten `Prefix + I`, manuell:
-
-```bash
-git clone --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-~/.tmux/plugins/tpm/bin/install_plugins
-```
+**tmux-Plugins** werden von `TPM` verwaltet und beim ersten Start von tmux automatisch installiert (über `run '~/.tmux/plugins/tpm/tpm'` in der Konfiguration). Falls nötig, können sie auch mit `Prefix + I` installiert werden.
 
 ## Updates
 

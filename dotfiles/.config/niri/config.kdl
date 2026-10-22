@@ -1,0 +1,391 @@
+// ============================================================
+//  niri-Konfiguration
+//  Portiert von ~/.config/sway/config (swayfx) auf niri 26.04
+//  https://niri-wm.github.io/niri/Configuration:-Introduction
+// ============================================================
+//
+//  Workspaces sind in niri dynamisch. Die statischen
+//  sway-Workspaces 1-10 sind über Mod+1..Mod+0 (Index) und
+//  Mod+Shift+1..Mod+Shift+0 (Fenster verschieben) abgebildet.
+
+// ------------------------------------------------------------
+//  Eingabe
+// ------------------------------------------------------------
+
+input {
+    // sway: set $mod Mod4  ->  niri: "Mod" ist auf TTY Super.
+    mod-key "Super"
+    // Für verschachteltes Testen im Fenster (winit) bleibt Alt.
+    mod-key-nested "Alt"
+
+    keyboard {
+        // sway: xkb_layout us / xkb_variant altgr-intl
+        xkb {
+            layout "us"
+            variant "altgr-intl"
+        }
+
+        // sway: repeat_delay 250 / repeat_rate 40
+        repeat-delay 250
+        repeat-rate 40
+    }
+}
+
+// ------------------------------------------------------------
+//  Monitor
+// ------------------------------------------------------------
+//  Positionen in logischen Pixeln: DP-2 ist bei scale 1.5
+//  2560 Pixel breit -> HDMI-A-1 links bei x=-2560.
+
+output "DP-2" {
+    mode "3840x2160@100"
+    scale 1.5
+    position x=0 y=0
+}
+
+// Zweiter Monitor, falls er angesteckt wird (aktuell nicht belegt).
+output "HDMI-A-1" {
+    mode "3840x2160@60"
+    scale 1
+    position x=-2560 y=0
+}
+
+// ------------------------------------------------------------
+//  Layout  (SwayFX: corner_radius / gaps / shadows / border)
+// ------------------------------------------------------------
+
+layout {
+    // sway: gaps inner 5 / gaps outer 1
+    // niri hat nur einen Gap-Wert, negative struts emulieren
+    // "inner vs. outer": 5 - 4 = 1px Außenabstand.
+    gaps 5
+    struts {
+        left -4
+        right -4
+        top -4
+        bottom -4
+    }
+
+    // sway: default_border pixel 2
+    // niri zeichnet den Border um alle Fenster, den Focus-Ring nur
+    // um das aktive -> Ring aus, sonst zwei Rahmen.
+    focus-ring {
+        off
+    }
+    border {
+        on
+        width 2
+        active-color "#dbbc7f"     // Everforest-Gelb
+        inactive-color "#3d484d"
+        urgent-color "#e67e80"     // sway: dim_inactive_colors.urgent #ff0000
+    }
+
+    // sway: shadows enable / shadow_blur_radius 20
+    //        shadow_color #00000066 / shadow_inactive_color #00000033
+    shadow {
+        on
+        softness 20
+        spread 0
+        offset x=0 y=5
+        color "#00000066"
+        inactive-color "#00000033"
+    }
+
+    // Beim Fokuswechsel wird nur an den Rand gescrollt, nicht
+    // zentriert (center-focused-column ist niri-Default). Eine
+    // einzelne Spalte wird immer zentriert.
+    always-center-single-column
+
+    // sway-Standard: neues Fenster bekommt die halbe Bildschirmbreite.
+    default-column-width { proportion 0.5; }
+}
+
+// ------------------------------------------------------------
+//  Blur  (SwayFX: blur enable / blur_passes 3 / blur_noise 0.05)
+// ------------------------------------------------------------
+//  niri-Defaults (passes 3, offset 3.0), nur noise und saturation
+//  sind an sway angepasst.
+
+blur {
+    noise 0.05
+    saturation 1.0
+}
+
+// ------------------------------------------------------------
+//  Window Rules
+// ------------------------------------------------------------
+
+// sway: corner_radius 12 + smart_corner_radius enable
+// niri kennt den CSD-Eckenradius automatisch; clip-to-geometry
+// erzwingt die runden Ecken für alle Fenster.
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+}
+
+// niri zeichnet Border und Focus-Ring standardmäßig als gefülltes
+// Rechteck HINTER dem Fenster. Bei halbtransparenten Fenstern
+// schimmert das durch: das Terminal wird vom gelben aktiven Rahmen
+// eingefärbt UND der Blur wird vom Rechteck verdeckt (nur Fenster,
+// die SSD aushandeln, bekommen den Rand "außen" gezeichnet -
+// Terminals tun das nicht).
+// Mit false wird der Rahmen rund um das Fenster gezeichnet.
+window-rule {
+    draw-border-with-background false
+}
+
+// sway: blur enable (global)
+// Wird nur bei halbtransparenten Fenstern sichtbar - wie in swayfx.
+window-rule {
+    background-effect {
+        blur true
+    }
+}
+
+// sway: default_dim_inactive 0.05 hat in niri kein Pendant.
+// Der Ersatz per opacity (0.95) ließ den hellen Wallpaper durch die
+// inaktiven Fenster scheinen, dadurch sahen sie farblich anders aus
+// als das aktive Fenster. Deshalb weggelassen.
+
+// ------------------------------------------------------------
+//  Layer Rules
+// ------------------------------------------------------------
+
+// sway: layer_effects "waybar" { blur enable; blur_xray enable;
+//                               shadows enable; corner_radius 6 }
+layer-rule {
+    match namespace="^waybar$"
+    background-effect {
+        blur true
+        xray true
+    }
+    shadow {
+        on
+        softness 20
+        spread 0
+        offset x=0 y=3
+        color "#00000066"
+    }
+    geometry-corner-radius 6
+}
+
+// ------------------------------------------------------------
+//  Fenster-Dekorationen
+// ------------------------------------------------------------
+
+// niri zeichnet Rahmen/Shadow selbst statt die App. Terminals
+// handeln keine Server-Side-Decorations aus, ohne das würde der
+// Rahmen durch das transparente Fenster schimmern.
+prefer-no-csd
+
+// ------------------------------------------------------------
+//  Screenshots
+// ------------------------------------------------------------
+
+// Zielordner für die niri-Screenshots (Mod+Shift+Print).
+screenshot-path "~/Bilder/Screenshots/Screenshot from %Y%m%d-%H%M%S.png"
+
+// ------------------------------------------------------------
+//  Workspaces
+// ------------------------------------------------------------
+
+// Fester Workspace 1. niri nummeriert Workspaces dynamisch, ein
+// benannter Workspace existiert aber immer und bleibt an seinem
+// Monitor - so landet Mod+1 immer auf dem gleichen Workspace.
+workspace "1" {
+    open-on-output "DP-2"
+}
+
+// ------------------------------------------------------------
+//  Start
+// ------------------------------------------------------------
+
+// sway: exec swayidle ... (300s -> Lock, dann Displays aus)
+// niri implementiert ext-idle-notifier, swayidle funktioniert also.
+spawn-sh-at-startup "swayidle -w timeout 300 'swaylock -f' timeout 360 'niri msg action power-off-monitors' resume 'niri msg action power-on-monitors' before-sleep 'swaylock -f' lock 'swaylock -f' unlock 'pkill -xu \"$USER\" -SIGUSR1 swaylock'"
+
+// sway: output * bg $wallpaper fill
+// swaybg meldet den Namespace "wallpaper" (nicht "swaybg").
+// Wichtig: KEIN "place-within-backdrop" per Layer-Rule - dann wird
+// die Fläche im normalen Desktop gar nicht mehr gezeichnet.
+spawn-at-startup "swaybg" "-i" "/home/woodz/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg" "-m" "fill"
+
+spawn-at-startup "waybar"
+
+// sway: config.d/50-session-portal.conf
+// (Env-Import + gnome-keyring für Brave/Chromium)
+spawn-at-startup "gnome-keyring-daemon" "--start" "--components=secrets"
+
+// ------------------------------------------------------------
+//  Hotkey-Overlay
+// ------------------------------------------------------------
+
+// Das "Important Hotkeys"-Fenster von niri: kein Popup beim Start
+// (sway hatte keins) und nur Aktionen zeigen, die auch wirklich
+// an eine Taste gebunden sind.
+hotkey-overlay {
+    skip-at-startup
+    hide-not-bound
+}
+
+// ------------------------------------------------------------
+//  Tastenkürzel
+// ------------------------------------------------------------
+
+binds {
+    // ---------- Apps ----------
+    Mod+Return hotkey-overlay-title="Terminal: ghostty" { spawn "ghostty"; }
+    Mod+D hotkey-overlay-title="App-Menü: rofi" { spawn "rofi" "-show" "drun" "-config" "/home/woodz/.config/rofi/everforest.rasi"; }
+    Mod+Shift+B hotkey-overlay-title="Browser: brave-browser" { spawn "brave-browser"; }
+    Mod+Shift+F hotkey-overlay-title="Dateimanager: yazi" { spawn "ghostty" "-e" "yazi"; }
+
+    // ---------- Fenster schließen ----------
+    Mod+Q hotkey-overlay-title="Fenster schließen" { close-window; }
+
+    // ---------- System ----------
+    Mod+Shift+C hotkey-overlay-title="Niri-Config neu laden" { spawn-sh "niri msg action load-config-file"; }
+    Mod+Shift+E hotkey-overlay-title="Niri beenden" { quit; }
+    Mod+Ctrl+Shift+L hotkey-overlay-title="Bildschirm sperren" { spawn "swaylock" "-i" "/home/woodz/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg"; }
+    Mod+Ctrl+P hotkey-overlay-title="Power-Menü" { spawn "~/.config/waybar/scripts/powermenu.sh"; }
+
+    // ---------- Fokus bewegen ----------
+    // sway: focus left/down/up/right
+    Mod+Left  hotkey-overlay-title="Fokus: Spalte links" { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right hotkey-overlay-title="Fokus: Spalte rechts" { focus-column-right; }
+    Mod+H     { focus-column-left; }
+    Mod+L     { focus-column-right; }
+    // Mod+J / Mod+K: einen Workspace weiter / zurück
+    Mod+J     hotkey-overlay-title="Workspace: weiter" { focus-workspace-down; }
+    Mod+K     hotkey-overlay-title="Workspace: zurück" { focus-workspace-up; }
+
+    // ---------- Fokussiertes Fenster bewegen ----------
+    // sway: move left/down/up/right
+    Mod+Shift+Left  hotkey-overlay-title="Spalte nach links verschieben" { move-column-left; }
+    Mod+Shift+Down  { move-window-down; }
+    Mod+Shift+Up    { move-window-up; }
+    Mod+Shift+Right hotkey-overlay-title="Spalte nach rechts verschieben" { move-column-right; }
+    Mod+Shift+H     { move-column-left; }
+    Mod+Shift+L     { move-column-right; }
+    // J/K sind Workspaces -> mit Shift wandert das FENSTER in den
+    // nächsten/vorherigen Workspace (i3/sway: "move container to
+    // workspace down/up")
+    Mod+Shift+J     hotkey-overlay-title="Fenster: in den nächsten Workspace" { move-column-to-workspace-down; }
+    Mod+Shift+K     hotkey-overlay-title="Fenster: in den vorherigen Workspace" { move-column-to-workspace-up; }
+    // ...und mit Mod+Ctrl+Shift wird der ganze Workspace in der
+    // Liste verschoben (niri-Aktion, in sway nicht vorhanden)
+    Mod+Ctrl+Shift+J hotkey-overlay-title="Workspace: nach unten schieben" { move-workspace-down; }
+    Mod+Ctrl+Shift+K hotkey-overlay-title="Workspace: nach oben schieben" { move-workspace-up; }
+
+    // ---------- Monitor-Fokus / Fenster auf Monitor ----------
+    // In sway gibt es dafür keine Tasten (der Fokus wandert mit den
+    // Pfeilen zum Monitorrand), deshalb eigene Bindings.
+    Mod+Alt+Left  { focus-monitor-left; }
+    Mod+Alt+Down  { focus-monitor-down; }
+    Mod+Alt+Up    { focus-monitor-up; }
+    Mod+Alt+Right { focus-monitor-right; }
+
+    Mod+Alt+Shift+Left  { move-column-to-monitor-left; }
+    Mod+Alt+Shift+Down  { move-column-to-monitor-down; }
+    Mod+Alt+Shift+Up    { move-column-to-monitor-up; }
+    Mod+Alt+Shift+Right { move-column-to-monitor-right; }
+
+    // ---------- Workspace wechseln ----------
+    // sway: workspace number 1..10
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+0 { focus-workspace 10; }
+
+    // ---------- Fenster zu Workspace verschieben ----------
+    // sway: move container to workspace number 1..10
+    Mod+Shift+1 { move-column-to-workspace 1; }
+    Mod+Shift+2 { move-column-to-workspace 2; }
+    Mod+Shift+3 { move-column-to-workspace 3; }
+    Mod+Shift+4 { move-column-to-workspace 4; }
+    Mod+Shift+5 { move-column-to-workspace 5; }
+    Mod+Shift+6 { move-column-to-workspace 6; }
+    Mod+Shift+7 { move-column-to-workspace 7; }
+    Mod+Shift+8 { move-column-to-workspace 8; }
+    Mod+Shift+9 { move-column-to-workspace 9; }
+    Mod+Shift+0 { move-column-to-workspace 10; }
+
+    // ---------- Layout ----------
+    // sway: splith -> Spalte rechts erzeugen / konsumieren
+    Mod+B hotkey-overlay-title="Neue Spalte rechts" { consume-or-expel-window-right; }
+    // sway: splitv -> Fenster in die Spalte stapeln
+    Mod+V hotkey-overlay-title="Fenster in Spalte stapeln" { consume-window-into-column; }
+    // sway: Mod+W = layout tabbed. Mod+S (layout stacking) gibt es
+    // in niri nicht, die Spalte wird zur Tab-Leiste.
+    Mod+W hotkey-overlay-title="Spalte: Tab-Leiste" { toggle-column-tabbed-display; }
+    // sway: fullscreen
+    Mod+F hotkey-overlay-title="Fenster: Vollbild" { fullscreen-window; }
+    // sway: Mod+Shift+space = floating toggle
+    Mod+Shift+space hotkey-overlay-title="Fenster: floating/tiling" { toggle-window-floating; }
+    // sway: focus mode_toggle
+    Mod+space hotkey-overlay-title="Fokus: floating/tiling" { switch-focus-between-floating-and-tiling; }
+    // sway: focus parent -> niri hat keinen Baum; die Spalte ist
+    // das nächste Analogon.
+    Mod+A hotkey-overlay-title="Fokus: erstes Fenster der Spalte" { focus-window-in-column 1; }
+
+    // ---------- Größe ändern ----------
+    // sway hatte dafür einen resize-Modus (Mod+R, dann hjkl).
+    // Niri kennt keine Modi - dafür ist es hier ein reines
+    // Halten-von-Mod+Ctrl plus Richtung, ohne Zwischenmodus.
+    // Pfeil: links/rechts = Breite, hoch/runter = Höhe.
+    Mod+Ctrl+Left  hotkey-overlay-title="Breite verkleinern" { set-column-width "-5%"; }
+    Mod+Ctrl+Right hotkey-overlay-title="Breite vergrößern" { set-column-width "+5%"; }
+    Mod+Ctrl+Up    hotkey-overlay-title="Höhe verkleinern" { set-window-height "-5%"; }
+    Mod+Ctrl+Down  hotkey-overlay-title="Höhe vergrößern" { set-window-height "+5%"; }
+    // Gleiches mit hjkl, wie im sway-resize-Modus.
+    Mod+Ctrl+H     { set-column-width "-5%"; }
+    Mod+Ctrl+L     { set-column-width "+5%"; }
+    Mod+Ctrl+J     { set-window-height "+5%"; }
+    Mod+Ctrl+K     { set-window-height "-5%"; }
+
+    // ---------- Fenster auf den ganzen Bildschirm ----------
+    // sway: keine Entsprechung (dort nur "fullscreen").
+    // maximize-window-to-edges: Fenster füllt die verfügbare
+    // Fläche (ohne Rand/Gaps), Waybar bleibt sichtbar, das Fenster
+    // bleibt im Tiling - anders als fullscreen.
+    Mod+M     hotkey-overlay-title="Fenster: Bildschirm füllen" { maximize-window-to-edges; }
+    // Volle Spaltenbreite (die ganze Breite, mehrere Fenster
+    // übereinander möglich) - entspricht sway "layout splith".
+    Mod+Shift+M hotkey-overlay-title="Spalte maximieren" { maximize-column; }
+
+    // ---------- Übersicht / Overlay ----------
+    Mod+O repeat=false hotkey-overlay-title="Übersicht öffnen" { toggle-overview; }
+    Mod+Shift+Slash hotkey-overlay-title="Hilfe: alle Tastenkürzel" { show-hotkey-overlay; }
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+
+    // ---------- Screenshots ----------
+    // sway: grimshot copy area / copy screen / save area / save screen
+    // Print/Shift+Print: grim + slurp (sofort, Auswahl per Maus).
+    // Mod+Print/Mod+Shift+Print: niri's interaktiver Screenshot.
+    Print hotkey-overlay-title="Screenshot: Auswahl kopieren" { spawn-sh "grim -g \"$(slurp)\" - | wl-copy"; }
+    Shift+Print hotkey-overlay-title="Screenshot: Auswahl speichern" { spawn-sh "grim -g \"$(slurp)\" \"$HOME/Bilder/Screenshots/$(date +%Y%m%d-%H%M%S).png\""; }
+    Mod+Print hotkey-overlay-title="Screenshot: Bildschirm kopieren" { screenshot-screen write-to-disk=false; }
+    Mod+Shift+Print hotkey-overlay-title="Screenshot: Bildschirm speichern" { screenshot-screen; }
+
+    // ---------- Monitor an/aus ----------
+    Mod+Shift+P hotkey-overlay-title="Monitore aus" { power-off-monitors; }
+
+    // ---------- Multimedia ----------
+    XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
+    XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
+    XF86AudioPlay        allow-when-locked=true { spawn-sh "playerctl play-pause"; }
+    XF86AudioStop        allow-when-locked=true { spawn-sh "playerctl stop"; }
+    XF86AudioPrev        allow-when-locked=true { spawn-sh "playerctl previous"; }
+    XF86AudioNext        allow-when-locked=true { spawn-sh "playerctl next"; }
+    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
+    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+}

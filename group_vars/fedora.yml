@@ -3,6 +3,7 @@
 # true  -> swayfx wird installiert bzw. ersetzt ein vorhandenes "sway"
 # false -> Rolle wird komplett uebersprungen
 install_swayfx: true
+install_niri: true
 
 dev_packages:
   - git

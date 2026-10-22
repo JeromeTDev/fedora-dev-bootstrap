@@ -43,6 +43,8 @@
     # Sway/SwayFX-Rolle (opt-in via install_swayfx, Default: aus)
     - role: sway
       when: install_swayfx | bool
+    - role: niri
+      when: install_niri | bool
     - dnf
     - copr
     - fonts

@@ -1,0 +1,7 @@
+---
+# Aktiviert die niri-Rolle in playbook.yml.
+# Standard ist false, damit das Playbook nie an einer undefinierten Variablen
+# scheitert. Ueberschreiben in group_vars/fedora.yml oder inventory.ini:
+#   [fedora:vars]
+#   install_niri=true
+install_niri: false

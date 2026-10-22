@@ -1,0 +1,6 @@
+---
+name: install niri
+become: true
+ansible.builtin.dnf:
+  name: niri
+  state: present
