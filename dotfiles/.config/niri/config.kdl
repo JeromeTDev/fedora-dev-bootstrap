@@ -208,7 +208,7 @@ spawn-sh-at-startup "swayidle -w timeout 300 'swaylock -f' timeout 360 'niri msg
 // swaybg meldet den Namespace "wallpaper" (nicht "swaybg").
 // Wichtig: KEIN "place-within-backdrop" per Layer-Rule - dann wird
 // die Fläche im normalen Desktop gar nicht mehr gezeichnet.
-spawn-at-startup "swaybg" "-i" "/home/woodz/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg" "-m" "fill"
+spawn-sh-at-startup "swaybg -i ~/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg -m fill"
 
 spawn-at-startup "waybar"
 
@@ -235,7 +235,7 @@ hotkey-overlay {
 binds {
     // ---------- Apps ----------
     Mod+Return hotkey-overlay-title="Terminal: ghostty" { spawn "ghostty"; }
-    Mod+D hotkey-overlay-title="App-Menü: rofi" { spawn "rofi" "-show" "drun" "-config" "/home/woodz/.config/rofi/everforest.rasi"; }
+    Mod+D hotkey-overlay-title="App-Menü: rofi" { spawn-sh "rofi -show drun -config ~/.config/rofi/everforest.rasi"; }
     Mod+Shift+B hotkey-overlay-title="Browser: brave-browser" { spawn "brave-browser"; }
     Mod+Shift+F hotkey-overlay-title="Dateimanager: yazi" { spawn "ghostty" "-e" "yazi"; }
 
@@ -245,8 +245,8 @@ binds {
     // ---------- System ----------
     Mod+Shift+C hotkey-overlay-title="Niri-Config neu laden" { spawn-sh "niri msg action load-config-file"; }
     Mod+Shift+E hotkey-overlay-title="Niri beenden" { quit; }
-    Mod+Ctrl+Shift+L hotkey-overlay-title="Bildschirm sperren" { spawn "swaylock" "-i" "/home/woodz/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg"; }
-    Mod+Ctrl+P hotkey-overlay-title="Power-Menü" { spawn "~/.config/waybar/scripts/powermenu.sh"; }
+    Mod+Ctrl+Shift+L hotkey-overlay-title="Bildschirm sperren" { spawn-sh "swaylock -i ~/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg"; }
+    Mod+Ctrl+P hotkey-overlay-title="Power-Menü" { spawn-sh "~/.config/waybar/scripts/powermenu.sh"; }
 
     // ---------- Fokus bewegen ----------
     // sway: focus left/down/up/right

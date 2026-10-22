@@ -1,0 +1,3 @@
+// Globales Rofi-Theme. Wird bei jedem rofi-Aufruf ohne eigenes -config
+// geladen. @theme loest relativ zu ~/.config/rofi/ auf.
+@theme "everforest"
