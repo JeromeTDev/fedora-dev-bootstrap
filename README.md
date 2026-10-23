@@ -14,7 +14,9 @@ System setup, packages, fonts, Flatpak apps, mise runtimes and **GNU Stow**-depl
 
 ## Screenshots
 
+swayfx:
 ![Niri](screenshots/screenshot-3.png)
+niri:
 ![Niri](screenshots/screenshot.png)
 
 ## Desktop: Sway/SwayFX or niri
