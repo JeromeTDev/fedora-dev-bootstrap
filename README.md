@@ -12,7 +12,32 @@ one-shot run on a fresh Fedora installation.
 System setup, packages, fonts, Flatpak apps, mise runtimes and **GNU Stow**-deployed
 **dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway, niri and more).
 
-## ![Fedora Dev Bootstrap – Terminal](https://github.com/user-attachments/assets/1e2692f9-ed51-4e78-bc4c-8d889fd377e2)
+## Desktop: Sway/SwayFX or niri
+
+Pick your Wayland desktop – or install both and choose at the login screen.
+Both compositors are toggled in [`group_vars/fedora.yml`](group_vars/fedora.yml)
+(or per host in `inventory.ini`):
+
+| `install_swayfx` | `install_niri` | Result                                                 |
+| :--------------: | :------------: | ------------------------------------------------------ |
+|      `true`      |    `false`     | SwayFX only – replaces a preinstalled `sway`           |
+|     `false`      |     `true`     | niri only                                              |
+|      `true`      |     `true`     | both – pick **sway** or **niri** in greetd _(default)_ |
+|     `false`      |    `false`     | no compositor – packages and dotfiles only             |
+
+```ini
+[fedora:vars]
+install_swayfx=true   # SwayFX from COPR
+install_niri=true     # niri from Fedora
+```
+
+Matching dotfiles are stowed automatically: [`dotfiles/.config/sway/`](dotfiles/.config/sway/)
+for SwayFX and [`dotfiles/.config/niri/`](dotfiles/.config/niri/) for niri.
+
+## Screenshot
+
+![Niri](screenshots/screenshot-3.png)
+![Niri](screenshots/screenshot.png)
 
 ## Installation
 
@@ -35,56 +60,23 @@ automatically via `ansible.cfg` and is listed in `.gitignore`.
 
 Everything configurable lives in [`group_vars/fedora.yml`](group_vars/fedora.yml).
 
-| Category           | Source              | Tools                                                                                                             |
-| ------------------ | ------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Dev & Build        | Fedora              | `git`, `gh`, `make`, `gcc`, `luarocks`, `texlive-scheme-medium`                                                   |
-| Shell & Editor     | Fedora              | `fish` (default shell), `neovim` (LazyVim), `tmux`                                                                 |
-| CLI                | Fedora              | `fzf`, `zoxide`, `btop`, `tree`, `ripgrep`, `fd-find`, `jq`, `ncdu`, `stow`, `fastfetch`                          |
-| Media & PDF        | Fedora              | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                |
-| Desktop            | Fedora              | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                  |
-| Prompt & Terminals | COPR                | `starship`, `lazygit`, `yazi`, `ghostty`                                                                          |
-| Window Manager     | Fedora/COPR – opt-in | `rofi`, `mako`, `swayfx` (replaces `sway`), `niri`                                                                 |
-| Apps               | Flatpak, system-wide | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                           |
-| Fonts              | GitHub release      | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                  |
-| Runtimes           | mise                | `python`, `rust`, `uv`, `opencode`                                                                                |
-| System             | DNF                 | `fastestmirror`, 15 parallel downloads, `defaultyes`, no weak deps, `clean_requirements_on_remove`, `plugins=1` |
+| Category           | Source               | Tools                                                                                                           |
+| ------------------ | -------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Dev & Build        | Fedora               | `git`, `gh`, `make`, `gcc`, `luarocks`, `texlive-scheme-medium`                                                 |
+| Shell & Editor     | Fedora               | `fish` (default shell), `neovim` (LazyVim), `tmux`                                                              |
+| CLI                | Fedora               | `fzf`, `zoxide`, `btop`, `tree`, `ripgrep`, `fd-find`, `jq`, `ncdu`, `stow`, `fastfetch`                        |
+| Media & PDF        | Fedora               | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`              |
+| Desktop            | Fedora               | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                |
+| Prompt & Terminals | COPR                 | `starship`, `lazygit`, `yazi`, `ghostty`                                                                        |
+| Window Manager     | Fedora/COPR – opt-in | `rofi`, `mako`, **SwayFX** or **niri** (choose either, both or none)                                            |
+| Apps               | Flatpak, system-wide | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                         |
+| Fonts              | GitHub release       | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                |
+| Runtimes           | mise                 | `python`, `rust`, `uv`, `opencode`                                                                              |
+| System             | DNF                  | `fastestmirror`, 15 parallel downloads, `defaultyes`, no weak deps, `clean_requirements_on_remove`, `plugins=1` |
 
 A full `dnf upgrade` runs on top of that. Runtimes come from
 [`dotfiles/.config/mise/config.toml`](dotfiles/.config/mise/config.toml), falling
 back to `mise_tools` in `group_vars/fedora.yml`.
-
-### Sway / SwayFX
-
-The `sway` role is opt-in and controlled by `install_swayfx` (default `false`,
-see [`roles/sway/defaults/main.yml`](roles/sway/defaults/main.yml)). Enable it in
-[`group_vars/fedora.yml`](group_vars/fedora.yml) or per host in `inventory.ini`:
-
-```ini
-[fedora:vars]
-install_swayfx=true
-```
-
-- `sway` installed → replaced by `swayfx` from COPR
-- no `sway` installed → `swayfx` is installed directly
-
-The role also installs `rofi`, `mako`, `sway-config-fedora` (greetd session and
-`layered-include` for the dotfiles), `sway-systemd` (`XDG_CURRENT_DESKTOP`,
-`sway-session.target`) and `xdg-desktop-portal-wlr` (portal backend).
-
-### Niri (testing)
-
-The `niri` role is enabled by default for testing and controlled by `install_niri`
-(default `true`, see [`group_vars/fedora.yml`](group_vars/fedora.yml) and
-[`roles/niri/defaults/main.yml`](roles/niri/defaults/main.yml)). Disable it in
-[`group_vars/fedora.yml`](group_vars/fedora.yml) or per host in `inventory.ini`:
-
-```ini
-[fedora:vars]
-install_niri=false
-```
-
-- Installs `niri` from Fedora repositories
-- Dotfiles are provided in [`dotfiles/.config/niri/`](dotfiles/.config/niri/) and stowed automatically
 
 ## Dotfiles
 
@@ -123,7 +115,29 @@ Ein **vollautomatischer Fedora-Developer-Bootstrap** auf **Ansible**-Basis –
 gedacht für die **einmalige** Ausführung auf einer frischen Fedora-Installation.
 
 System-Setup, Pakete, Schriften, Flatpak-Apps, mise-Runtimes und per **GNU Stow**
-deployte **Dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway u. v. m.).
+deployte **Dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway/niri u. v. m.).
+
+## Desktop: Sway/SwayFX oder niri
+
+Wayland-Desktop auswählen – oder beide installieren und erst beim Login entscheiden.
+Beide Compositor werden in [`group_vars/fedora.yml`](group_vars/fedora.yml)
+(oder pro Host in `inventory.ini`) geschaltet:
+
+| `install_swayfx` | `install_niri` | Ergebnis                                                           |
+| :--------------: | :------------: | ------------------------------------------------------------------ |
+|      `true`      |    `false`     | nur SwayFX – ersetzt ein vorhandenes `sway`                        |
+|     `false`      |     `true`     | nur niri                                                           |
+|      `true`      |     `true`     | beide – im greetd-Login **sway** oder **niri** wählen _(Standard)_ |
+|     `false`      |    `false`     | kein Compositor – nur Pakete und Dotfiles                          |
+
+```ini
+[fedora:vars]
+install_swayfx=true   # SwayFX aus COPR
+install_niri=true     # niri aus Fedora
+```
+
+Passende Dotfiles werden automatisch gestowt: [`dotfiles/.config/sway/`](dotfiles/.config/sway/)
+für SwayFX und [`dotfiles/.config/niri/`](dotfiles/.config/niri/) für niri.
 
 ## Installation
 
@@ -154,7 +168,7 @@ Alles Anpassbare liegt in [`group_vars/fedora.yml`](group_vars/fedora.yml).
 | Medien & PDF       | Fedora               | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                |
 | Desktop            | Fedora               | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                  |
 | Prompt & Terminals | COPR                 | `starship`, `lazygit`, `yazi`, `ghostty`                                                                          |
-| Window Manager     | Fedora/COPR – opt-in | `rofi`, `mako`, `swayfx` (ersetzt `sway`), `niri`                                                                 |
+| Window Manager     | Fedora/COPR – opt-in | `rofi`, `mako`, **SwayFX** oder **niri** (einzeln, beide oder keins)                                              |
 | Apps               | Flatpak, systemweit  | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                           |
 | Schriften          | GitHub-Release       | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                  |
 | Runtimes           | mise                 | `python`, `rust`, `uv`, `opencode`                                                                                |
@@ -163,40 +177,6 @@ Alles Anpassbare liegt in [`group_vars/fedora.yml`](group_vars/fedora.yml).
 Zusätzlich läuft ein `dnf upgrade`. Runtimes kommen aus
 [`dotfiles/.config/mise/config.toml`](dotfiles/.config/mise/config.toml), sonst aus
 `mise_tools` in `group_vars/fedora.yml`.
-
-### Sway / SwayFX
-
-Die `sway`-Rolle ist opt-in und wird über `install_swayfx` gesteuert (Standard
-`false`, siehe [`roles/sway/defaults/main.yml`](roles/sway/defaults/main.yml)).
-Aktivieren in [`group_vars/fedora.yml`](group_vars/fedora.yml) oder pro Host in
-`inventory.ini`:
-
-```ini
-[fedora:vars]
-install_swayfx=true
-```
-
-- `sway` installiert → wird durch `swayfx` aus COPR ersetzt
-- kein `sway` installiert → `swayfx` wird direkt installiert
-
-Die Rolle installiert außerdem `rofi`, `mako`, `sway-config-fedora` (greetd-Session
-und `layered-include` für die Dotfiles), `sway-systemd` (`XDG_CURRENT_DESKTOP`,
-`sway-session.target`) und `xdg-desktop-portal-wlr` (Portal-Backend).
-
-### Niri (Test)
-
-Die `niri`-Rolle ist zum Testen standardmäßig aktiviert und wird über `install_niri`
-gesteuert (Standard `true`, siehe [`group_vars/fedora.yml`](group_vars/fedora.yml) und
-[`roles/niri/defaults/main.yml`](roles/niri/defaults/main.yml)). Deaktivieren in
-[`group_vars/fedora.yml`](group_vars/fedora.yml) oder pro Host in `inventory.ini`:
-
-```ini
-[fedora:vars]
-install_niri=false
-```
-
-- Installiert `niri` aus den Fedora-Repositories
-- Dotfiles liegen in [`dotfiles/.config/niri/`](dotfiles/.config/niri/) und werden automatisch gestowt
 
 ## Dotfiles
 
