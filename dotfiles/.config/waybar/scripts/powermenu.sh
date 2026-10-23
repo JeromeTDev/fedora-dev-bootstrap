@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Icons grün Gruvbox #b8bb26 links wie bei microphone/bluetooth/network
+# Icons grün Everforest #a7c080 links wie bei microphone/bluetooth/network
 labels=("Lock" "Suspend" "Logout" "Reboot" "Shutdown")
 icons=(
   "$HOME/.config/rofi/icons/power-lock-green.svg"

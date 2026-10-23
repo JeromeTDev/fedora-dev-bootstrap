@@ -6,11 +6,11 @@ ignore-timeout=1
 max-visible=5
 max-history=20
 
-# Optik passend zum Gruvbox-Look
+# Optik passend zu Everforest Dark Medium
 font=JetBrainsMono Nerd Font 11
-background-color=#282828ee
-text-color=#ebdbb2
-border-color=#8ec07c
+background-color=#2d353bee
+text-color=#d3c6aa
+border-color=#83c092
 border-size=2
 border-radius=10
 padding=10

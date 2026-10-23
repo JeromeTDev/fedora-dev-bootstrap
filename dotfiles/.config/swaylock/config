@@ -1,0 +1,54 @@
+# swaylock — Everforest Dark Medium
+#
+# Ueberschreibt /etc/swaylock/config. Palette identisch mit
+# ~/.dotfiles/.config/waybar/style.css und rofi/everforest.rasi.
+#
+# Format: eine Option pro Zeile, "option=wert" (wird intern zu --option=wert).
+# Optionen ohne Wert stehen allein in der Zeile.
+# Kein Leerzeichen um das "=", keine Inline-Kommentare.
+
+# --- Hintergrund ---
+image=~/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg
+scaling=fill
+
+# --- Schrift ---
+font=JetBrainsMono Nerd Font
+font-size=24
+
+# --- Indikator ---
+indicator-idle-visible
+indicator-radius=56
+indicator-thickness=8
+indicator-caps-lock
+show-failed-attempts
+line-uses-inside
+
+# --- Everforest-Palette ---
+key-hl-color=a7c080
+bs-hl-color=e67e80
+caps-lock-key-hl-color=e69875
+caps-lock-bs-hl-color=e67e80
+separator-color=2d353b
+
+inside-color=2d353bcc
+inside-ver-color=2d353bcc
+inside-wrong-color=2d353bcc
+inside-clear-color=2d353bcc
+inside-caps-lock-color=2d353bcc
+
+ring-color=dbbc7f
+ring-ver-color=a7c080
+ring-wrong-color=e67e80
+ring-clear-color=83c092
+ring-caps-lock-color=e69875
+
+text-color=d3c6aa
+text-ver-color=a7c080
+text-wrong-color=e67e80
+text-clear-color=83c092
+text-caps-lock-color=e69875
+
+# --- Tastaturlayout-Box ---
+layout-bg-color=2d353bcc
+layout-border-color=dbbc7f
+layout-text-color=d3c6aa

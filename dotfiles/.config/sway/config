@@ -14,8 +14,7 @@ set $browser brave-browser
 set $files ghostty -e yazi
 set $menu rofi -show drun -config ~/.config/rofi/everforest.rasi
 
-# Eigenes Wallpaper hier ablegen (sonst bleibt der Desktop grau)
-set $wallpaper $HOME/Pictures/wallpaper.png
+set $wallpaper $HOME/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg
 
 ### Tastenkürzel
 
@@ -117,6 +116,7 @@ bindsym $mod+r mode "resize"
 
 ### Eingabe
 
+
 input type:keyboard {
     xkb_layout us
     xkb_variant altgr-intl
@@ -127,12 +127,37 @@ input type:keyboard {
 ### Monitor
 
 output DP-2 {
+    enable
     mode 3840x2160@100Hz
     scale 1.5
+    pos 0 0
 }
+
+output HDMI-A-1 {
+    enable
+    mode 3840x2160@60Hz
+    scale 1
+    pos -3840 0
+}
+
+# Workspaces an Outputs binden
+workspace 1 output DP-2
+workspace 0 output HDMI-A-1
 
 # Standardwallpaper für weitere Ausgaben
 output * bg $wallpaper fill
+
+# Idle/Lock-Handhabung: übernimmt /usr/share/sway/config.d/90-swayidle.conf
+# (300 s -> Sperren, vor dem Schlafen, auf loginctl lock-session).
+# Lockscreen-Bild kommt aus ~/.config/swaylock/config.
+
+### Beim Spielen nicht in den Standby schalten
+
+# Jedes Fenster im echten Vollbild hält den Bildschirm wach
+for_window [class=".*"] inhibit_idle fullscreen
+
+# Steam-Spiele auch im rahmenlosen Fenster (fokussiert) wach halten
+for_window [class="steam_app_.*"] inhibit_idle focus
 
 ### Systemweite Konfiguration laden (/usr/share/sway/config.d, /etc/sway/config.d, ~/.config/sway/config.d)
 
@@ -153,8 +178,9 @@ bindsym $mod+Shift+Print exec grimshot save screen ~/Bilder/Screenshots/$(date +
 corner_radius 12
 smart_corner_radius enable
 
-gaps inner 2
-gaps outer 3
+gaps inner 5
+gaps outer 1
+
 
 blur enable
 blur_xray disable
@@ -181,3 +207,7 @@ layer_effects "waybar" {
 
 default_border pixel 2
 default_floating_border pixel 2
+
+# Farbtemperatur läuft als systemd-user-service:
+#   systemctl --user {enable,status} gammastep.service
+# (WantedBy=graphical-session.target, daher kein sway-exec nötig)

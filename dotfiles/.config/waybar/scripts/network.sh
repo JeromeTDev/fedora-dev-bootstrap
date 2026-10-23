@@ -3,7 +3,7 @@ set -euo pipefail
 
 WIFI_IF="wlp5s0"
 
-# Icons grün Gruvbox #b8bb26
+# Icons grün Everforest #a7c080
 ICON_CONNECTED="$HOME/.config/rofi/icons/check-green.svg"
 ICON_KNOWN="$HOME/.config/rofi/icons/network-wireless-connected-symbolic-green.svg"
 ICON_NEW="$HOME/.config/rofi/icons/bt-new-green.svg"

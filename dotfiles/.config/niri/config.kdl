@@ -360,6 +360,7 @@ binds {
     // übereinander möglich) - entspricht sway "layout splith".
     Mod+Shift+M hotkey-overlay-title="Spalte maximieren" { maximize-column; }
 
+    
     // ---------- Übersicht / Overlay ----------
     Mod+O repeat=false hotkey-overlay-title="Übersicht öffnen" { toggle-overview; }
     Mod+Shift+Slash hotkey-overlay-title="Hilfe: alle Tastenkürzel" { show-hotkey-overlay; }

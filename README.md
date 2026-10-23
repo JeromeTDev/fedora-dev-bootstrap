@@ -12,6 +12,11 @@ one-shot run on a fresh Fedora installation.
 System setup, packages, fonts, Flatpak apps, mise runtimes and **GNU Stow**-deployed
 **dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway, niri and more).
 
+## Screenshots
+
+![Niri](screenshots/screenshot-3.png)
+![Niri](screenshots/screenshot.png)
+
 ## Desktop: Sway/SwayFX or niri
 
 Pick your Wayland desktop – or install both and choose at the login screen.
@@ -33,11 +38,6 @@ install_niri=true     # niri from Fedora
 
 Matching dotfiles are stowed automatically: [`dotfiles/.config/sway/`](dotfiles/.config/sway/)
 for SwayFX and [`dotfiles/.config/niri/`](dotfiles/.config/niri/) for niri.
-
-## Screenshot
-
-![Niri](screenshots/screenshot-3.png)
-![Niri](screenshots/screenshot.png)
 
 ## Installation
 

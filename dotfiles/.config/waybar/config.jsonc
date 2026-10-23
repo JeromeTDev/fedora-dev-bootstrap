@@ -3,7 +3,7 @@
   "position": "top",
   "height": 34,
   "spacing": 6,
-  "modules-left": ["sway/workspaces"],
+  "modules-left": ["niri/workspaces"],
   "modules-center": ["clock"],
   "modules-right": [
     "cpu",
@@ -15,10 +15,9 @@
     "tray",
     "custom/power",
   ],
-  "sway/workspaces": {
-    "disable-scroll": false,
+  "niri/workspaces": {
     "all-outputs": true,
-    "format": "{name}",
+    "format": "{value}",
   },
   "clock": {
     "format": "{:%H:%M | %d.%m.%y}",
@@ -29,10 +28,10 @@
       "weeks-pos": "left",
       "on-scroll": 1,
       "format": {
-        "months": "<span color='#fabd2f'><b>{}</b></span>",
-        "weekdays": "<span color='#928374'><b>{}</b></span>",
-        "weeks": "<span color='#8ec07c'><b>W{}</b></span>",
-        "today": "<span color='#282828' background='#fabd2f'><b>{}</b></span>",
+        "months": "<span color='#dbbc7f'><b>{}</b></span>",
+        "weekdays": "<span color='#859289'><b>{}</b></span>",
+        "weeks": "<span color='#83c092'><b>W{}</b></span>",
+        "today": "<span color='#2d353b' background='#dbbc7f'><b>{}</b></span>",
       },
     },
     "actions": {

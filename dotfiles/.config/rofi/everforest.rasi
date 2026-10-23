@@ -5,7 +5,7 @@ configuration {
     display-drun: "Apps";
 }
 * {
-    bg:      #1e2326d9;
+    bg:      #2d353bd9;
     bg-alt:  #343f44de;
     fg:      #d3c6aa;
     fg-dim:  #9da9a0;
@@ -77,7 +77,7 @@ element alternate.normal {
 
 element selected.normal,
 element selected.alternate {
-    background-color: #434f55e6;
+    background-color: #3d484de6;
     text-color: @fg;
 }
 

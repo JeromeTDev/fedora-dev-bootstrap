@@ -6,6 +6,7 @@
     "lazyvim.plugins.extras.editor.inc-rename",
     "lazyvim.plugins.extras.editor.neo-tree",
     "lazyvim.plugins.extras.formatting.prettier",
+    "lazyvim.plugins.extras.lang.ansible",
     "lazyvim.plugins.extras.lang.java",
     "lazyvim.plugins.extras.lang.json",
     "lazyvim.plugins.extras.lang.markdown",
@@ -21,6 +22,7 @@
     "lazyvim.plugins.extras.test.core",
     "lazyvim.plugins.extras.ui.dashboard-nvim",
     "lazyvim.plugins.extras.util.dot",
+    "lazyvim.plugins.extras.util.gh",
     "lazyvim.plugins.extras.util.mini-hipatterns"
   ],
   "install_version": 8,

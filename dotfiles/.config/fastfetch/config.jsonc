@@ -1,0 +1,83 @@
+{
+  // Everforest Dark – passt zu starship.toml und yazi
+  "display": {
+    "separator": " ",
+    "key": {
+      "paddingLeft": 1,
+      "paddingRight": 2,
+      "width": 6,
+      "color": "#a7c080"
+    }
+  },
+  "logo": {
+    "type": "small",
+    "color": {
+      "1": "#a7c080",
+      "2": "#dbbc7f"
+    },
+    "padding": {
+      "top": 1,
+      "left": 1
+    }
+  },
+  "modules": [
+    "title",
+    "separator",
+    {
+      "type": "host",
+      "key": "󰌢"
+    },
+    {
+      "type": "cpu",
+      "key": "",
+      "showPeCoreCount": true
+    },
+    {
+      "type": "gpu",
+      "key": "󰢮"
+    },
+    {
+      "type": "memory",
+      "key": "󰍛"
+    },
+    "break",
+    {
+      "type": "os",
+      "key": "󰌽"
+    },
+    {
+      "type": "kernel",
+      "key": ""
+    },
+    {
+      "type": "packages",
+      "key": "󰏖"
+    },
+    {
+      "type": "wm",
+      "key": ""
+    },
+    {
+      "type": "command",
+      "key": "",
+      "text": "sh -c 'term=\"\"; [ -n \"$GHOSTTY_RESOURCES_DIR\" ] && term=\"ghostty\"; [ \"$TERM_PROGRAM\" = \"ghostty\" ] && term=\"ghostty\"; [ \"$TERM_PROGRAM\" = \"kitty\" ] && term=\"kitty\"; [ \"$TERM_PROGRAM\" = \"alacritty\" ] && term=\"alacritty\"; [ \"$TERM_PROGRAM\" = \"wezterm\" ] && term=\"wezterm\"; if [ -n \"$TMUX\" ]; then if [ -n \"$term\" ]; then echo \"$term • tmux\"; else echo tmux; fi; elif [ -n \"$term\" ]; then echo \"$term\"; else echo ${TERM_PROGRAM:-$TERM}; fi'"
+    },
+    {
+      "type": "shell",
+      "key": ""
+    },
+    {
+      "type": "de",
+      "key": ""
+    },
+    {
+      "type": "display",
+      "key": "󰍹"
+    },
+    "break",
+    {
+      "type": "uptime",
+      "key": "󰔛"
+    }
+  ]
+}

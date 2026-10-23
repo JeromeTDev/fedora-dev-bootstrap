@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Bluetooth-Menü für Rofi (Basierend auf nickclyde/rofi-bluetooth)
 # Quelle: https://github.com/nickclyde/rofi-bluetooth
-# Angepasst: Gruvbox-Rofi-Theme, dynamische Breite, Gruvbox-Icons,
-# Sanitized bluetoothctl-Aufrufe, per-Gerät-Untermenü (Verbinden/Paaren/Löschen/Trust).
+# Angepasst: Everforest-Rofi-Theme, dynamische Breite, Everforest-Icons,
+# Sanitized bluetoothctl-Aufrufe, per-Gerät-Untermenü (Verbinden/Paaren/Löschen/Trust),
+# Zombie-Erkennung + "Link neu aufbauen" für BT-HID (z.B. Xbox-Controller).
 
 set -uo pipefail
 
@@ -88,11 +89,34 @@ device_trusted() {
   timeout 5 bluetoothctl info "$1" 2>/dev/null | grep -q "Trusted: yes"
 }
 
+# Kernel-Input-Device vorhanden? BT-HID-Geräte tragen ihre MAC im Uniq-Feld.
+# Fehlt es trotz "Connected: yes", ist der HOG-Link ein Zombie.
+input_present() {
+  local mac_lc
+  mac_lc=$(echo "$1" | tr 'A-F' 'a-f')
+  grep -qi "Uniq=${mac_lc}" /proc/bus/input/devices 2>/dev/null
+}
+
 toggle_connection() {
   if device_connected "$1"; then
     timeout 10 bluetoothctl disconnect "$1" >/dev/null 2>&1 || true
   else
     timeout 20 bluetoothctl connect "$1" >/dev/null 2>&1 || true
+  fi
+  show_menu
+}
+
+# HOG-Link neu aufbauen: disconnect -> connect, dann Input-Device prüfen
+rebuild_link() {
+  local mac=$1 name=$2
+  timeout 10 bluetoothctl disconnect "$mac" >/dev/null 2>&1 || true
+  sleep 2
+  timeout 20 bluetoothctl connect "$mac" >/dev/null 2>&1 || true
+  sleep 2
+  if input_present "$mac"; then
+    notify-send -i input-gaming "Bluetooth" "$name: Link neu aufgebaut, Input-Device aktiv."
+  else
+    notify-send -i dialog-error "Bluetooth" "$name: verbunden, aber kein Input-Device gefunden."
   fi
   show_menu
 }
@@ -116,7 +140,7 @@ toggle_trust() {
   show_menu
 }
 
-# Gerätezeilen mit Gruvbox-Icons (rofi-\0icon\x1f-Markup)
+# Gerätezeilen mit Everforest-Icons (rofi-\0icon\x1f-Markup)
 device_rows() {
   while IFS= read -r line; do
     local mac name icon
@@ -137,12 +161,16 @@ device_rows() {
 # Untermenü für ein einzelnes Gerät
 device_menu() {
   local device=$1
-  local device_name mac connected paired trusted c_icon p_icon t_icon w
+  local device_name mac connected paired trusted rebuild c_icon p_icon t_icon w
   device_name=$(echo "$device" | cut -d' ' -f3-)
   mac=$(echo "$device" | awk '{print $2}')
 
   if device_connected "$mac"; then
-    connected="Connected: yes"; c_icon="$ICON_CONNECTED"
+    if input_present "$mac"; then
+      connected="Connected: yes"; c_icon="$ICON_CONNECTED"
+    else
+      connected="Connected: yes (kein Input!)"; c_icon="$ICON_NEW"
+    fi
   else
     connected="Connected: no"; c_icon="$ICON_NEW"
   fi
@@ -157,12 +185,15 @@ device_menu() {
     trusted="Trusted: no"; t_icon="$ICON_NEW"
   fi
 
+  rebuild="Link neu aufbauen (disconnect + connect)"
+
   w=$(em_width "${#device_name}")
 
   chosen="$({
     printf '%s\0icon\x1f%s\n' "$connected" "$c_icon"
     printf '%s\0icon\x1f%s\n' "$paired" "$p_icon"
     printf '%s\0icon\x1f%s\n' "$trusted" "$t_icon"
+    printf '%s\0icon\x1f%s\n' "$rebuild" "$ICON_CONNECTED"
     printf '%s\n%s\nExit\n' "$divider" "$goback"
   } | rofi -dmenu -i -config "$ROFI_CONFIG" -theme-str "window {width: ${w}em;}" -p "$device_name")"
 
@@ -171,6 +202,7 @@ device_menu() {
     "$connected") toggle_connection "$mac" ;;
     "$paired") toggle_paired "$mac" ;;
     "$trusted") toggle_trust "$mac" ;;
+    "$rebuild") rebuild_link "$mac" "$device_name" ;;
     "$goback") show_menu ;;
   esac
 }

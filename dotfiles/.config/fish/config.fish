@@ -33,12 +33,6 @@ end
 # Aliases
 # =====
 
-# Snapshot-Management
-alias snls="sudo snapper ls" # Alle Root-Snapshots listen
-alias snls-home="sudo snapper -c home ls" # Alle Home-Snapshots listen
-alias sn-create="sudo snapper create --description" # Schneller Snapshot vor Experimenten
-alias sn-space="sudo btrfs filesystem du -s --human-readable /.snapshots /home/.snapshots"
-
 # Speicherplatz-Check (Btrfs-spezifisch)
 alias btop-du="sudo btrfs filesystem du -s -x --human-readable"
 alias v="nvim" # Neovim als Standard-Editor
@@ -49,10 +43,11 @@ alias ld="lazydocker"
 alias dcd="docker compose -f docker/compose.yml"
 
 alias dev="cd ~/dev"
-alias dot="cd ~/.local/share/fedora-dev-bootstrap/dotfiles" # Dotfiles-Repo
+alias dot="cd ~/.dotfiles"
 alias c="clear"
 
 starship init fish | source
 mise activate fish | source
+zoxide init fish | source
 
 fish_add_path --prepend ~/.npm-global/bin

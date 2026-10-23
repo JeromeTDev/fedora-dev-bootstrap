@@ -1,10 +1,10 @@
 /* ===============================
-   Everforest Dark - Waybar
+   Everforest Dark Medium - Waybar
    =============================== */
 
-@define-color bg0       #1e2326;
+@define-color bg0       #2d353b;
 @define-color bg1       #343f44;
-@define-color bg2       #434f55;
+@define-color bg2       #3d484d;
 
 @define-color fg0       #d3c6aa;
 @define-color fg1       #d3c6aa;
@@ -31,7 +31,7 @@
 /* ---------- Entire Bar ---------- */
 
 window#waybar {
-  background: rgba(30, 35, 38, 0.82);
+  background: rgba(45, 53, 59, 0.82);
   color: @fg1;
 }
 
@@ -103,7 +103,7 @@ window#waybar {
   min-width: 0;
 }
 
-/* Individual Gruvbox colors */
+/* Individual Everforest colors */
 
 #cpu {
   color: @purple;

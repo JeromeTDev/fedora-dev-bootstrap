@@ -1,4 +1,3 @@
 [flavor]
-use = "gruvbox-material"
-dark = "gruvbox-material"
-light = "gruvbox-material"
+dark = "everforest"
+light = "everforest"

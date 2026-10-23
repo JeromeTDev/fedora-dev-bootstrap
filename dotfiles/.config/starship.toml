@@ -38,7 +38,7 @@ $line_break\
 $character\
 """
 
-palette = 'default'
+palette = 'everforest_dark'
 
 [palettes.default]
 
@@ -65,55 +65,55 @@ color_vimcmd_ok = 'green'
 color_vimcmd_replace = 'purple'
 color_vimcmd_visual = 'yellow'
 
-[palettes.gruvbox_dark]
+[palettes.everforest_dark]
 
-color_ok = '#b8bb26'
-color_danger = '#fb4934'
-color_caution = '#d79921'
+color_ok = '#a7c080'
+color_danger = '#e67e80'
+color_caution = '#dbbc7f'
 
-color_os = '#d65d0e'
-color_username = '#d65d0e'
-color_directory = '#d79921'
-color_git = '#689d6a'
-color_git_added = '#b8bb26'
-color_git_deleted = '#fb4934'
-color_env = '#458588'
-color_kubernetes = '#b16286'
-color_docker = '#458588'
-color_shell = '#a89984'
-color_container = '#cc241d'
-color_other = '#d5c4a1'
-color_time = '#fbf1c7'
-color_duration = '#fbf1c7'
+color_os = '#e69875'
+color_username = '#e69875'
+color_directory = '#dbbc7f'
+color_git = '#83c092'
+color_git_added = '#a7c080'
+color_git_deleted = '#e67e80'
+color_env = '#7fbbb3'
+color_kubernetes = '#d699b6'
+color_docker = '#7fbbb3'
+color_shell = '#859289'
+color_container = '#e67e80'
+color_other = '#d3c6aa'
+color_time = '#d3c6aa'
+color_duration = '#d3c6aa'
 
-color_vimcmd_ok = '#8ec07c'
-color_vimcmd_replace = '#b16286'
-color_vimcmd_visual = '#d79921'
+color_vimcmd_ok = '#a7c080'
+color_vimcmd_replace = '#d699b6'
+color_vimcmd_visual = '#dbbc7f'
 
-[palettes.gruvbox_light]
+[palettes.everforest_light]
 
-color_ok = '#79740e'
-color_danger = '#9d0006'
-color_caution = '#d79921'
+color_ok = '#8da101'
+color_danger = '#f85552'
+color_caution = '#dfa000'
 
-color_os = '#d65d0e'
-color_username = '#d65d0e'
-color_directory = '#d79921'
-color_git = '#689d6a'
-color_git_added = '#79740e'
-color_git_deleted = '#9d0006'
-color_env = '#458588'
-color_kubernetes = '#b16286'
-color_docker = '#458588'
-color_shell = '#7c6f64'
-color_container = '#cc241d'
-color_other = '#504945'
-color_time = '#282828'
-color_duration = '#282828'
+color_os = '#f57d26'
+color_username = '#f57d26'
+color_directory = '#dfa000'
+color_git = '#35a77c'
+color_git_added = '#8da101'
+color_git_deleted = '#f85552'
+color_env = '#3a94c5'
+color_kubernetes = '#df69ba'
+color_docker = '#3a94c5'
+color_shell = '#7a8478'
+color_container = '#f85552'
+color_other = '#5c6a72'
+color_time = '#5c6a72'
+color_duration = '#5c6a72'
 
-color_vimcmd_ok = '#689d6a'
-color_vimcmd_replace = '#b16286'
-color_vimcmd_visual = '#d79921'
+color_vimcmd_ok = '#8da101'
+color_vimcmd_replace = '#df69ba'
+color_vimcmd_visual = '#dfa000'
 
 [os]
 disabled = false
@@ -184,7 +184,7 @@ disabled = false
 
 [git_status]
 style = "fg:color_git"
-format = '([$ahead_behind]($style) )([$all_status]($style) )'
+format = '([$ahead_behind]($style) )([$conflicted](bold fg:color_danger) )([$stashed](fg:color_kubernetes) )([$deleted](fg:color_danger) )([$renamed](fg:color_ok) )([$modified](fg:color_caution) )([$typechanged](fg:color_caution) )([$staged](fg:color_ok) )([$untracked](fg:color_env) )'
 stashed = "*${count}"
 ahead = "⇡${count}"
 behind = "⇣${count}"

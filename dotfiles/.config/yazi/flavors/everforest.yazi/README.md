@@ -1,32 +1,64 @@
-<div align="center">
-<img src="https://github.com/sxyazi/yazi/blob/main/assets/logo.png?raw=true" alt="Yazi logo" width="20%">
-</div>
+# Everforest Dark - Yazi Flavor
 
-<h3 align="center">
-	Gruvbox Dark Flavor for <a href="https://github.com/sxyazi/yazi">Yazi</a>
-</h3>
+A dark [Yazi](https://github.com/sxyazi/yazi) flavor based on the [Everforest](https://github.com/sainnhe/everforest) color scheme (medium variant).
 
-## 👀 Preview
+## Preview
 
-<img src="preview.png" width="600" />
+This flavor brings the warm, forest-inspired colors of Everforest to Yazi's file manager interface with a comfortable dark theme.
 
-## 🎨 Installation
+## Compatibility
 
-```bash
-ya pack -a bennyyip/gruvbox-dark
+Maintained against Yazi/Ya `26.8.15`.
+
+## Installation
+
+### Yazi Package Manager
+
+```sh
+ya pkg add stellarjmr/everforest-dark
 ```
 
-## ⚙️ Usage
+### Manual Installation
 
-Add the these lines to your `theme.toml` configuration file to use it:
+Copy the `everforest-dark.yazi` directory to:
+- Linux/macOS: `~/.config/yazi/flavors/`
+- Windows: `%APPDATA%\yazi\config\flavors\`
+
+## Usage
+
+Add the following to your `~/.config/yazi/theme.toml`:
 
 ```toml
 [flavor]
-dark = "gruvbox-dark"
+dark = "everforest-dark"
 ```
 
-## 📜 License
+Or use it as both your light and dark flavor:
 
-The flavor is MIT-licensed, and the included tmTheme is also MIT-licensed.
+```toml
+[flavor]
+dark = "everforest-dark"
+light = "everforest-dark"
+```
 
-Check the [LICENSE](LICENSE) and [LICENSE-tmtheme](LICENSE-tmtheme) file for more details.
+## Color Palette
+
+This flavor uses the Everforest medium dark palette:
+
+- Background: `#2d353b`
+- Foreground: `#d3c6aa`
+- Red: `#e67e80`
+- Yellow: `#dbbc7f`
+- Green: `#a7c080`
+- Aqua: `#83c092`
+- Blue: `#7fbbb3`
+- Purple: `#d699b6`
+
+## Credits
+
+- Everforest color scheme by [sainnhe](https://github.com/sainnhe)
+- Yazi file manager by [sxyazi](https://github.com/sxyazi)
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
