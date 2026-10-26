@@ -1,5 +1,17 @@
 [plugin]
 deps = []
 
-[flavor]
-deps = []
+[[flavor.deps]]
+use = "matt-dong-123/gruvbox-material"
+rev = "e0fd2d8"
+hash = "8f46ca96c0bbe1bdfb4fa201dd5eed4b"
+
+[[flavor.deps]]
+use = "Chromium-3-Oxide/everforest-medium"
+rev = "e1ead7b"
+hash = "f7dc46200e53da5e94858630184a9220"
+
+[[flavor.deps]]
+use = "bennyyip/gruvbox-dark"
+rev = "71b03f6"
+hash = "fc8fb278e5e1ede76b7a57c76a6db28b"

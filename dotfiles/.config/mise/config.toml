@@ -1,5 +1,7 @@
 [tools]
-python = "3.14"
+"github:mroboff/vm-curator" = "latest"
+node = "latest"
+opencode = { version = "latest", allow_builds = ["@opencode/cli"] }
+python = "latest"
 rust = "latest"
 uv = "latest"
-opencode = "latest"

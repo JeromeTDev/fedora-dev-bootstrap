@@ -8,6 +8,7 @@
   "modules-right": [
     "cpu",
     "memory",
+    "battery",
     "network",
     "pulseaudio",
     "pulseaudio#microphone",
@@ -47,6 +48,33 @@
   "memory": {
     "interval": 5,
     "format": "  {}%",
+  },
+  // Wird nur angezeigt, wenn ein Akku (BAT*) vorhanden ist –
+  // auf Desktop-Rechnern blendet Waybar das Modul automatisch aus.
+  "battery": {
+    "interval": 10,
+    "states": {
+      "warning": 25,
+      "critical": 10,
+    },
+    "format": "{icon}  {capacity}%",
+    "format-charging": "󰂄  {capacity}%",
+    "format-plugged": "󰚥  {capacity}%",
+    "format-full": "󰁹  {capacity}%",
+    "format-icons": [
+      "󰁺",
+      "󰁻",
+      "󰁼",
+      "󰁽",
+      "󰁾",
+      "󰁿",
+      "󰂀",
+      "󰂁",
+      "󰂂",
+      "󰁹",
+    ],
+    // {status} gibt es in Waybar 0.15 nicht mehr -> Modul blieb leer
+    "tooltip-format": "{capacity}%  ·  {power} W\n{time}\n{cycles} Zyklen · Gesundheit {health}",
   },
   "network": {
     "interval": 5,

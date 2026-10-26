@@ -15,6 +15,7 @@ ICON_CONNECTED="$ICONS/check-green.png"
 ICON_PAIRED="$ICONS/bt-paired-green.png"
 ICON_NEW="$ICONS/bt-new-green.png"
 ROFI_CONFIG="$HOME/.config/rofi/everforest.rasi"
+HID_UUID="00001812-0000-1000-8000-00805f9b34fb"
 
 # Rofi-Breite dynamisch an Textlänge anpassen (wie andere Waybar-Skripte)
 em_width() {
@@ -106,12 +107,14 @@ toggle_connection() {
   show_menu
 }
 
-# HOG-Link neu aufbauen: disconnect -> connect, dann Input-Device prüfen
+# HOG-Link neu aufbauen: disconnect -> HID-Profil gezielt neu verbinden,
+# dann Input-Device prüfen. Ein normaler "connect" löst einen hängenden
+# HOG-Zustand (Connected: yes, aber kein uhid/Input-Device) oft nicht aus.
 rebuild_link() {
   local mac=$1 name=$2
   timeout 10 bluetoothctl disconnect "$mac" >/dev/null 2>&1 || true
   sleep 2
-  timeout 20 bluetoothctl connect "$mac" >/dev/null 2>&1 || true
+  timeout 20 bluetoothctl connect "$mac" "$HID_UUID" >/dev/null 2>&1 || true
   sleep 2
   if input_present "$mac"; then
     notify-send -i input-gaming "Bluetooth" "$name: Link neu aufgebaut, Input-Device aktiv."
@@ -126,7 +129,11 @@ toggle_paired() {
   if device_paired "$1"; then
     timeout 10 bluetoothctl remove "$1" >/dev/null 2>&1 || true
   else
-    timeout 30 bluetoothctl pair "$1" >/dev/null 2>&1 || true
+    # Ohne laufenden Agenten kann die Pairing-Bestätigung nicht beantwortet
+    # werden (niri/Sway hat kein BT-Applet). NoInputNoOutput laesst BlueZ
+    # "Just Works" nutzen, also ohne Passkey-Rueckfrage.
+    timeout 30 bluetoothctl --agent NoInputNoOutput pair "$1" \
+      >/dev/null 2>&1 || true
   fi
   show_menu
 }

@@ -91,6 +91,9 @@ back to `mise_tools` in `group_vars/fedora.yml`.
   is **not** replaced, but merged into it via `--adopt`
 - Paths are overridable in [`roles/dotfiles/defaults/main.yml`](roles/dotfiles/defaults/main.yml)
   (`dotfiles_dir`, `dotfiles_src`, `dotfiles_stow_target`)
+- The embedded configs are a **public-safe subset**: no private state (e.g. the
+  OpenCode service/password), only the lock-screen wallpaper, and `gammastep`
+  ships with placeholder coordinates (Berlin) – adjust them before first use
 
 > **Careful:** `--adopt` takes over existing files (e.g. a `~/.config/fontconfig/fonts.conf`
 > created by the desktop) – back them up first if needed. Never run `stow .` on the

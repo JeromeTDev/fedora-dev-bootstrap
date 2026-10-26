@@ -28,6 +28,12 @@ input {
         // sway: repeat_delay 250 / repeat_rate 40
         repeat-delay 250
         repeat-rate 40
+        numlock
+    }
+    touchpad{
+      tap //tap to click
+      dwt // Disable when typing
+      natural-scroll 
     }
 }
 
@@ -152,22 +158,25 @@ window-rule {
 // ------------------------------------------------------------
 
 // sway: layer_effects "waybar" { blur enable; blur_xray enable;
-//                               shadows enable; corner_radius 6 }
 layer-rule {
     match namespace="^waybar$"
+
+    match namespace="^rofi$"
     background-effect {
         blur true
         xray true
     }
+
+    geometry-corner-radius 12
     shadow {
         on
         softness 20
-        spread 0
+        spread 5
         offset x=0 y=3
         color "#00000066"
     }
-    geometry-corner-radius 6
 }
+
 
 // ------------------------------------------------------------
 //  Fenster-Dekorationen
@@ -208,7 +217,7 @@ spawn-sh-at-startup "swayidle -w timeout 300 'swaylock -f' timeout 360 'niri msg
 // swaybg meldet den Namespace "wallpaper" (nicht "swaybg").
 // Wichtig: KEIN "place-within-backdrop" per Layer-Rule - dann wird
 // die Fläche im normalen Desktop gar nicht mehr gezeichnet.
-spawn-sh-at-startup "swaybg -i ~/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg -m fill"
+spawn-sh-at-startup "swaybg -i ~/.dotfiles/Bilder/Wallpapers/kristian-seedorff-BvUicqkaZZ0.jpg -m fill"
 
 spawn-at-startup "waybar"
 

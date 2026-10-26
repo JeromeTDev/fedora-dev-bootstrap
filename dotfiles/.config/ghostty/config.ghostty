@@ -5,7 +5,7 @@ font-thicken = true
 background-opacity = 0.90
 background-opacity-cells = true
 
-theme = "Everforest Dark Medium"
+theme = "Gruvbox Material Dark"
 window-decoration = false
 window-padding-x = 5
 window-padding-y = 0

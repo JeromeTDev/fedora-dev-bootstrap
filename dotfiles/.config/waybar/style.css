@@ -88,6 +88,7 @@ window#waybar {
 
 #cpu,
 #memory,
+#battery,
 #network,
 #pulseaudio,
 #pulseaudio#microphone,
@@ -111,6 +112,39 @@ window#waybar {
 
 #memory {
   color: @aqua;
+}
+
+/* ---------- Battery (nur auf Laptops sichtbar) ---------- */
+
+#battery {
+  color: @green;
+}
+
+#battery.charging {
+  color: @green;
+}
+
+#battery.plugged {
+  color: @aqua;
+}
+
+#battery.full {
+  color: @aqua;
+}
+
+#battery.warning:not(.charging) {
+  color: @yellow;
+}
+
+#battery.critical:not(.charging) {
+  color: @red;
+  animation: blink 1.5s linear infinite alternate;
+}
+
+@keyframes blink {
+  to {
+    color: @fg0;
+  }
 }
 
 #network {

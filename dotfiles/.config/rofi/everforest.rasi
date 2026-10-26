@@ -5,8 +5,8 @@ configuration {
     display-drun: "Apps";
 }
 * {
-    bg:      #2d353bd9;
-    bg-alt:  #343f44de;
+    bg:     #2d353be6;  /* Fenster: 90 % Deckkraft */
+    bg-alt: #343f44f2;  /* Suchleiste: 95 % Deckkraft */
     fg:      #d3c6aa;
     fg-dim:  #9da9a0;
     green:   #a7c080;

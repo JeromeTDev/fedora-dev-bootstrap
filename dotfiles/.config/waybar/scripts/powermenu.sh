@@ -55,7 +55,11 @@ Suspend)
 Logout)
   if confirm "Abmelden?"; then
     quit_brave
-    swaymsg exit
+    if [[ -n "${NIRI_SOCKET:-}" ]]; then
+      niri msg action quit --skip-confirmation
+    else
+      swaymsg exit
+    fi
   fi
   ;;
 Reboot)

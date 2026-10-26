@@ -1,4 +1,9 @@
 [[mgr.prepend_keymap]]
+on = ["g", "c"]
+run = "cd ~/.local/share/Cryptomator/mnt/Tresor_Dokumente"
+desc = "Tresor"
+
+[[mgr.prepend_keymap]]
 on = ["g", "d"]
 run = "cd ~/dev"
 desc = "Dev"
