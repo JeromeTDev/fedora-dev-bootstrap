@@ -12,6 +12,12 @@ one-shot run on a fresh Fedora installation.
 System setup, packages, fonts, Flatpak apps, mise runtimes and **GNU Stow**-deployed
 **dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway, niri and more).
 
+> **🚧 Roadmap – rework in the coming days**
+> This bootstrap is being converted to run on **Fedora minimal**. As part of that
+> rework, **Sway/SwayFX will be removed** and **niri will be the only supported
+> compositor**. The instructions below still describe the current state
+> (Sway/SwayFX + niri) until the rework lands.
+
 ## Screenshots
 
 swayfx:
@@ -20,6 +26,8 @@ niri:
 ![Niri](screenshots/screenshot.png)
 
 ## Desktop: Sway/SwayFX or niri
+
+> **Planned:** Sway/SwayFX will be dropped – niri becomes the only compositor.
 
 Pick your Wayland desktop – or install both and choose at the login screen.
 Both compositors are toggled in [`group_vars/fedora.yml`](group_vars/fedora.yml)
@@ -44,6 +52,7 @@ for SwayFX and [`dotfiles/.config/niri/`](dotfiles/.config/niri/) for niri.
 ## Installation
 
 Requires Fedora Linux (Workstation or Sway Spin), tested on **Fedora 44**.
+Support for **Fedora minimal** is part of the upcoming rework.
 
 ```bash
 sudo dnf install -y ansible-core git
@@ -122,7 +131,15 @@ gedacht für die **einmalige** Ausführung auf einer frischen Fedora-Installatio
 System-Setup, Pakete, Schriften, Flatpak-Apps, mise-Runtimes und per **GNU Stow**
 deployte **Dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway/niri u. v. m.).
 
+> **🚧 Roadmap – Umbau in den nächsten Tagen**
+> Dieser Bootstrap wird auf **Fedora Minimal** umgestellt. Dabei **fliegt
+> Sway/SwayFX raus** und **niri wird der einzige unterstützte Compositor**.
+> Die Anleitung unten beschreibt bis dahin noch den aktuellen Stand
+> (Sway/SwayFX + niri).
+
 ## Desktop: Sway/SwayFX oder niri
+
+> **Geplant:** Sway/SwayFX wird entfernt – niri wird der einzige Compositor.
 
 Wayland-Desktop auswählen – oder beide installieren und erst beim Login entscheiden.
 Beide Compositor werden in [`group_vars/fedora.yml`](group_vars/fedora.yml)
@@ -147,6 +164,7 @@ für SwayFX und [`dotfiles/.config/niri/`](dotfiles/.config/niri/) für niri.
 ## Installation
 
 Voraussetzung: Fedora Linux (Workstation oder Sway Spin), getestet auf **Fedora 44**.
+**Fedora Minimal** wird im Rahmen des kommenden Umbaus unterstützt.
 
 ```bash
 sudo dnf install -y ansible-core git
