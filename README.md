@@ -10,7 +10,8 @@ One-shot Fedora 44 developer workstation bootstrap with Ansible: **niri**,
 greetd/tuigreet, fish, Neovim, tmux, Ghostty, Flatpak apps, Nerd Font and
 GNU Stow managed dotfiles.
 
-![niri](screenshots/screenshot.png)
+![niri](screenshots/screenshot1.webp)
+![niri](screenshots/screenshot2.webp)
 
 ## Install
 
@@ -38,7 +39,7 @@ Without `inventory.ini` the local machine is configured. For another machine:
 Selected in [`group_vars/fedora.yml`](group_vars/fedora.yml):
 
 ```yaml
-display_manager: greetd   # greetd | none
+display_manager: greetd # greetd | none
 ```
 
 - `greetd` (default): greetd + tuigreet on TTY1; other display managers are disabled.
@@ -49,19 +50,19 @@ The change takes effect after a reboot. Running sessions are not terminated.
 
 ## Tools
 
-| Area            | Included                                                                                                                                                                                                 |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dev & build     | `git`, `gh`, `make`, `gcc`, `luarocks`, `texlive-scheme-medium`                                                                                                                                          |
-| Shell & editor  | `fish` (default shell), `neovim` (LazyVim), `tmux`                                                                                                                                                      |
-| CLI             | `fzf`, `zoxide`, `btop`, `tree`, `ripgrep`, `fd-find`, `jq`, `ncdu`, `stow`, `fastfetch`                                                                                                                |
-| Media & PDF     | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                                                                                                      |
-| Desktop         | `niri`, `xwayland-satellite`, Waybar, rofi, mako, swaybg, swayidle, swaylock, `lxqt-policykit`, `gnome-keyring`, XDG portals, `grim`, `slurp`, `wl-clipboard`, `playerctl`, `brightnessctl`, `dolphin`, `gammastep`, `xournalpp`, `keepassxc` |
-| Login           | `greetd` + `tuigreet` on TTY1 (or `none` to keep an existing greeter)                                                                                                                                     |
-| COPR            | `starship`, `lazygit`, `yazi`, `ghostty`                                                                                                                                                                |
-| Flatpak         | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                                                                                                                 |
-| Fonts           | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                                                                                                         |
-| Runtimes        | `python`, `rust`, `node`, `uv`, `opencode` (mise)                                                                                                                                                        |
-| System          | DNF tuning, full upgrade, NetworkManager, PipeWire, BlueZ, UPower, `power-profiles-daemon`                                                                                                               |
+| Area           | Included                                                                                                                                                                                                                                      |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dev & build    | `git`, `gh`, `make`, `gcc`, `luarocks`, `texlive-scheme-medium`                                                                                                                                                                               |
+| Shell & editor | `fish` (default shell), `neovim` (LazyVim), `tmux`                                                                                                                                                                                            |
+| CLI            | `fzf`, `zoxide`, `btop`, `tree`, `ripgrep`, `fd-find`, `jq`, `ncdu`, `stow`, `fastfetch`                                                                                                                                                      |
+| Media & PDF    | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                                                                                                                                            |
+| Desktop        | `niri`, `xwayland-satellite`, Waybar, rofi, mako, swaybg, swayidle, swaylock, `lxqt-policykit`, `gnome-keyring`, XDG portals, `grim`, `slurp`, `wl-clipboard`, `playerctl`, `brightnessctl`, `dolphin`, `gammastep`, `xournalpp`, `keepassxc` |
+| Login          | `greetd` + `tuigreet` on TTY1 (or `none` to keep an existing greeter)                                                                                                                                                                         |
+| COPR           | `starship`, `lazygit`, `yazi`, `ghostty`                                                                                                                                                                                                      |
+| Flatpak        | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                                                                                                                                                       |
+| Fonts          | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                                                                                                                                              |
+| Runtimes       | `python`, `rust`, `node`, `uv`, `opencode` (mise)                                                                                                                                                                                             |
+| System         | DNF tuning, full upgrade, NetworkManager, PipeWire, BlueZ, UPower, `power-profiles-daemon`                                                                                                                                                    |
 
 ## Customize
 
@@ -125,7 +126,7 @@ Maschine: `cp inventory.ini.example inventory.ini` und `ansible_host` sowie
 Auswahl in [`group_vars/fedora.yml`](group_vars/fedora.yml):
 
 ```yaml
-display_manager: greetd   # greetd | none
+display_manager: greetd # greetd | none
 ```
 
 - `greetd` (Default): greetd + tuigreet auf TTY1; andere Display-Manager werden
