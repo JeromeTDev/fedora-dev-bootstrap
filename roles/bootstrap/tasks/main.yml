@@ -1,0 +1,14 @@
+---
+# Prepare Fedora Minimal for Ansible modules
+
+- name: Check Ansible Python dependencies
+  ansible.builtin.raw: rpm -q python3-rpm python3-libdnf5
+  register: bootstrap_dependencies
+  changed_when: false
+  failed_when: false
+
+- name: Install missing Ansible Python dependencies
+  become: true
+  ansible.builtin.raw: dnf install -y python3-rpm python3-libdnf5
+  when: bootstrap_dependencies.rc != 0
+  changed_when: true

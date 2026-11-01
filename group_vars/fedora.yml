@@ -1,9 +1,8 @@
 ---
-# Sway/SwayFX-Rolle aktivieren (siehe roles/sway/defaults/main.yml).
-# true  -> swayfx wird installiert bzw. ersetzt ein vorhandenes "sway"
-# false -> Rolle wird komplett uebersprungen
-install_swayfx: true
-install_niri: true
+# Display-Manager-Auswahl:
+#   greetd -> greetd + tuigreet (Default, uebernimmt den Login auf TTY1)
+#   none   -> keine DM-Rolle; einen bereits vorhandenen Greeter behalten
+display_manager: greetd
 
 dev_packages:
   - git
@@ -37,6 +36,9 @@ dev_packages:
   - tmux
   - gammastep
   - dolphin
+  # Font-Tooling fuer roles/fonts (fc-cache + ZIP-Extraktion)
+  - fontconfig
+  - unzip
 
 copr_repositories:
   - atim/lazygit

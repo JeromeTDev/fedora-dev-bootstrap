@@ -1,0 +1,11 @@
+
+# Managed by Ansible
+# greetd + tuigreet (Gruvbox Dark)
+
+[terminal]
+vt = {{ greetd_tty }}
+
+[default_session]
+user = "greetd"
+command = "tuigreet --time --greeting {{ greetd_greeting | quote }} --remember --remember-user-session --sessions /usr/share/wayland-sessions --cmd {{ greetd_session }} --width 58 --container-padding 2 --theme {{ greetd_theme | replace(' ', '') | quote }}"
+

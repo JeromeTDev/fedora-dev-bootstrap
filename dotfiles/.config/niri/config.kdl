@@ -224,6 +224,8 @@ spawn-at-startup "waybar"
 // sway: config.d/50-session-portal.conf
 // (Env-Import + gnome-keyring für Brave/Chromium)
 spawn-at-startup "gnome-keyring-daemon" "--start" "--components=secrets"
+spawn-at-startup "mako"
+spawn-at-startup "lxqt-policykit-agent"
 
 // ------------------------------------------------------------
 //  Hotkey-Overlay
@@ -254,7 +256,7 @@ binds {
     // ---------- System ----------
     Mod+Shift+C hotkey-overlay-title="Niri-Config neu laden" { spawn-sh "niri msg action load-config-file"; }
     Mod+Shift+E hotkey-overlay-title="Niri beenden" { quit; }
-    Mod+Ctrl+Shift+L hotkey-overlay-title="Bildschirm sperren" { spawn-sh "swaylock -i ~/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg"; }
+    Mod+Ctrl+Shift+L hotkey-overlay-title="Bildschirm sperren" { spawn-sh "swaylock -i ~/.dotfiles/Bilder/Wallpapers/kristian-seedorff-BvUicqkaZZ0.jpg"; }
     Mod+Ctrl+P hotkey-overlay-title="Power-Menü" { spawn-sh "~/.config/waybar/scripts/powermenu.sh"; }
 
     // ---------- Fokus bewegen ----------
@@ -380,7 +382,7 @@ binds {
     // Print/Shift+Print: grim + slurp (sofort, Auswahl per Maus).
     // Mod+Print/Mod+Shift+Print: niri's interaktiver Screenshot.
     Print hotkey-overlay-title="Screenshot: Auswahl kopieren" { spawn-sh "grim -g \"$(slurp)\" - | wl-copy"; }
-    Shift+Print hotkey-overlay-title="Screenshot: Auswahl speichern" { spawn-sh "grim -g \"$(slurp)\" \"$HOME/Bilder/Screenshots/$(date +%Y%m%d-%H%M%S).png\""; }
+    Shift+Print hotkey-overlay-title="Screenshot: Auswahl speichern" { spawn-sh "mkdir -p \"$HOME/Bilder/Screenshots\" && grim -g \"$(slurp)\" \"$HOME/Bilder/Screenshots/$(date +%Y%m%d-%H%M%S).png\""; }
     Mod+Print hotkey-overlay-title="Screenshot: Bildschirm kopieren" { screenshot-screen write-to-disk=false; }
     Mod+Shift+Print hotkey-overlay-title="Screenshot: Bildschirm speichern" { screenshot-screen; }
 

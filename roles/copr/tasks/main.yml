@@ -1,13 +1,32 @@
 ---
+- name: Install DNF5 COPR plugin
+  become: true
+  ansible.builtin.dnf5:
+    name: dnf5-plugins
+    state: present
+
+- name: Get enabled DNF5 repositories
+  ansible.builtin.command:
+    cmd: dnf5 repo list --enabled --json
+  register: enabled_repos
+  changed_when: false
+
 - name: Enable COPR repositories
   become: true
-  community.general.copr:
-    name: "{{ item }}"
-    state: enabled
+  ansible.builtin.command:
+    argv:
+      - dnf5
+      - -y
+      - copr
+      - enable
+      - "{{ item }}"
   loop: "{{ copr_repositories }}"
+  when: >-
+    ('copr:copr.fedorainfracloud.org:' ~ (item | replace('/', ':')))
+    not in (enabled_repos.stdout | from_json | map(attribute='id') | list)
 
 - name: Install COPR packages
   become: true
-  ansible.builtin.dnf:
+  ansible.builtin.dnf5:
     name: "{{ copr_packages }}"
     state: present

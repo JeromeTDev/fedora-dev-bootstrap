@@ -1,0 +1,59 @@
+---
+- name: Install desktop foundation
+  become: true
+  ansible.builtin.dnf:
+    name:
+      # Grafik / Wayland
+      - mesa-dri-drivers
+      - mesa-libEGL
+      - xorg-x11-server-Xwayland
+
+      # Desktop-Sitzung und Berechtigungen
+      - dbus
+      - polkit
+      - xdg-user-dirs
+      - xdg-utils
+
+      # Audio
+      - pipewire
+      - pipewire-pulseaudio
+      - wireplumber
+      - pipewire-alsa
+      - alsa-ucm
+      - alsa-sof-firmware
+
+      # Netzwerk und Bluetooth
+      - NetworkManager
+      - NetworkManager-wifi
+      - bluez
+      - bluez-tools
+
+      # Hardware-Unterstuetzung (WLAN, GPU, Bluetooth, ...)
+      - linux-firmware
+
+      # Stromverwaltung
+      - upower
+      - power-profiles-daemon
+
+    state: present
+
+- name: Enable NetworkManager
+  become: true
+  ansible.builtin.systemd:
+    name: NetworkManager
+    enabled: true
+    state: started
+
+- name: Enable Bluetooth
+  become: true
+  ansible.builtin.systemd:
+    name: bluetooth
+    enabled: true
+    state: started
+
+- name: Enable power-profiles-daemon
+  become: true
+  ansible.builtin.systemd:
+    name: power-profiles-daemon
+    enabled: true
+    state: started

@@ -6,116 +6,85 @@
 
 **English** · [Deutsch](#deutsch)
 
-A fully automated Fedora developer bootstrap built on **Ansible** – designed for a
-one-shot run on a fresh Fedora installation.
+One-shot Fedora 44 developer workstation bootstrap with Ansible: **niri**,
+greetd/tuigreet, fish, Neovim, tmux, Ghostty, Flatpak apps, Nerd Font and
+GNU Stow managed dotfiles.
 
-System setup, packages, fonts, Flatpak apps, mise runtimes and **GNU Stow**-deployed
-**dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway, niri and more).
+![niri](screenshots/screenshot.png)
 
-> **🚧 Roadmap – rework in the coming days**
-> This bootstrap is being converted to run on **Fedora minimal**. As part of that
-> rework, **Sway/SwayFX will be removed** and **niri will be the only supported
-> compositor**. The instructions below still describe the current state
-> (Sway/SwayFX + niri) until the rework lands.
+## Install
 
-## Screenshots
-
-swayfx:
-![Niri](screenshots/screenshot-3.png)
-niri:
-![Niri](screenshots/screenshot.png)
-
-## Desktop: Sway/SwayFX or niri
-
-> **Planned:** Sway/SwayFX will be dropped – niri becomes the only compositor.
-
-Pick your Wayland desktop – or install both and choose at the login screen.
-Both compositors are toggled in [`group_vars/fedora.yml`](group_vars/fedora.yml)
-(or per host in `inventory.ini`):
-
-| `install_swayfx` | `install_niri` | Result                                                 |
-| :--------------: | :------------: | ------------------------------------------------------ |
-|      `true`      |    `false`     | SwayFX only – replaces a preinstalled `sway`           |
-|     `false`      |     `true`     | niri only                                              |
-|      `true`      |     `true`     | both – pick **sway** or **niri** in greetd _(default)_ |
-|     `false`      |    `false`     | no compositor – packages and dotfiles only             |
-
-```ini
-[fedora:vars]
-install_swayfx=true   # SwayFX from COPR
-install_niri=true     # niri from Fedora
-```
-
-Matching dotfiles are stowed automatically: [`dotfiles/.config/sway/`](dotfiles/.config/sway/)
-for SwayFX and [`dotfiles/.config/niri/`](dotfiles/.config/niri/) for niri.
-
-## Installation
-
-Requires Fedora Linux (Workstation or Sway Spin), tested on **Fedora 44**.
-Support for **Fedora minimal** is part of the upcoming rework.
+Fedora Minimal or Workstation (tested on **Fedora 44**, compatible with **Fedora 45**). Run as a normal user;
+`-K` asks for the sudo password.
 
 ```bash
 sudo dnf install -y ansible-core git
 git clone https://github.com/JeromeTDev/fedora-dev-bootstrap.git
 cd fedora-dev-bootstrap
-ansible-galaxy collection install -r requirements.yml # once: copr + flatpak
+ansible-galaxy collection install -r requirements.yml
 ansible-playbook playbook.yml -K
+sudo reboot
 ```
 
-Without an `inventory.ini`, the machine you start the playbook on is the target.
-For a different machine: copy `inventory.ini.example` to `inventory.ini` and define
-a group named `fedora` with `ansible_host`/`ansible_user` – the file is picked up
-automatically via `ansible.cfg` and is listed in `.gitignore`.
+`ansible-core` and `git` are the only prerequisites; the `bootstrap` role
+installs the required DNF Python bindings on the target.
+
+Without `inventory.ini` the local machine is configured. For another machine:
+`cp inventory.ini.example inventory.ini` and fill in `ansible_host` and
+`ansible_user`.
+
+## Display manager
+
+Selected in [`group_vars/fedora.yml`](group_vars/fedora.yml):
+
+```yaml
+display_manager: greetd   # greetd | none
+```
+
+- `greetd` (default): greetd + tuigreet on TTY1; other display managers are disabled.
+- `none`: keep an existing greeter (e.g. GDM) and select **niri** at its login
+  screen. A greeter enabled by an earlier run is not disabled automatically.
+
+The change takes effect after a reboot. Running sessions are not terminated.
 
 ## Tools
 
-Everything configurable lives in [`group_vars/fedora.yml`](group_vars/fedora.yml).
+| Area            | Included                                                                                                                                                                                                 |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dev & build     | `git`, `gh`, `make`, `gcc`, `luarocks`, `texlive-scheme-medium`                                                                                                                                          |
+| Shell & editor  | `fish` (default shell), `neovim` (LazyVim), `tmux`                                                                                                                                                      |
+| CLI             | `fzf`, `zoxide`, `btop`, `tree`, `ripgrep`, `fd-find`, `jq`, `ncdu`, `stow`, `fastfetch`                                                                                                                |
+| Media & PDF     | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                                                                                                      |
+| Desktop         | `niri`, `xwayland-satellite`, Waybar, rofi, mako, swaybg, swayidle, swaylock, `lxqt-policykit`, `gnome-keyring`, XDG portals, `grim`, `slurp`, `wl-clipboard`, `playerctl`, `brightnessctl`, `dolphin`, `gammastep`, `xournalpp`, `keepassxc` |
+| Login           | `greetd` + `tuigreet` on TTY1 (or `none` to keep an existing greeter)                                                                                                                                     |
+| COPR            | `starship`, `lazygit`, `yazi`, `ghostty`                                                                                                                                                                |
+| Flatpak         | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                                                                                                                 |
+| Fonts           | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                                                                                                         |
+| Runtimes        | `python`, `rust`, `node`, `uv`, `opencode` (mise)                                                                                                                                                        |
+| System          | DNF tuning, full upgrade, NetworkManager, PipeWire, BlueZ, UPower, `power-profiles-daemon`                                                                                                               |
 
-| Category           | Source               | Tools                                                                                                           |
-| ------------------ | -------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Dev & Build        | Fedora               | `git`, `gh`, `make`, `gcc`, `luarocks`, `texlive-scheme-medium`                                                 |
-| Shell & Editor     | Fedora               | `fish` (default shell), `neovim` (LazyVim), `tmux`                                                              |
-| CLI                | Fedora               | `fzf`, `zoxide`, `btop`, `tree`, `ripgrep`, `fd-find`, `jq`, `ncdu`, `stow`, `fastfetch`                        |
-| Media & PDF        | Fedora               | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`              |
-| Desktop            | Fedora               | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                |
-| Prompt & Terminals | COPR                 | `starship`, `lazygit`, `yazi`, `ghostty`                                                                        |
-| Window Manager     | Fedora/COPR – opt-in | `rofi`, `mako`, **SwayFX** or **niri** (choose either, both or none)                                            |
-| Apps               | Flatpak, system-wide | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                         |
-| Fonts              | GitHub release       | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                |
-| Runtimes           | mise                 | `python`, `rust`, `uv`, `opencode`                                                                              |
-| System             | DNF                  | `fastestmirror`, 15 parallel downloads, `defaultyes`, no weak deps, `clean_requirements_on_remove`, `plugins=1` |
+## Customize
 
-A full `dnf upgrade` runs on top of that. Runtimes come from
-[`dotfiles/.config/mise/config.toml`](dotfiles/.config/mise/config.toml), falling
-back to `mise_tools` in `group_vars/fedora.yml`.
+Packages, Flatpak apps, fonts, mise tools and the display manager live in
+[`group_vars/fedora.yml`](group_vars/fedora.yml). The niri config is
+[`dotfiles/.config/niri/config.kdl`](dotfiles/.config/niri/config.kdl).
 
 ## Dotfiles
 
-`dotfiles/` is copied to `~/.dotfiles` on the first run and stowed from there
-(`dotfiles/ -> ~/.dotfiles --stow .--> ~/.config/...`).
+`dotfiles/` is copied to `~/.dotfiles` on the first run and linked into `$HOME`
+with GNU Stow. An existing `~/.dotfiles` always wins and is left untouched.
 
-- An existing `~/.dotfiles` always wins – move your own dotfiles there beforehand
-- If `dotfiles/` is absent, nothing is stowed
-- Every top-level entry is linked individually; a real directory such as `~/.config`
-  is **not** replaced, but merged into it via `--adopt`
-- Paths are overridable in [`roles/dotfiles/defaults/main.yml`](roles/dotfiles/defaults/main.yml)
-  (`dotfiles_dir`, `dotfiles_src`, `dotfiles_stow_target`)
-- The embedded configs are a **public-safe subset**: no private state (e.g. the
-  OpenCode service/password), only the lock-screen wallpaper, and `gammastep`
-  ships with placeholder coordinates (Berlin) – adjust them before first use
+- Existing files are merged with `--adopt`; back up anything you want to keep.
+- The included configs are a public-safe subset: wallpaper only, no private state.
+- `gammastep` ships with Berlin coordinates; adjust them for your location.
+- The niri outputs and workspace pinning are tuned to the author's monitor setup.
+- Paths are overridable in [`roles/dotfiles/defaults/main.yml`](roles/dotfiles/defaults/main.yml).
 
-> **Careful:** `--adopt` takes over existing files (e.g. a `~/.config/fontconfig/fonts.conf`
-> created by the desktop) – back them up first if needed. Never run `stow .` on the
-> **repo root**, or `roles/` and `playbook.yml` end up in your home directory.
+## Update
 
-**tmux plugins** are managed by `TPM` and will be installed automatically on first launch of tmux (via `run '~/.tmux/plugins/tpm/tpm'` in the config). If needed, they can also be installed with `Prefix + I`.
-
-## Updates
-
-[`update.sh`](update.sh) updates DNF, mise and Flatpak in one go: `./update.sh`
-
-Legacy bash script with a Btrfs/Snapper strategy: [`legacy/feddev-setup.sh`](legacy/feddev-setup.sh)
-– kept as a historical reference, no longer maintained.
+```bash
+./update.sh
+```
 
 ## License
 
@@ -125,106 +94,78 @@ MIT License – (c) JeromeTDev
 
 # Deutsch
 
-Ein **vollautomatischer Fedora-Developer-Bootstrap** auf **Ansible**-Basis –
-gedacht für die **einmalige** Ausführung auf einer frischen Fedora-Installation.
-
-System-Setup, Pakete, Schriften, Flatpak-Apps, mise-Runtimes und per **GNU Stow**
-deployte **Dotfiles** (Fish, Neovim/LazyVim, tmux, Yazi, Kitty/Ghostty, Sway/niri u. v. m.).
-
-> **🚧 Roadmap – Umbau in den nächsten Tagen**
-> Dieser Bootstrap wird auf **Fedora Minimal** umgestellt. Dabei **fliegt
-> Sway/SwayFX raus** und **niri wird der einzige unterstützte Compositor**.
-> Die Anleitung unten beschreibt bis dahin noch den aktuellen Stand
-> (Sway/SwayFX + niri).
-
-## Desktop: Sway/SwayFX oder niri
-
-> **Geplant:** Sway/SwayFX wird entfernt – niri wird der einzige Compositor.
-
-Wayland-Desktop auswählen – oder beide installieren und erst beim Login entscheiden.
-Beide Compositor werden in [`group_vars/fedora.yml`](group_vars/fedora.yml)
-(oder pro Host in `inventory.ini`) geschaltet:
-
-| `install_swayfx` | `install_niri` | Ergebnis                                                           |
-| :--------------: | :------------: | ------------------------------------------------------------------ |
-|      `true`      |    `false`     | nur SwayFX – ersetzt ein vorhandenes `sway`                        |
-|     `false`      |     `true`     | nur niri                                                           |
-|      `true`      |     `true`     | beide – im greetd-Login **sway** oder **niri** wählen _(Standard)_ |
-|     `false`      |    `false`     | kein Compositor – nur Pakete und Dotfiles                          |
-
-```ini
-[fedora:vars]
-install_swayfx=true   # SwayFX aus COPR
-install_niri=true     # niri aus Fedora
-```
-
-Passende Dotfiles werden automatisch gestowt: [`dotfiles/.config/sway/`](dotfiles/.config/sway/)
-für SwayFX und [`dotfiles/.config/niri/`](dotfiles/.config/niri/) für niri.
+Einmaliger Fedora-44-Developer-Bootstrap mit Ansible: **niri**,
+greetd/tuigreet, fish, Neovim, tmux, Ghostty, Flatpak-Apps, Nerd Font und per
+GNU Stow verwaltete Dotfiles.
 
 ## Installation
 
-Voraussetzung: Fedora Linux (Workstation oder Sway Spin), getestet auf **Fedora 44**.
-**Fedora Minimal** wird im Rahmen des kommenden Umbaus unterstützt.
+Fedora Minimal oder Workstation (getestet auf **Fedora 44**, kompatibel mit
+**Fedora 45**). Als normaler Benutzer ausführen; `-K` fragt nach dem
+sudo-Passwort.
 
 ```bash
 sudo dnf install -y ansible-core git
 git clone https://github.com/JeromeTDev/fedora-dev-bootstrap.git
 cd fedora-dev-bootstrap
-ansible-galaxy collection install -r requirements.yml # einmalig: copr + flatpak
+ansible-galaxy collection install -r requirements.yml
 ansible-playbook playbook.yml -K
+sudo reboot
 ```
 
-Ohne `inventory.ini` ist der Rechner, auf dem du das Playbook startest, das Ziel.
-Für eine andere Maschine: `cp inventory.ini.example inventory.ini` und dort eine
-Gruppe `fedora` mit `ansible_host`/`ansible_user` eintragen – die Datei wird über
-`ansible.cfg` automatisch erkannt und ist in `.gitignore`.
+`ansible-core` und `git` sind die einzigen Voraussetzungen; die Rolle
+`bootstrap` installiert die nötigen DNF-Python-Bindings auf dem Zielhost.
 
-## Tools
+Ohne `inventory.ini` wird der lokale Rechner konfiguriert. Für eine andere
+Maschine: `cp inventory.ini.example inventory.ini` und `ansible_host` sowie
+`ansible_user` eintragen.
 
-Alles Anpassbare liegt in [`group_vars/fedora.yml`](group_vars/fedora.yml).
+## Display-Manager
 
-| Kategorie          | Quelle               | Tools                                                                                                             |
-| ------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Dev & Build        | Fedora               | `git`, `gh`, `make`, `gcc`, `luarocks`, `texlive-scheme-medium`                                                   |
-| Shell & Editor     | Fedora               | `fish` (Default-Shell), `neovim` (LazyVim), `tmux`                                                                |
-| CLI                | Fedora               | `fzf`, `zoxide`, `btop`, `tree`, `ripgrep`, `fd-find`, `jq`, `ncdu`, `stow`, `fastfetch`                          |
-| Medien & PDF       | Fedora               | `ImageMagick`, `mediainfo`, `perl-Image-ExifTool`, `poppler-utils`, `zathura`, `zathura-pdf-mupdf`                |
-| Desktop            | Fedora               | `dolphin`, `gammastep`, `xournalpp`, `wl-clipboard`, `keepassxc`                                                  |
-| Prompt & Terminals | COPR                 | `starship`, `lazygit`, `yazi`, `ghostty`                                                                          |
-| Window Manager     | Fedora/COPR – opt-in | `rofi`, `mako`, **SwayFX** oder **niri** (einzeln, beide oder keins)                                              |
-| Apps               | Flatpak, systemweit  | Discord, Obsidian, Cryptomator, TeamSpeak, ONLYOFFICE, Telegram, Signal                                           |
-| Schriften          | GitHub-Release       | JetBrainsMono Nerd Font → `~/.local/share/fonts`                                                                  |
-| Runtimes           | mise                 | `python`, `rust`, `uv`, `opencode`                                                                                |
-| System             | DNF                  | `fastestmirror`, 15 Paralleldownloads, `defaultyes`, keine weak-deps, `clean_requirements_on_remove`, `plugins=1` |
+Auswahl in [`group_vars/fedora.yml`](group_vars/fedora.yml):
 
-Zusätzlich läuft ein `dnf upgrade`. Runtimes kommen aus
-[`dotfiles/.config/mise/config.toml`](dotfiles/.config/mise/config.toml), sonst aus
-`mise_tools` in `group_vars/fedora.yml`.
+```yaml
+display_manager: greetd   # greetd | none
+```
+
+- `greetd` (Default): greetd + tuigreet auf TTY1; andere Display-Manager werden
+  deaktiviert.
+- `none`: einen vorhandenen Greeter behalten (z. B. GDM) und beim Login **niri**
+  auswählen. Ein von einem früheren Lauf aktivierter Greeter wird nicht
+  automatisch deaktiviert.
+
+Die Änderung greift nach einem Reboot. Laufende Sitzungen werden nicht beendet.
+
+## Werkzeuge
+
+Die Tool-Übersicht steht oben unter [Tools](#tools).
+
+## Anpassen
+
+Pakete, Flatpak-Apps, Schriften, mise-Tools und der Display-Manager stehen in
+[`group_vars/fedora.yml`](group_vars/fedora.yml). Die niri-Config liegt in
+[`dotfiles/.config/niri/config.kdl`](dotfiles/.config/niri/config.kdl).
 
 ## Dotfiles
 
-`dotfiles/` wird beim ersten Lauf nach `~/.dotfiles` kopiert und von dort per Stow
-verlinkt (`dotfiles/ -> ~/.dotfiles --stow .--> ~/.config/...`).
+`dotfiles/` wird beim ersten Lauf nach `~/.dotfiles` kopiert und per GNU Stow
+nach `$HOME` verlinkt. Ein vorhandenes `~/.dotfiles` gewinnt immer und bleibt
+unangetastet.
 
-- Ein vorhandenes `~/.dotfiles` gewinnt immer – eigene Dotfiles vorher dorthin ziehen
-- Fehlt `dotfiles/`, wird nichts gestowt
-- Jeder Top-Level-Eintrag wird einzeln verlinkt; ein echtes Verzeichnis wie `~/.config`
-  wird **nicht** ersetzt, sondern mit `--adopt` hineingemischt
-- Pfade überschreibbar in [`roles/dotfiles/defaults/main.yml`](roles/dotfiles/defaults/main.yml)
-  (`dotfiles_dir`, `dotfiles_src`, `dotfiles_stow_target`)
+- Vorhandene Dateien werden per `--adopt` zusammengeführt; was erhalten bleiben
+  soll, vorher sichern.
+- Die enthaltenen Configs sind eine public-safe Teilmenge: nur das Wallpaper,
+  kein privater State.
+- `gammastep` enthält Berlin-Koordinaten; für den eigenen Standort anpassen.
+- Die niri-Ausgänge und das Workspace-Pinning sind auf das Monitor-Setup des
+  Autors abgestimmt.
+- Pfade überschreibbar in [`roles/dotfiles/defaults/main.yml`](roles/dotfiles/defaults/main.yml).
 
-> **Achtung:** `--adopt` übernimmt vorhandene Dateien (z. B. eine vom Desktop angelegte
-> `~/.config/fontconfig/fonts.conf`) – vorher ggf. sichern. `stow .` niemals auf das
-> **Repo-Root** anwenden, sonst landen `roles/` und `playbook.yml` in deinem Home.
+## Update
 
-**tmux-Plugins** werden von `TPM` verwaltet und beim ersten Start von tmux automatisch installiert (über `run '~/.tmux/plugins/tpm/tpm'` in der Konfiguration). Falls nötig, können sie auch mit `Prefix + I` installiert werden.
-
-## Updates
-
-[`update.sh`](update.sh) aktualisiert DNF, mise und Flatpak in einem Durchgang: `./update.sh`
-
-Altes Bash-Script mit Btrfs-/Snapper-Strategie: [`legacy/feddev-setup.sh`](legacy/feddev-setup.sh)
-– historische Referenz, nicht mehr gepflegt.
+```bash
+./update.sh
+```
 
 ## License
 

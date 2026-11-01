@@ -1,0 +1,101 @@
+---
+- name: Install greetd and tuigreet
+  become: true
+  ansible.builtin.dnf5:
+    name:
+      - greetd
+      - greetd-selinux
+      - tuigreet
+    state: present
+
+- name: Create tuigreet cache directory
+  become: true
+  ansible.builtin.file:
+    path: /var/cache/tuigreet
+    state: directory
+    owner: greetd
+    group: greetd
+    mode: "0755"
+
+- name: Configure greetd
+  become: true
+  ansible.builtin.template:
+    src: config.toml.j2
+    dest: /etc/greetd/config.toml
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Check display-manager alias
+  ansible.builtin.stat:
+    path: /etc/systemd/system/display-manager.service
+  register: greetd_display_manager_alias
+
+- name: Resolve current display manager
+  ansible.builtin.command:
+    cmd: readlink /etc/systemd/system/display-manager.service
+  register: greetd_current_display_manager
+  changed_when: false
+  failed_when: false
+  when: greetd_display_manager_alias.stat.exists
+
+# Ein laufender Greeter wird bewusst nicht gestoppt: Das Playbook kann aus einer
+# grafischen Sitzung heraus laufen, die sonst beendet wuerde. Der Wechsel wird
+# beim naechsten Reboot wirksam.
+- name: Disable previous display managers
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: false
+  loop: >-
+    {{ (([greetd_current_display_manager.stdout | default('') | basename]
+         if greetd_display_manager_alias.stat.exists else [])
+        + greetd_known_display_managers) | unique }}
+  when:
+    - item | length > 0
+    - item != 'greetd.service'
+    - item in ansible_facts.services
+
+- name: Disable getty on the greeter VT
+  become: true
+  ansible.builtin.systemd_service:
+    name: "getty@tty{{ greetd_tty }}.service"
+    enabled: false
+
+# Fedora 45+ uses kmscon instead of getty on the VTs. greetd.service already
+# conflicts with kmsconvt@tty1; this also covers a custom greetd_tty.
+- name: Disable kmscon on the greeter VT
+  become: true
+  ansible.builtin.systemd_service:
+    name: "kmsconvt@tty{{ greetd_tty }}.service"
+    enabled: false
+  when: ('kmsconvt@tty' ~ greetd_tty ~ '.service') in ansible_facts.services
+
+- name: Keep a rescue console on another TTY
+  become: true
+  ansible.builtin.systemd_service:
+    name: "getty@tty{{ greetd_rescue_tty }}.service"
+    masked: false
+    enabled: true
+
+- name: Enable greetd at boot
+  become: true
+  ansible.builtin.systemd_service:
+    name: greetd.service
+    enabled: true
+
+- name: Get current default target
+  ansible.builtin.command:
+    cmd: systemctl get-default
+  register: default_target
+  changed_when: false
+
+- name: Set graphical boot target
+  become: true
+  ansible.builtin.command:
+    cmd: systemctl set-default graphical.target
+  when: default_target.stdout != 'graphical.target'

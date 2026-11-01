@@ -5,7 +5,7 @@ GenericName=File Synchronizer
 Name=MEGAsync
 Comment=Easy automated syncing between your computers and your MEGA cloud drive.
 TryExec=megasync
-Exec=megasync
+Exec=env START_MEGASYNC_IN_BACKGROUND=1 megasync
 Icon=mega
 Terminal=false
 Categories=Network;System;

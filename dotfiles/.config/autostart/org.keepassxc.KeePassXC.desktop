@@ -1,1 +1,16 @@
-/usr/share/applications/org.keepassxc.KeePassXC.desktop
+[Desktop Entry]
+Type=Application
+Version=1.5
+Name=KeePassXC
+GenericName=Password Manager
+GenericName[de]=Passwortverwaltung
+Comment=Community-driven port of the Windows application “KeePass Password Safe”
+Exec=keepassxc --minimized
+TryExec=keepassxc
+Icon=keepassxc
+Terminal=false
+NoDisplay=true
+StartupNotify=false
+StartupWMClass=keepassxc
+Categories=Utility;Security;Qt;
+X-GNOME-Autostart-Delay=10

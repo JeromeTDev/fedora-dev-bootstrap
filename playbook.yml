@@ -33,20 +33,32 @@
   hosts: fedora
 
   pre_tasks:
+    - name: Prepare Fedora for Ansible
+      ansible.builtin.import_role:
+        name: bootstrap
+      tags: always
     - name: Paket-Fakten sammeln (fuer bedingte Rollen)
       ansible.builtin.package_facts:
         manager: auto
+    - name: Display-Manager-Auswahl pruefen
+      ansible.builtin.assert:
+        that:
+          - display_manager in ['greetd', 'none']
+        fail_msg: >-
+          display_manager muss 'greetd' oder 'none' sein
+          (aktuell: {{ display_manager }}).
 
   roles:
     - base
     - packages
-    # Sway/SwayFX-Rolle (opt-in via install_swayfx, Default: aus)
-    - role: sway
-      when: install_swayfx | bool
-    - role: niri
-      when: install_niri | bool
+    - desktop
+    - niri
     - dnf
     - copr
+    # greetd installieren oder einen vorhandenen Greeter behalten.
+    # 'none' ist fuer Systeme gedacht, die z. B. GDM weiter nutzen wollen.
+    - role: greetd
+      when: display_manager == 'greetd'
     - fonts
     - flatpak
     - shell

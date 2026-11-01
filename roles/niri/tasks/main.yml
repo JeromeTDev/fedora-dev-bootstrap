@@ -1,6 +1,38 @@
 ---
-- name: Install niri
+- name: Install Niri desktop packages
   become: true
   ansible.builtin.dnf:
-    name: niri
+    name:
+      # Compositor
+      - niri
+      - xwayland-satellite
+
+      # Desktop-Oberfläche
+      - waybar
+      - rofi
+      - mako
+      - swaybg
+      - swayidle
+      - swaylock
+
+      # Desktop-Integration
+      - lxqt-policykit
+      - libnotify
+      - gnome-keyring
+      - gnome-keyring-pam
+
+      # XDG-Portals
+      - xdg-desktop-portal
+      - xdg-desktop-portal-gtk
+      - xdg-desktop-portal-gnome
+
+      # Screenshots / Medien
+      - grim
+      - slurp
+      - wl-clipboard
+      - playerctl
+
+      # Weitere Hilfsprogramme
+      - brightnessctl
+
     state: present

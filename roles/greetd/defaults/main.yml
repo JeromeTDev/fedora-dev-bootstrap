@@ -1,0 +1,30 @@
+---
+# greetd / tuigreet configuration
+greetd_tty: 1
+# Rettungskonsole: nie derselbe VT wie greetd.
+greetd_rescue_tty: "{{ 2 if greetd_tty | int != 2 else 3 }}"
+greetd_session: niri-session
+greetd_greeting: "Welcome back"
+
+# Diese Units werden zusaetzlich zu dem aktuell per display-manager.service
+# verknuepften Greeter deaktiviert. Unbekannte Greeter werden ueber den
+# display-manager.service-Symlink erkannt.
+greetd_known_display_managers:
+  - gdm.service
+  - sddm.service
+  - lightdm.service
+  - lxdm.service
+  - cosmic-greeter.service
+
+# Gruvbox Dark (ANSI approximation)
+greetd_theme: >-
+  border=yellow;
+  text=gray;
+  time=darkgray;
+  container=black;
+  title=yellow;
+  greet=yellow;
+  prompt=lightyellow;
+  input=white;
+  action=gray;
+  button=yellow

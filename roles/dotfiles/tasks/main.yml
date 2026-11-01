@@ -2,10 +2,29 @@
 # Kein "become": Stow muss als der Ziel-User nach $HOME linken.
 # Ein vorhandenes dotfiles_dir (z. B. eigenes Repo) wird nie angefasst.
 
-- name: Eingebaute Dotfiles pruefen
+# dotfiles_src zeigt per Default auf {{ playbook_dir }}/dotfiles, liegt also auf
+# dem Controller. Der Test muss deshalb dort laufen - sonst findet ein Remote-Lauf
+# die mitgelieferten Configs nie (der Pfad existiert auf dem Zielhost nicht).
+- name: Eingebaute Dotfiles pruefen (Controller)
+  delegate_to: localhost
+  become: false
   ansible.builtin.stat:
     path: "{{ dotfiles_src }}"
-  register: dotfiles_src_stat
+  register: dotfiles_src_controller
+
+# Falls dotfiles_src auf einen Pfad des Zielhosts umgebogen wurde (Repo dort
+# geklont), wird dort geprueft und anschliessend lokal auf dem Ziel kopiert.
+- name: Eingebaute Dotfiles pruefen (Zielhost)
+  ansible.builtin.stat:
+    path: "{{ dotfiles_src }}"
+  register: dotfiles_src_target
+  when: not dotfiles_src_controller.stat.exists
+
+- name: Verfuegbarkeit der eingebauten Dotfiles setzen
+  ansible.builtin.set_fact:
+    dotfiles_src_available: >-
+      {{ dotfiles_src_controller.stat.exists or
+         (dotfiles_src_target.stat.exists | default(false)) }}
 
 - name: Vorhandene Dotfiles pruefen
   ansible.builtin.stat:
@@ -15,7 +34,7 @@
 - name: Dotfiles vorhanden
   ansible.builtin.set_fact:
     dotfiles_present: >-
-      {{ dotfiles_src_stat.stat.exists or dotfiles_dir_stat.stat.exists }}
+      {{ dotfiles_src_available | bool or dotfiles_dir_stat.stat.exists }}
 
 - name: Eingebaute Dotfiles kopieren
   ansible.builtin.copy:
@@ -23,7 +42,20 @@
     dest: "{{ dotfiles_dir }}/"
     mode: preserve
   when:
-    - dotfiles_src_stat.stat.exists
+    - dotfiles_src_controller.stat.exists | bool
+    - not dotfiles_dir_stat.stat.exists
+
+# Falls das Repo nur auf dem Zielhost liegt (dotfiles_src zeigt auf einen
+# Ziel-Pfad), wird eben dort kopiert - ohne Transfer vom Controller.
+- name: Eingebaute Dotfiles kopieren (auf dem Zielhost)
+  ansible.builtin.copy:
+    src: "{{ dotfiles_src }}/"
+    dest: "{{ dotfiles_dir }}/"
+    remote_src: true
+    mode: preserve
+  when:
+    - not dotfiles_src_controller.stat.exists
+    - dotfiles_src_target.stat.exists | default(false)
     - not dotfiles_dir_stat.stat.exists
 
 - name: Vorhandene Dotfiles als Quelle melden
@@ -33,7 +65,7 @@
       die eingebauten Configs aus {{ dotfiles_src }} werden nicht kopiert.
   when:
     - dotfiles_dir_stat.stat.exists
-    - dotfiles_src_stat.stat.exists
+    - dotfiles_src_available | bool
 
 - name: Hinweis, wenn es keine Dotfiles zum Stowen gibt
   ansible.builtin.debug:
