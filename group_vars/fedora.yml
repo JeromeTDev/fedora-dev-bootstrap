@@ -39,6 +39,10 @@ dev_packages:
   # Font-Tooling fuer roles/fonts (fc-cache + ZIP-Extraktion)
   - fontconfig
   - unzip
+  # Document scanning
+  - simple-scan
+  - sane-airscan
+  - ipp-usb
 
 copr_repositories:
   - atim/lazygit
