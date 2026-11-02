@@ -14,7 +14,7 @@ set $browser brave-browser
 set $files ghostty -e yazi
 set $menu rofi -show drun -config ~/.config/rofi/everforest.rasi
 
-set $wallpaper $HOME/.dotfiles/Bilder/Wallpapers/everforest/bush.jpg
+set $wallpaper $HOME/.dotfiles/Bilder/Wallpapers/kristian-seedorff-BvUicqkaZZ0.jpg
 
 ### Tastenkürzel
 
