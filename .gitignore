@@ -11,4 +11,8 @@ dotfiles/.config/**/node_modules/
 # Lokale Ansible-Inventory (aus inventory.ini.example erzeugen)
 inventory.ini
 # Private/lokale Configs (nie veroeffentlichen)
+
 dotfiles/.config/opencode/
+dotfiles/.config/keepassxc/
+dotfiles/.config/Cryptomator/
+dotfiles/.git/

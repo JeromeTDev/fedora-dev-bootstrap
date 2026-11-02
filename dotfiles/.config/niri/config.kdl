@@ -217,7 +217,7 @@ spawn-sh-at-startup "swayidle -w timeout 300 'swaylock -f' timeout 360 'niri msg
 // swaybg meldet den Namespace "wallpaper" (nicht "swaybg").
 // Wichtig: KEIN "place-within-backdrop" per Layer-Rule - dann wird
 // die Fläche im normalen Desktop gar nicht mehr gezeichnet.
-spawn-sh-at-startup "swaybg -i ~/.dotfiles/Bilder/Wallpapers/kristian-seedorff-BvUicqkaZZ0.jpg -m fill"
+spawn-sh-at-startup "swaybg -i $HOME/Bilder/Wallpapers/kristian-seedorff-BvUicqkaZZ0.jpg -m fill"
 
 spawn-at-startup "waybar"
 
