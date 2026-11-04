@@ -29,7 +29,7 @@ dev_packages:
   - mediainfo
   - perl-Image-ExifTool
   - xournalpp
-  - texlive-scheme-medium
+  - texlive-scheme-small
   - luarocks
   - keepassxc
   - fastfetch
