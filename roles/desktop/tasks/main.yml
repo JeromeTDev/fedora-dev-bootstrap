@@ -57,3 +57,10 @@
     name: power-profiles-daemon
     enabled: true
     state: started
+
+- name: Create USB mount shortcut
+  ansible.builtin.file:
+    src: "/run/media/{{ ansible_user_id }}"
+    dest: "{{ ansible_env.HOME }}/usb"
+    state: link
+    force: true
