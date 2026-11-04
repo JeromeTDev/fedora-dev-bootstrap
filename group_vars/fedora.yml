@@ -36,7 +36,6 @@ dev_packages:
   - tmux
   - gammastep
   - dolphin
-  - udiskie # Auto-USB-mounter
   # Font-Tooling fuer roles/fonts (fc-cache + ZIP-Extraktion)
   - fontconfig
   - unzip
