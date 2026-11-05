@@ -38,6 +38,16 @@ input {
 }
 
 // ------------------------------------------------------------
+//  Cursor
+// ------------------------------------------------------------
+// gsettings: Pop / 24. niri setzt damit auch XCURSOR_THEME und
+// XCURSOR_SIZE für Wayland- und XWayland-Clients.
+cursor {
+    xcursor-theme "Pop"
+    xcursor-size 24
+}
+
+// ------------------------------------------------------------
 //  Monitor
 // ------------------------------------------------------------
 //  Positionen in logischen Pixeln: DP-2 ist bei scale 1.5
@@ -211,7 +221,7 @@ workspace "1" {
 
 // sway: exec swayidle ... (300s -> Lock, dann Displays aus)
 // niri implementiert ext-idle-notifier, swayidle funktioniert also.
-spawn-sh-at-startup "swayidle -w timeout 300 'swaylock -f' timeout 360 'niri msg action power-off-monitors' resume 'niri msg action power-on-monitors' before-sleep 'swaylock -f' lock 'swaylock -f' unlock 'pkill -xu \"$USER\" -SIGUSR1 swaylock'"
+spawn-sh-at-startup "swayidle -w timeout 300 '$HOME/.config/niri/scripts/lock.sh' timeout 360 'niri msg action power-off-monitors' resume 'niri msg action power-on-monitors' before-sleep '$HOME/.config/niri/scripts/lock.sh' lock '$HOME/.config/niri/scripts/lock.sh' unlock 'pkill -xu \"$USER\" -SIGUSR1 swaylock'"
 
 // sway: output * bg $wallpaper fill
 // swaybg meldet den Namespace "wallpaper" (nicht "swaybg").
@@ -221,11 +231,11 @@ spawn-sh-at-startup "swaybg -i $HOME/Bilder/Wallpapers/kristian-seedorff-BvUicqk
 
 spawn-at-startup "waybar"
 
-// sway: config.d/50-session-portal.conf
-// (Env-Import + gnome-keyring für Brave/Chromium)
-spawn-at-startup "gnome-keyring-daemon" "--start" "--components=secrets"
+// gnome-keyring wird über gnome-keyring-pam (Login) und D-Bus-Aktivierung
+// (org.freedesktop.secrets) gestartet - kein spawn-at-startup nötig.
 spawn-at-startup "mako"
-spawn-at-startup "lxqt-policykit-agent"
+// Das Binary liegt in /usr/libexec, nicht in $PATH.
+spawn-at-startup "/usr/libexec/lxqt-policykit-agent"
 
 // ------------------------------------------------------------
 //  Hotkey-Overlay
@@ -256,7 +266,7 @@ binds {
     // ---------- System ----------
     Mod+Shift+C hotkey-overlay-title="Niri-Config neu laden" { spawn-sh "niri msg action load-config-file"; }
     Mod+Shift+E hotkey-overlay-title="Niri beenden" { quit; }
-    Mod+Ctrl+Shift+L hotkey-overlay-title="Bildschirm sperren" { spawn-sh "swaylock -i ~/.dotfiles/Bilder/Wallpapers/kristian-seedorff-BvUicqkaZZ0.jpg"; }
+    Mod+Ctrl+Shift+L hotkey-overlay-title="Bildschirm sperren" { spawn-sh "$HOME/.config/niri/scripts/lock.sh"; }
     Mod+Ctrl+P hotkey-overlay-title="Power-Menü" { spawn-sh "~/.config/waybar/scripts/powermenu.sh"; }
 
     // ---------- Fokus bewegen ----------
